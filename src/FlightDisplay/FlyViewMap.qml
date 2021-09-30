@@ -12,6 +12,7 @@ import QtQuick.Controls             2.4
 import QtLocation                   5.3
 import QtPositioning                5.3
 import QtQuick.Dialogs              1.2
+import QtQuick.Window               2.2
 
 import QGroundControl               1.0
 import QGroundControl.Airspace      1.0
@@ -562,6 +563,95 @@ FlightMap {
             border.width:   object.lineWidth
         }
     }
+
+    ///////////////////////////////////////////////////////////////////////////
+
+    Item{
+        id: drone
+        width: parent.width<parent.height?parent.width:parent.height/5.5
+        height: width
+        anchors.right: parent.right
+        anchors.bottom: parent.bottom
+        anchors.rightMargin: width
+        anchors.bottomMargin: width
+
+        Rectangle {
+            id: drone_center
+            width: drone.width
+            height: width * 1.66
+            color: "grey"
+            border.color: "black"
+            border.width: 1
+            radius: width * 0.33
+            anchors.verticalCenter: drone.verticalCenter
+            anchors.horizontalCenter: drone.horizontalCenter
+        }
+
+        Rectangle {
+            id: top_left_prop
+            width: drone.width / 1.33
+            height: width
+            color: "yellow"
+            border.color: "black"
+            border.width: 1
+            radius: width*0.5
+            anchors.top: drone_center.top
+            anchors.left: drone_center.left
+            anchors.topMargin: -top_left_prop.height / 1.25
+            anchors.leftMargin: -top_left_prop.width / 1.25
+        }
+
+        Rectangle {
+            id: bottom_left_prop
+            width: top_left_prop.width
+            height: width
+            color: "orange"
+            border.color: "black"
+            border.width: 1
+            radius: width*0.5
+            anchors.bottom: drone_center.bottom
+            anchors.left: drone_center.left
+            anchors.bottomMargin: -bottom_left_prop.height / 1.25
+            anchors.leftMargin: -bottom_left_prop.width / 1.25
+        }
+
+        Rectangle {
+            id: bottom_right_prop
+            width: top_left_prop.width
+            height: width
+            color: "red"
+            border.color: "black"
+            border.width: 1
+            radius: width*0.5
+            anchors.bottom: drone_center.bottom
+            anchors.right: drone_center.right
+            anchors.bottomMargin: -bottom_right_prop.height / 1.25
+            anchors.rightMargin: -bottom_right_prop.width / 1.25
+        }
+
+        Rectangle {
+            id: top_right_prop
+            width: top_left_prop.width
+            height: width
+            color: "green"
+            border.color: "black"
+            border.width: 1
+            radius: width*0.5
+            anchors.top: drone_center.top
+            anchors.right: drone_center.right
+            anchors.topMargin: -top_right_prop.height / 1.25
+            anchors.rightMargin: -top_right_prop.width / 1.25
+            Text {
+                anchors.verticalCenter: top_right_prop.verticalCenter
+                anchors.horizontalCenter: top_right_prop.horizontalCenter
+                color: "black"
+                text: "Test"
+            }
+        }
+    }
+
+
+    /////////////////////////////////////////////////////////////
 
     MapItemView {
         model:              _airspaceEnabled && QGroundControl.settingsManager.airMapSettings.enableAirspace && QGroundControl.airspaceManager.airspaceVisible ? QGroundControl.airspaceManager.airspaces.polygons : []
