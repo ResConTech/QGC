@@ -9,10 +9,12 @@
 
 import QtQuick                      2.11
 import QtQuick.Controls             2.4
+import QtQuick.Layouts              1.11
 import QtLocation                   5.3
 import QtPositioning                5.3
 import QtQuick.Dialogs              1.2
 import QtQuick.Window               2.2
+import QtCharts                     2.3
 
 import QGroundControl               1.0
 import QGroundControl.Airspace      1.0
@@ -26,6 +28,15 @@ import QGroundControl.Vehicle       1.0
 
 FlightMap {
     id:                         _root
+
+    property var    curSystem:          controller ? controller.activeSystem : null
+    property var    curMessage:         curSystem && curSystem.messages.count ? curSystem.messages.get(curSystem.selected) : null
+    property int    curCompID:          0
+    property real   maxButtonWidth:     0
+    MAVLinkInspectorController {
+        id: controller
+    }
+
     allowGCSLocationCenter:     true
     allowVehicleLocationCenter: !_keepVehicleCentered
     planView:                   false
@@ -627,6 +638,12 @@ FlightMap {
             anchors.right: drone_center.right
             anchors.bottomMargin: -bottom_right_prop.height / 1.25
             anchors.rightMargin: -bottom_right_prop.width / 1.25
+            Text {
+                anchors.verticalCenter: bottom_right_prop.verticalCenter
+                anchors.horizontalCenter: bottom_right_prop.horizontalCenter
+                color: "black"
+                //text:
+            }
         }
 
         Rectangle {
@@ -641,14 +658,30 @@ FlightMap {
             anchors.right: drone_center.right
             anchors.topMargin: -top_right_prop.height / 1.25
             anchors.rightMargin: -top_right_prop.width / 1.25
+
             Text {
+                id: trp_txt
                 anchors.verticalCenter: top_right_prop.verticalCenter
                 anchors.horizontalCenter: top_right_prop.horizontalCenter
                 color: "black"
-                text: "Test"
+                text: curMessage ? curMessage.name : ""            
+
+                Repeater {
+                    model:      curMessage ? curMessage.fields : []
+                    delegate:   QGCLabel {
+                        //anchors.horizontalCenter: trp_txt.horizontalCenter
+                        x: -300
+                        y: 15
+                        color: "black"
+                        text:               object.type
+                    }
+                }
             }
         }
     }
+
+
+
 
 
     /////////////////////////////////////////////////////////////
@@ -674,5 +707,7 @@ FlightMap {
 
         property real centerInset: visible ? parent.height - y : 0
     }
+
+
 
 }
