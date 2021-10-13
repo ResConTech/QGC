@@ -669,11 +669,10 @@ FlightMap {
                 Repeater {
                     model:      curMessage ? curMessage.fields : []
                     delegate:   QGCLabel {
-                        //anchors.horizontalCenter: trp_txt.horizontalCenter
-                        x: -300
+                        anchors.horizontalCenter: trp_txt.horizontalCenter
                         y: 15
                         color: "black"
-                        text:               object.type
+                        text:               object.value
                     }
                 }
             }
