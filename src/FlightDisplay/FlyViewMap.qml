@@ -20,6 +20,7 @@ import QGroundControl               1.0
 import QGroundControl.Airspace      1.0
 import QGroundControl.Controllers   1.0
 import QGroundControl.Controls      1.0
+import QGroundControl.FactSystem    1.0
 import QGroundControl.FlightDisplay 1.0
 import QGroundControl.FlightMap     1.0
 import QGroundControl.Palette       1.0
@@ -35,6 +36,10 @@ FlightMap {
     property real   maxButtonWidth:     0
     MAVLinkInspectorController {
         id: controller
+    }
+
+    FactPanelController {
+        id:             factController
     }
 
     allowGCSLocationCenter:     true
@@ -660,28 +665,15 @@ FlightMap {
             anchors.rightMargin: -top_right_prop.width / 1.25
 
             Text {
-                id: trp_txt
-                anchors.verticalCenter: top_right_prop.verticalCenter
-                anchors.horizontalCenter: top_right_prop.horizontalCenter
-                color: "black"
-                text: curMessage ? curMessage.name : ""            
-
-                Repeater {
-                    model:      curMessage ? curMessage.fields : []
-                    delegate:   QGCLabel {
-                        anchors.horizontalCenter: trp_txt.horizontalCenter
-                        y: 15
-                        color: "black"
-                        text:               object.value
-                    }
-                }
+                //model:      factController.vehicle._handleServoOutputRaw
+                    anchors.horizontalCenter: parent.horizontalCenter
+                    y: 15
+                    color: "black"
+                    visible:                true
+                    text:                 factController.vehicle._handleServoOutputRaw(1)
             }
         }
     }
-
-
-
-
 
     /////////////////////////////////////////////////////////////
 

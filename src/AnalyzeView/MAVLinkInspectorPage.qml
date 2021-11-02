@@ -85,6 +85,7 @@ AnalyzePage {
         }
     }
 
+
     Component {
         id:                         pageComponent
         Row {

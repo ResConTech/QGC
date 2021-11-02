@@ -51,7 +51,6 @@
 #include "VehicleBatteryFactGroup.h"
 #ifdef QT_DEBUG
 #include "MockLink.h"
-
 #endif
 
 #if defined(QGC_AIRMAP_ENABLED)
@@ -1504,44 +1503,9 @@ void Vehicle::_handleHeartbeat(mavlink_message_t& message)
     }
 }
 
-void Vehicle::_handleServoOutputRaw(const mavlink_message_t& message)
+void Vehicle:: _handleServoOutputRaw(mavlink_message_t& message)
 {
-    //printf("I GOT TO THE SERVO FUNCTION!!!/n");
-    mavlink_servo_output_raw_t channels;
-
-    mavlink_msg_servo_output_raw_decode(&message, &channels);
-
-    uint16_t* _rgChannelvalues[cMaxServoChannels] = {
-        &channels.servo1_raw,
-        &channels.servo2_raw,
-        &channels.servo3_raw,
-        &channels.servo4_raw,
-        &channels.servo5_raw,
-        &channels.servo6_raw,
-        &channels.servo7_raw,
-        &channels.servo8_raw,
-        &channels.servo9_raw,
-        &channels.servo10_raw,
-        &channels.servo11_raw,
-        &channels.servo12_raw,
-        &channels.servo13_raw,
-        &channels.servo14_raw,
-        &channels.servo15_raw,
-        &channels.servo16_raw,
-    };
-    int pwmValues[cMaxServoChannels];
-
-    for (int i=0; i<cMaxServoChannels; i++){
-        uint16_t channelValue = *_rgChannelvalues[i];
-        //if(i < channels.){
-            pwmValues[i] = channelValue == UINT16_MAX ? -1 : channelValue;
-            printf("\n%d", pwmValues[i]);
-      //  }
-      //  else {
-       //     pwmValues[i] = -1;
-       // }
-}
-    //emit servoChannels(channels.servo1_raw, pwmValues);
+    emit mavlink_msg_servo_output_raw_get_servo1_raw(message);
 }
 
 void Vehicle::_handleRadioStatus(mavlink_message_t& message)

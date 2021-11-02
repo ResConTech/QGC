@@ -186,6 +186,9 @@ public:
     Q_PROPERTY(bool               supportsMotorInterference     READ supportsMotorInterference                                      CONSTANT)
     Q_PROPERTY(QString              prearmError                 READ prearmError                WRITE setPrearmError                NOTIFY prearmErrorChanged)
     Q_PROPERTY(int                  motorCount                  READ motorCount                                                     CONSTANT)
+
+    //Q_PROPERTY(int                  _handleServoOutputRaw       READ _handleServoOutputRaw                                          CONSTANT)
+
     Q_PROPERTY(bool                 coaxialMotors               READ coaxialMotors                                                  CONSTANT)
     Q_PROPERTY(bool                 xConfigMotors               READ xConfigMotors                                                  CONSTANT)
     Q_PROPERTY(bool                 isOfflineEditingVehicle     READ isOfflineEditingVehicle                                        CONSTANT)
@@ -628,6 +631,8 @@ public:
 
     static const int cMaxRcChannels = 18;
 
+    static const int cMaxServoChannels = 16;
+
     /// Sends the specified MAV_CMD to the vehicle. If no Ack is received command will be retried. If a sendMavCommand is already in progress
     /// the command will be queued and sent when the previous command completes.
     ///     @param compId Component to send to.
@@ -764,8 +769,10 @@ public slots:
     void setVtolInFwdFlight                 (bool vtolInFwdFlight);
     void _offlineFirmwareTypeSettingChanged (QVariant varFirmwareType); // Should only be used by MissionControler to set firmware from Plan file
     void _offlineVehicleTypeSettingChanged  (QVariant varVehicleType);  // Should only be used by MissionController to set vehicle type from Plan file
+    void _handleServoOutputRaw              (const mavlink_message_t& message);
 
 signals:
+    //void _handleServoOutputRaw          (const mavlink_message_t& message);
     void coordinateChanged              (QGeoCoordinate coordinate);
     void joystickEnabledChanged         (bool enabled);
     void mavlinkMessageReceived         (const mavlink_message_t& message);
@@ -833,6 +840,8 @@ signals:
     ///     @param channelCount Number of available channels, cMaxRcChannels max
     ///     @param pwmValues -1 signals channel not available
     void rcChannelsChanged              (int channelCount, int pwmValues[cMaxRcChannels]);
+
+    void servoChannels                  (int channelPort, int rpmValues[cMaxServoChannels]);
 
     /// Remote control RSSI changed  (0% - 100%)
     void remoteControlRSSIChanged       (uint8_t rssi);
@@ -925,6 +934,7 @@ private:
     void _handleMessageInterval         (const mavlink_message_t& message);
     void _handleGimbalOrientation       (const mavlink_message_t& message);
     void _handleObstacleDistance        (const mavlink_message_t& message);
+    //void _handleServoOutputRaw          (const mavlink_message_t& message);
     // ArduPilot dialect messages
 #if !defined(NO_ARDUPILOT_DIALECT)
     void _handleCameraFeedback          (const mavlink_message_t& message);
