@@ -282,6 +282,7 @@ public:
     Q_PROPERTY(Fact* distanceToGCS      READ distanceToGCS      CONSTANT)
     Q_PROPERTY(Fact* hobbs              READ hobbs              CONSTANT)
     Q_PROPERTY(Fact* throttlePct        READ throttlePct        CONSTANT)
+    Q_PROPERTY(Fact* servoRaw           READ servoRaw           CONSTANT)
 
     Q_PROPERTY(FactGroup*           gps             READ gpsFactGroup               CONSTANT)
     Q_PROPERTY(FactGroup*           wind            READ windFactGroup              CONSTANT)
@@ -606,6 +607,7 @@ public:
     Fact* distanceToGCS                     () { return &_distanceToGCSFact; }
     Fact* hobbs                             () { return &_hobbsFact; }
     Fact* throttlePct                       () { return &_throttlePctFact; }
+    Fact* servoRaw                          () { return &_servoRawFact; }
 
     FactGroup* gpsFactGroup                 () { return &_gpsFactGroup; }
     FactGroup* windFactGroup                () { return &_windFactGroup; }
@@ -631,7 +633,7 @@ public:
 
     static const int cMaxRcChannels = 18;
 
-    static const int cMaxServoChannels = 16;
+    static const int cMaxServoChannels = 4;
 
     /// Sends the specified MAV_CMD to the vehicle. If no Ack is received command will be retried. If a sendMavCommand is already in progress
     /// the command will be queued and sent when the previous command completes.
@@ -1219,6 +1221,7 @@ private:
     Fact _distanceToGCSFact;
     Fact _hobbsFact;
     Fact _throttlePctFact;
+    Fact _servoRawFact;
 
     VehicleGPSFactGroup             _gpsFactGroup;
     VehicleWindFactGroup            _windFactGroup;
@@ -1261,6 +1264,7 @@ private:
     static const char* _distanceToGCSFactName;
     static const char* _hobbsFactName;
     static const char* _throttlePctFactName;
+    static const char* _servoRawFactName;
 
     static const char* _gpsFactGroupName;
     static const char* _windFactGroupName;

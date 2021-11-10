@@ -665,12 +665,13 @@ FlightMap {
             anchors.rightMargin: -top_right_prop.width / 1.25
 
             Text {
-                //model:      factController.vehicle._handleServoOutputRaw
+                //model:      _activeVehicle.altitudeRelative
                     anchors.horizontalCenter: parent.horizontalCenter
                     y: 15
-                    color: "black"
-                    visible:                true
-                    text:                 factController.vehicle._handleServoOutputRaw(1)
+                    //color: "black"
+                    visible:                true                  
+                    text:                   _activeVehicle ? _activeVehicle.servoRaw.value : null
+
             }
         }
     }

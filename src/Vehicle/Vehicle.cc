@@ -89,6 +89,7 @@ const char* Vehicle::_headingToHomeFactName =       "headingToHome";
 const char* Vehicle::_distanceToGCSFactName =       "distanceToGCS";
 const char* Vehicle::_hobbsFactName =               "hobbs";
 const char* Vehicle::_throttlePctFactName =         "throttlePct";
+const char* Vehicle::_servoRawFactName =            "servoRaw";
 
 const char* Vehicle::_gpsFactGroupName =                "gps";
 const char* Vehicle::_windFactGroupName =               "wind";
@@ -143,6 +144,8 @@ Vehicle::Vehicle(LinkInterface*             link,
     , _distanceToGCSFact            (0, _distanceToGCSFactName,     FactMetaData::valueTypeDouble)
     , _hobbsFact                    (0, _hobbsFactName,             FactMetaData::valueTypeString)
     , _throttlePctFact              (0, _throttlePctFactName,       FactMetaData::valueTypeUint16)
+    , _servoRawFact                 (0, _servoRawFactName,          FactMetaData::valueTypeUint16)
+
     , _gpsFactGroup                 (this)
     , _windFactGroup                (this)
     , _vibrationFactGroup           (this)
@@ -289,6 +292,7 @@ Vehicle::Vehicle(MAV_AUTOPILOT              firmwareType,
     , _distanceToGCSFact                (0, _distanceToGCSFactName,     FactMetaData::valueTypeDouble)
     , _hobbsFact                        (0, _hobbsFactName,             FactMetaData::valueTypeString)
     , _throttlePctFact                  (0, _throttlePctFactName,       FactMetaData::valueTypeUint16)
+    , _servoRawFact                     (0, _servoRawFactName,          FactMetaData::valueTypeUint16)
     , _gpsFactGroup                     (this)
     , _windFactGroup                    (this)
     , _vibrationFactGroup               (this)
@@ -394,6 +398,7 @@ void Vehicle::_commonInit()
     _addFact(&_headingToHomeFact,       _headingToHomeFactName);
     _addFact(&_distanceToGCSFact,       _distanceToGCSFactName);
     _addFact(&_throttlePctFact,         _throttlePctFactName);
+    _addFact(&_servoRawFact,            _servoRawFactName);
 
     _hobbsFact.setRawValue(QVariant(QString("0000:00:00")));
     _addFact(&_hobbsFact,               _hobbsFactName);
@@ -1516,32 +1521,34 @@ void Vehicle::_handleServoOutputRaw(const mavlink_message_t& message)
         &channels.servo2_raw,
         &channels.servo3_raw,
         &channels.servo4_raw,
-        &channels.servo5_raw,
-        &channels.servo6_raw,
-        &channels.servo7_raw,
-        &channels.servo8_raw,
-        &channels.servo9_raw,
-        &channels.servo10_raw,
-        &channels.servo11_raw,
-        &channels.servo12_raw,
-        &channels.servo13_raw,
-        &channels.servo14_raw,
-        &channels.servo15_raw,
-        &channels.servo16_raw,
+        //&channels.servo5_raw,
+        //&channels.servo6_raw,
+        //&channels.servo7_raw,
+        //&channels.servo8_raw,
+        //&channels.servo9_raw,
+        //&channels.servo10_raw,
+        //&channels.servo11_raw,
+        //&channels.servo12_raw,
+       // &channels.servo13_raw,
+       // &channels.servo14_raw,
+       // &channels.servo15_raw,
+        //&channels.servo16_raw,
     };
     int pwmValues[cMaxServoChannels];
+
+    //_servoRawFact.setRawValue(qQNaN());
 
     for (int i=0; i<cMaxServoChannels; i++){
         uint16_t channelValue = *_rgChannelvalues[i];
         //if(i < channels.){
             pwmValues[i] = channelValue == UINT16_MAX ? -1 : channelValue;
-            printf("\n%d", pwmValues[i]);
+            //printf("\n%d", pwmValues[i]);
       //  }
       //  else {
        //     pwmValues[i] = -1;
        // }
 }
-    //emit servoChannels(channels.servo1_raw, pwmValues);
+    emit rcChannelsChanged(channels.servo1_raw, pwmValues);
 }
 
 void Vehicle::_handleRadioStatus(mavlink_message_t& message)
