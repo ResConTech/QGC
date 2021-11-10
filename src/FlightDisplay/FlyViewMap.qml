@@ -671,7 +671,6 @@ FlightMap {
                     //color: "black"
                     visible:                true                  
                     text:                   _activeVehicle ? _activeVehicle.servoRaw.value : null
-
             }
         }
     }

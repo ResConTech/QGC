@@ -305,7 +305,6 @@ Vehicle::Vehicle(MAV_AUTOPILOT              firmwareType,
     if (_firmwareType == MAV_AUTOPILOT_TRACK) {
         trackFirmwareVehicleTypeChanges();
     }
-
     _commonInit();
 
     connect(_settingsManager->appSettings()->offlineEditingCruiseSpeed(),   &Fact::rawValueChanged, this, &Vehicle::_offlineCruiseSpeedSettingChanged);
