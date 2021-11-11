@@ -615,6 +615,12 @@ FlightMap {
             anchors.left: drone_center.left
             anchors.topMargin: -top_left_prop.height / 1.25
             anchors.leftMargin: -top_left_prop.width / 1.25
+            Text {
+                    anchors.horizontalCenter: parent.horizontalCenter
+                    anchors.verticalCenter: parent.verticalCenter
+                    visible:                true
+                    text:                   _activeVehicle ? _activeVehicle.servoRaw.value : null
+            }
         }
 
         Rectangle {
@@ -629,6 +635,13 @@ FlightMap {
             anchors.left: drone_center.left
             anchors.bottomMargin: -bottom_left_prop.height / 1.25
             anchors.leftMargin: -bottom_left_prop.width / 1.25
+            Text {
+                    anchors.horizontalCenter: parent.horizontalCenter
+                    anchors.verticalCenter: parent.verticalCenter
+                    //color: "black"
+                    visible:                true
+                    text:                   _activeVehicle ? _activeVehicle.servoRaw3.value : null
+            }
         }
 
         Rectangle {
@@ -644,10 +657,10 @@ FlightMap {
             anchors.bottomMargin: -bottom_right_prop.height / 1.25
             anchors.rightMargin: -bottom_right_prop.width / 1.25
             Text {
-                anchors.verticalCenter: bottom_right_prop.verticalCenter
-                anchors.horizontalCenter: bottom_right_prop.horizontalCenter
-                color: "black"
-                //text:
+                    anchors.horizontalCenter: parent.horizontalCenter
+                    anchors.verticalCenter: parent.verticalCenter
+                    visible:                true
+                    text:                   _activeVehicle ? _activeVehicle.servoRaw4.value : null
             }
         }
 
@@ -665,12 +678,10 @@ FlightMap {
             anchors.rightMargin: -top_right_prop.width / 1.25
 
             Text {
-                //model:      _activeVehicle.altitudeRelative
                     anchors.horizontalCenter: parent.horizontalCenter
-                    y: 15
-                    //color: "black"
+                    anchors.verticalCenter: parent.verticalCenter
                     visible:                true                  
-                    text:                   _activeVehicle ? _activeVehicle.servoRaw.value : null
+                    text:                   _activeVehicle ? _activeVehicle.servoRaw2.value : null
             }
         }
     }

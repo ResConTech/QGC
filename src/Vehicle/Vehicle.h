@@ -282,6 +282,9 @@ public:
     Q_PROPERTY(Fact* hobbs              READ hobbs              CONSTANT)
     Q_PROPERTY(Fact* throttlePct        READ throttlePct        CONSTANT)
     Q_PROPERTY(Fact* servoRaw           READ servoRaw           CONSTANT)
+    Q_PROPERTY(Fact* servoRaw2           READ servoRaw2           CONSTANT)
+    Q_PROPERTY(Fact* servoRaw3           READ servoRaw3           CONSTANT)
+    Q_PROPERTY(Fact* servoRaw4           READ servoRaw4           CONSTANT)
 
     Q_PROPERTY(FactGroup*           gps             READ gpsFactGroup               CONSTANT)
     Q_PROPERTY(FactGroup*           wind            READ windFactGroup              CONSTANT)
@@ -607,6 +610,9 @@ public:
     Fact* hobbs                             () { return &_hobbsFact; }
     Fact* throttlePct                       () { return &_throttlePctFact; }
     Fact* servoRaw                          () { return &_servoRawFact; }
+    Fact* servoRaw2                          () { return &_servoRaw2Fact; }
+    Fact* servoRaw3                          () { return &_servoRaw3Fact; }
+    Fact* servoRaw4                          () { return &_servoRaw4Fact; }
 
     FactGroup* gpsFactGroup                 () { return &_gpsFactGroup; }
     FactGroup* windFactGroup                () { return &_windFactGroup; }
@@ -632,7 +638,7 @@ public:
 
     static const int cMaxRcChannels = 18;
 
-    static const int cMaxServoChannels = 4;
+    static const int cMaxServoChannels = 16;
 
     /// Sends the specified MAV_CMD to the vehicle. If no Ack is received command will be retried. If a sendMavCommand is already in progress
     /// the command will be queued and sent when the previous command completes.
@@ -1221,6 +1227,9 @@ private:
     Fact _hobbsFact;
     Fact _throttlePctFact;
     Fact _servoRawFact;
+    Fact _servoRaw2Fact;
+    Fact _servoRaw3Fact;
+    Fact _servoRaw4Fact;
 
     VehicleGPSFactGroup             _gpsFactGroup;
     VehicleWindFactGroup            _windFactGroup;
@@ -1264,6 +1273,9 @@ private:
     static const char* _hobbsFactName;
     static const char* _throttlePctFactName;
     static const char* _servoRawFactName;
+    static const char* _servoRaw2FactName;
+    static const char* _servoRaw3FactName;
+    static const char* _servoRaw4FactName;
 
     static const char* _gpsFactGroupName;
     static const char* _windFactGroupName;
