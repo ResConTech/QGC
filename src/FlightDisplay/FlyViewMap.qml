@@ -618,7 +618,7 @@ FlightMap {
             Text {
                     anchors.horizontalCenter: parent.horizontalCenter
                     anchors.verticalCenter: parent.verticalCenter
-                    visible:                true
+                    //visible:                true
                     text:                   _activeVehicle ? _activeVehicle.servoRaw.value : null
             }
         }
@@ -638,8 +638,7 @@ FlightMap {
             Text {
                     anchors.horizontalCenter: parent.horizontalCenter
                     anchors.verticalCenter: parent.verticalCenter
-                    //color: "black"
-                    visible:                true
+                    //visible:                true
                     text:                   _activeVehicle ? _activeVehicle.servoRaw3.value : null
             }
         }
