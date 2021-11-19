@@ -186,8 +186,6 @@ public:
     Q_PROPERTY(bool               supportsMotorInterference     READ supportsMotorInterference                                      CONSTANT)
     Q_PROPERTY(QString              prearmError                 READ prearmError                WRITE setPrearmError                NOTIFY prearmErrorChanged)
     Q_PROPERTY(int                  motorCount                  READ motorCount                                                     CONSTANT)
-    //Q_PROPERTY(int                  _handleServoOutputRaw       READ _handleServoOutputRaw                                          CONSTANT)
-
     Q_PROPERTY(bool                 coaxialMotors               READ coaxialMotors                                                  CONSTANT)
     Q_PROPERTY(bool                 xConfigMotors               READ xConfigMotors                                                  CONSTANT)
     Q_PROPERTY(bool                 isOfflineEditingVehicle     READ isOfflineEditingVehicle                                        CONSTANT)
@@ -610,9 +608,9 @@ public:
     Fact* hobbs                             () { return &_hobbsFact; }
     Fact* throttlePct                       () { return &_throttlePctFact; }
     Fact* servoRaw                          () { return &_servoRawFact; }
-    Fact* servoRaw2                          () { return &_servoRaw2Fact; }
-    Fact* servoRaw3                          () { return &_servoRaw3Fact; }
-    Fact* servoRaw4                          () { return &_servoRaw4Fact; }
+    Fact* servoRaw2                         () { return &_servoRaw2Fact; }
+    Fact* servoRaw3                         () { return &_servoRaw3Fact; }
+    Fact* servoRaw4                         () { return &_servoRaw4Fact; }
 
     FactGroup* gpsFactGroup                 () { return &_gpsFactGroup; }
     FactGroup* windFactGroup                () { return &_windFactGroup; }
@@ -779,7 +777,6 @@ public slots:
     void _handleServoOutputRaw              (const mavlink_message_t& message);
 
 signals:
-    //void _handleServoOutputRaw          (const mavlink_message_t& message);
     void coordinateChanged              (QGeoCoordinate coordinate);
     void joystickEnabledChanged         (bool enabled);
     void mavlinkMessageReceived         (const mavlink_message_t& message);
@@ -847,7 +844,6 @@ signals:
     ///     @param channelCount Number of available channels, cMaxRcChannels max
     ///     @param pwmValues -1 signals channel not available
     void rcChannelsChanged              (int channelCount, int pwmValues[cMaxRcChannels]);
-
     void servoChannels                  (int channelPort, int rpmValues[cMaxServoChannels]);
 
     /// Remote control RSSI changed  (0% - 100%)
@@ -941,7 +937,6 @@ private:
     void _handleMessageInterval         (const mavlink_message_t& message);
     void _handleGimbalOrientation       (const mavlink_message_t& message);
     void _handleObstacleDistance        (const mavlink_message_t& message);
-    //void _handleServoOutputRaw          (const mavlink_message_t& message);
     // ArduPilot dialect messages
 #if !defined(NO_ARDUPILOT_DIALECT)
     void _handleCameraFeedback          (const mavlink_message_t& message);

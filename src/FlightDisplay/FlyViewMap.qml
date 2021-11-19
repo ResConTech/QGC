@@ -610,25 +610,25 @@ FlightMap {
             color: "white"
             states:[
                 State {
-                    name: "green"; when: _activeVehicle.servoRaw.value < 50
+                    name: "green"; when: _activeVehicle.servoRaw.value < 75
                     PropertyChanges {target: top_left_prop; color: "green"}
                 },
                 State {
-                    name: "yellow"; when: _activeVehicle.servoRaw.value >= 50 && _activeVehicle.servoRaw.value <75
+                    name: "yellow"; when: _activeVehicle.servoRaw.value >= 75 && _activeVehicle.servoRaw.value <90
                     PropertyChanges {target: top_left_prop; color: "yellow"}
                 },
                 State {
-                    name: "orange"; when: _activeVehicle.servoRaw.value >= 75 && _activeVehicle.servoRaw.value <90
+                    name: "orange"; when: _activeVehicle.servoRaw.value >= 90 && _activeVehicle.servoRaw.value <95
                     PropertyChanges {target: top_left_prop; color: "orange"}
                 },
                 State {
-                    name: "red"; when: _activeVehicle.servoRaw.value >= 90
+                    name: "red"; when: _activeVehicle.servoRaw.value >= 95
                     PropertyChanges {target: top_left_prop; color: "red"}
                 }
             ]
             transitions:[
                 Transition{
-                    from: ""; to: "green"; reversible: true
+                    from: "yellow"; to: "green"; reversible: true
                     ParallelAnimation{
                         ColorAnimation { duration: 500 }
                     }
@@ -674,25 +674,25 @@ FlightMap {
             color: "white"
             states:[
                 State {
-                    name: "green"; when: _activeVehicle.servoRaw3.value < 50
+                    name: "green"; when: _activeVehicle.servoRaw3.value < 75
                     PropertyChanges {target: bottom_left_prop; color: "green"}
                 },
                 State {
-                    name: "yellow"; when: _activeVehicle.servoRaw3.value >= 50 && _activeVehicle.servoRaw3.value <75
+                    name: "yellow"; when: _activeVehicle.servoRaw3.value >= 75 && _activeVehicle.servoRaw3.value <90
                     PropertyChanges {target: bottom_left_prop; color: "yellow"}
                 },
                 State {
-                    name: "orange"; when: _activeVehicle.servoRaw3.value >= 75 && _activeVehicle.servoRaw3.value <90
+                    name: "orange"; when: _activeVehicle.servoRaw3.value >= 90 && _activeVehicle.servoRaw3.value <95
                     PropertyChanges {target: bottom_left_prop; color: "orange"}
                 },
                 State {
-                    name: "red"; when: _activeVehicle.servoRaw3.value >= 90
+                    name: "red"; when: _activeVehicle.servoRaw3.value >= 95
                     PropertyChanges {target: bottom_left_prop; color: "red"}
                 }
             ]
             transitions:[
                 Transition{
-                    from: ""; to: "green"; reversible: true
+                    from: "yellow"; to: "green"; reversible: true
                     ParallelAnimation{
                         ColorAnimation { duration: 500 }
                     }
@@ -739,25 +739,25 @@ FlightMap {
             color: "white"
             states:[
                 State {
-                    name: "green"; when: _activeVehicle.servoRaw4.value < 50
+                    name: "green"; when: _activeVehicle.servoRaw4.value < 75
                     PropertyChanges {target: bottom_right_prop; color: "green"}
                 },
                 State {
-                    name: "yellow"; when: _activeVehicle.servoRaw4.value >= 50 && _activeVehicle.servoRaw4.value <75
+                    name: "yellow"; when: _activeVehicle.servoRaw4.value >= 75 && _activeVehicle.servoRaw4.value <90
                     PropertyChanges {target: bottom_right_prop; color: "yellow"}
                 },
                 State {
-                    name: "orange"; when: _activeVehicle.servoRaw4.value >= 75 && _activeVehicle.servoRaw4.value <90
+                    name: "orange"; when: _activeVehicle.servoRaw4.value >= 90 && _activeVehicle.servoRaw4.value <95
                     PropertyChanges {target: bottom_right_prop; color: "orange"}
                 },
                 State {
-                    name: "red"; when: _activeVehicle.servoRaw4.value >= 90
+                    name: "red"; when: _activeVehicle.servoRaw4.value >= 95
                     PropertyChanges {target: bottom_right_prop; color: "red"}
                 }
             ]
             transitions:[
                 Transition{
-                    from: ""; to: "green"; reversible: true
+                    from: "yellow"; to: "green"; reversible: true
                     ParallelAnimation{
                         ColorAnimation { duration: 500 }
                     }
@@ -803,25 +803,25 @@ FlightMap {
             color: "white"
             states:[
                 State {
-                    name: "green"; when: _activeVehicle.servoRaw2.value < 50
+                    name: "green"; when: _activeVehicle.servoRaw2.value < 75
                     PropertyChanges {target: top_right_prop; color: "green"}
                 },
                 State {
-                    name: "yellow"; when: _activeVehicle.servoRaw2.value >= 50 && _activeVehicle.servoRaw2.value <75
+                    name: "yellow"; when: _activeVehicle.servoRaw2.value >= 75 && _activeVehicle.servoRaw2.value <90
                     PropertyChanges {target: top_right_prop; color: "yellow"}
                 },
                 State {
-                    name: "orange"; when: _activeVehicle.servoRaw2.value >= 75 && _activeVehicle.servoRaw2.value <90
+                    name: "orange"; when: _activeVehicle.servoRaw2.value >= 90 && _activeVehicle.servoRaw2.value <95
                     PropertyChanges {target: top_right_prop; color: "orange"}
                 },
                 State {
-                    name: "red"; when: _activeVehicle.servoRaw2.value >= 90
+                    name: "red"; when: _activeVehicle.servoRaw2.value >= 95
                     PropertyChanges {target: top_right_prop; color: "red"}
                 }
             ]
             transitions:[
                 Transition{
-                    from: ""; to: "green"; reversible: true
+                    from: "yellow"; to: "green"; reversible: true
                     ParallelAnimation{
                         ColorAnimation { duration: 500 }
                     }

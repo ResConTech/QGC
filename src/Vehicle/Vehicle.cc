@@ -1522,7 +1522,6 @@ void Vehicle::_handleHeartbeat(mavlink_message_t& message)
 
 void Vehicle::_handleServoOutputRaw(const mavlink_message_t& message)
 {
-    //printf("I GOT TO THE SERVO FUNCTION!!!/n");
     mavlink_servo_output_raw_t channels;
 
     mavlink_msg_servo_output_raw_decode(&message, &channels);
@@ -1546,9 +1545,6 @@ void Vehicle::_handleServoOutputRaw(const mavlink_message_t& message)
         &channels.servo16_raw,
     };
     int pwmValues[cMaxServoChannels];
-
-    //_servoRawFact.setRawValue(qQNaN());
-
     for (int i=0; i<cMaxServoChannels; i++){
         uint16_t channelValue = *_rgChannelvalues[i];
             pwmValues[i] = channelValue == UINT16_MAX ? -1 : channelValue;
@@ -1556,10 +1552,7 @@ void Vehicle::_handleServoOutputRaw(const mavlink_message_t& message)
             _servoRaw2Fact.setRawValue(pwmValues[1]/20);
             _servoRaw3Fact.setRawValue(pwmValues[2]/20);
             _servoRaw4Fact.setRawValue(pwmValues[3]/20);
-            //printf("\n%d", pwmValues[i]);
-
-}
-    emit rcChannelsChanged(channels.servo1_raw, pwmValues);
+    }
 }
 
 void Vehicle::_handleRadioStatus(mavlink_message_t& message)
