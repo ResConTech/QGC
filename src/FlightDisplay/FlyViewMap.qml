@@ -595,7 +595,7 @@ FlightMap {
             id: drone_center
             width: drone.width
             height: width * 1.66
-            color: "grey"
+            color: "gray"
             border.color: "black"
             border.width: 1
             radius: width * 0.33
@@ -607,7 +607,51 @@ FlightMap {
             id: top_left_prop
             width: drone.width / 1.33
             height: width
-            color: "yellow"
+            color: "white"
+            states:[
+                State {
+                    name: "green"; when: _activeVehicle.servoRaw.value < 50
+                    PropertyChanges {target: top_left_prop; color: "green"}
+                },
+                State {
+                    name: "yellow"; when: _activeVehicle.servoRaw.value >= 50 && _activeVehicle.servoRaw.value <75
+                    PropertyChanges {target: top_left_prop; color: "yellow"}
+                },
+                State {
+                    name: "orange"; when: _activeVehicle.servoRaw.value >= 75 && _activeVehicle.servoRaw.value <90
+                    PropertyChanges {target: top_left_prop; color: "orange"}
+                },
+                State {
+                    name: "red"; when: _activeVehicle.servoRaw.value >= 90
+                    PropertyChanges {target: top_left_prop; color: "red"}
+                }
+            ]
+            transitions:[
+                Transition{
+                    from: ""; to: "green"; reversible: true
+                    ParallelAnimation{
+                        ColorAnimation { duration: 500 }
+                    }
+                },
+                Transition{
+                    from: "green"; to: "yellow"; reversible: true
+                    ParallelAnimation{
+                        ColorAnimation { duration: 500 }
+                    }
+                },
+                Transition{
+                    from: "yellow"; to: "orange"; reversible: true
+                    ParallelAnimation{
+                        ColorAnimation { duration: 500 }
+                    }
+                },
+                Transition{
+                    from: "orange"; to: "red"; reversible: true
+                    ParallelAnimation{
+                        ColorAnimation { duration: 500 }
+                    }
+                }
+            ]
             border.color: "black"
             border.width: 1
             radius: width*0.5
@@ -618,8 +662,8 @@ FlightMap {
             Text {
                     anchors.horizontalCenter: parent.horizontalCenter
                     anchors.verticalCenter: parent.verticalCenter
-                    //visible:                true
-                    text:                   _activeVehicle ? _activeVehicle.servoRaw.value : null
+                    visible:                true
+                    text:                   _activeVehicle ? _activeVehicle.servoRaw.value +"%" : null
             }
         }
 
@@ -627,7 +671,51 @@ FlightMap {
             id: bottom_left_prop
             width: top_left_prop.width
             height: width
-            color: "orange"
+            color: "white"
+            states:[
+                State {
+                    name: "green"; when: _activeVehicle.servoRaw3.value < 50
+                    PropertyChanges {target: bottom_left_prop; color: "green"}
+                },
+                State {
+                    name: "yellow"; when: _activeVehicle.servoRaw3.value >= 50 && _activeVehicle.servoRaw3.value <75
+                    PropertyChanges {target: bottom_left_prop; color: "yellow"}
+                },
+                State {
+                    name: "orange"; when: _activeVehicle.servoRaw3.value >= 75 && _activeVehicle.servoRaw3.value <90
+                    PropertyChanges {target: bottom_left_prop; color: "orange"}
+                },
+                State {
+                    name: "red"; when: _activeVehicle.servoRaw3.value >= 90
+                    PropertyChanges {target: bottom_left_prop; color: "red"}
+                }
+            ]
+            transitions:[
+                Transition{
+                    from: ""; to: "green"; reversible: true
+                    ParallelAnimation{
+                        ColorAnimation { duration: 500 }
+                    }
+                },
+                Transition{
+                    from: "green"; to: "yellow"; reversible: true
+                    ParallelAnimation{
+                        ColorAnimation { duration: 500 }
+                    }
+                },
+                Transition{
+                    from: "yellow"; to: "orange"; reversible: true
+                    ParallelAnimation{
+                        ColorAnimation { duration: 500 }
+                    }
+                },
+                Transition{
+                    from: "orange"; to: "red"; reversible: true
+                    ParallelAnimation{
+                        ColorAnimation { duration: 500 }
+                    }
+                }
+            ]
             border.color: "black"
             border.width: 1
             radius: width*0.5
@@ -638,8 +726,9 @@ FlightMap {
             Text {
                     anchors.horizontalCenter: parent.horizontalCenter
                     anchors.verticalCenter: parent.verticalCenter
-                    //visible:                true
-                    text:                   _activeVehicle ? _activeVehicle.servoRaw3.value : null
+                    //color: "black"
+                    visible:                true
+                    text:                   _activeVehicle ? _activeVehicle.servoRaw3.value +"%" : null
             }
         }
 
@@ -647,7 +736,51 @@ FlightMap {
             id: bottom_right_prop
             width: top_left_prop.width
             height: width
-            color: "red"
+            color: "white"
+            states:[
+                State {
+                    name: "green"; when: _activeVehicle.servoRaw4.value < 50
+                    PropertyChanges {target: bottom_right_prop; color: "green"}
+                },
+                State {
+                    name: "yellow"; when: _activeVehicle.servoRaw4.value >= 50 && _activeVehicle.servoRaw4.value <75
+                    PropertyChanges {target: bottom_right_prop; color: "yellow"}
+                },
+                State {
+                    name: "orange"; when: _activeVehicle.servoRaw4.value >= 75 && _activeVehicle.servoRaw4.value <90
+                    PropertyChanges {target: bottom_right_prop; color: "orange"}
+                },
+                State {
+                    name: "red"; when: _activeVehicle.servoRaw4.value >= 90
+                    PropertyChanges {target: bottom_right_prop; color: "red"}
+                }
+            ]
+            transitions:[
+                Transition{
+                    from: ""; to: "green"; reversible: true
+                    ParallelAnimation{
+                        ColorAnimation { duration: 500 }
+                    }
+                },
+                Transition{
+                    from: "green"; to: "yellow"; reversible: true
+                    ParallelAnimation{
+                        ColorAnimation { duration: 500 }
+                    }
+                },
+                Transition{
+                    from: "yellow"; to: "orange"; reversible: true
+                    ParallelAnimation{
+                        ColorAnimation { duration: 500 }
+                    }
+                },
+                Transition{
+                    from: "orange"; to: "red"; reversible: true
+                    ParallelAnimation{
+                        ColorAnimation { duration: 500 }
+                    }
+                }
+            ]
             border.color: "black"
             border.width: 1
             radius: width*0.5
@@ -659,7 +792,7 @@ FlightMap {
                     anchors.horizontalCenter: parent.horizontalCenter
                     anchors.verticalCenter: parent.verticalCenter
                     visible:                true
-                    text:                   _activeVehicle ? _activeVehicle.servoRaw4.value : null
+                    text:                   _activeVehicle ? _activeVehicle.servoRaw4.value +"%" : null
             }
         }
 
@@ -667,7 +800,51 @@ FlightMap {
             id: top_right_prop
             width: top_left_prop.width
             height: width
-            color: "green"
+            color: "white"
+            states:[
+                State {
+                    name: "green"; when: _activeVehicle.servoRaw2.value < 50
+                    PropertyChanges {target: top_right_prop; color: "green"}
+                },
+                State {
+                    name: "yellow"; when: _activeVehicle.servoRaw2.value >= 50 && _activeVehicle.servoRaw2.value <75
+                    PropertyChanges {target: top_right_prop; color: "yellow"}
+                },
+                State {
+                    name: "orange"; when: _activeVehicle.servoRaw2.value >= 75 && _activeVehicle.servoRaw2.value <90
+                    PropertyChanges {target: top_right_prop; color: "orange"}
+                },
+                State {
+                    name: "red"; when: _activeVehicle.servoRaw2.value >= 90
+                    PropertyChanges {target: top_right_prop; color: "red"}
+                }
+            ]
+            transitions:[
+                Transition{
+                    from: ""; to: "green"; reversible: true
+                    ParallelAnimation{
+                        ColorAnimation { duration: 500 }
+                    }
+                },
+                Transition{
+                    from: "green"; to: "yellow"; reversible: true
+                    ParallelAnimation{
+                        ColorAnimation { duration: 500 }
+                    }
+                },
+                Transition{
+                    from: "yellow"; to: "orange"; reversible: true
+                    ParallelAnimation{
+                        ColorAnimation { duration: 500 }
+                    }
+                },
+                Transition{
+                    from: "orange"; to: "red"; reversible: true
+                    ParallelAnimation{
+                        ColorAnimation { duration: 500 }
+                    }
+                }
+            ]
             border.color: "black"
             border.width: 1
             radius: width*0.5
@@ -675,12 +852,11 @@ FlightMap {
             anchors.right: drone_center.right
             anchors.topMargin: -top_right_prop.height / 1.25
             anchors.rightMargin: -top_right_prop.width / 1.25
-
             Text {
                     anchors.horizontalCenter: parent.horizontalCenter
                     anchors.verticalCenter: parent.verticalCenter
-                    visible:                true                  
-                    text:                   _activeVehicle ? _activeVehicle.servoRaw2.value : null
+                    visible:                true
+                    text:                   _activeVehicle ? _activeVehicle.servoRaw2.value +"%" : null
             }
         }
     }
