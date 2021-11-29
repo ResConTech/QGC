@@ -859,6 +859,44 @@ FlightMap {
                     text:                   _activeVehicle ? _activeVehicle.servoRaw2.value +"%" : null
             }
         }
+
+        Rectangle{
+            id: button
+            width: drone_center.width/2
+            height: width/3
+            anchors.top: drone_center.top
+            anchors.topMargin: -button.width
+            anchors.horizontalCenter: drone_center.horizontalCenter
+            states: [
+                State {
+                    name: "on"
+                    PropertyChanges {target: drone_center; visible : true}
+                    PropertyChanges {target: top_left_prop; visible : true}
+                    PropertyChanges {target: top_right_prop; visible : true}
+                    PropertyChanges {target: bottom_right_prop; visible : true}
+                    PropertyChanges {target: bottom_left_prop; visible : true}
+
+                },
+                State {
+                    name: "off"
+                    PropertyChanges {target: drone_center; visible : false}
+                    PropertyChanges {target: top_left_prop; visible : false}
+                    PropertyChanges {target: top_right_prop; visible : false}
+                    PropertyChanges {target: bottom_right_prop; visible : false}
+                    PropertyChanges {target: bottom_left_prop; visible : false}
+                }
+            ]
+                transitions: [
+                    Transition {
+                        from: "on"; to: "off"; reversible: true
+                    }
+
+                ]
+            Button{
+                text: "On/Off"
+                onClicked: button.state = (button.state === 'on' ? 'off' : "on");
+            }
+        }
     }
 
     /////////////////////////////////////////////////////////////
