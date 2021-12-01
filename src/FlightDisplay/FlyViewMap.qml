@@ -584,7 +584,7 @@ FlightMap {
 
     Item{
         id: drone
-        width: parent.width<parent.height?parent.width:parent.height/5.5
+        width: parent.width<parent.height?parent.width:parent.height/6
         height: width
         anchors.right: parent.right
         anchors.bottom: parent.bottom
@@ -594,18 +594,18 @@ FlightMap {
         Rectangle {
             id: drone_center
             width: drone.width
-            height: width * 1.66
+            height: width
             color: "gray"
             border.color: "black"
             border.width: 1
-            radius: width * 0.33
+            radius: width * 0.25
             anchors.verticalCenter: drone.verticalCenter
             anchors.horizontalCenter: drone.horizontalCenter
         }
 
         Rectangle {
             id: top_left_prop
-            width: drone.width / 1.33
+            width: drone.width / 1.15
             height: width
             color: "white"
             states:[
@@ -657,8 +657,8 @@ FlightMap {
             radius: width*0.5
             anchors.top: drone_center.top
             anchors.left: drone_center.left
-            anchors.topMargin: -top_left_prop.height / 1.25
-            anchors.leftMargin: -top_left_prop.width / 1.25
+            anchors.topMargin: -top_left_prop.height / 1.33
+            anchors.leftMargin: -top_left_prop.width / 1.33
             Text {
                     anchors.horizontalCenter: parent.horizontalCenter
                     anchors.verticalCenter: parent.verticalCenter
@@ -721,8 +721,8 @@ FlightMap {
             radius: width*0.5
             anchors.bottom: drone_center.bottom
             anchors.left: drone_center.left
-            anchors.bottomMargin: -bottom_left_prop.height / 1.25
-            anchors.leftMargin: -bottom_left_prop.width / 1.25
+            anchors.bottomMargin: -bottom_left_prop.height / 1.33
+            anchors.leftMargin: -bottom_left_prop.width / 1.33
             Text {
                     anchors.horizontalCenter: parent.horizontalCenter
                     anchors.verticalCenter: parent.verticalCenter
@@ -786,8 +786,8 @@ FlightMap {
             radius: width*0.5
             anchors.bottom: drone_center.bottom
             anchors.right: drone_center.right
-            anchors.bottomMargin: -bottom_right_prop.height / 1.25
-            anchors.rightMargin: -bottom_right_prop.width / 1.25
+            anchors.bottomMargin: -bottom_right_prop.height / 1.33
+            anchors.rightMargin: -bottom_right_prop.width / 1.33
             Text {
                     anchors.horizontalCenter: parent.horizontalCenter
                     anchors.verticalCenter: parent.verticalCenter
@@ -850,8 +850,8 @@ FlightMap {
             radius: width*0.5
             anchors.top: drone_center.top
             anchors.right: drone_center.right
-            anchors.topMargin: -top_right_prop.height / 1.25
-            anchors.rightMargin: -top_right_prop.width / 1.25
+            anchors.topMargin: -top_right_prop.height / 1.33
+            anchors.rightMargin: -top_right_prop.width / 1.33
             Text {
                     anchors.horizontalCenter: parent.horizontalCenter
                     anchors.verticalCenter: parent.verticalCenter
@@ -859,14 +859,16 @@ FlightMap {
                     text:                   _activeVehicle ? _activeVehicle.servoRaw2.value +"%" : null
             }
         }
+    }
 
         Rectangle{
             id: button
-            width: drone_center.width/2
+            width: drone.width/2
             height: width/3
-            anchors.top: drone_center.top
-            anchors.topMargin: -button.width
-            anchors.horizontalCenter: drone_center.horizontalCenter
+            anchors.top: parent.top
+            anchors.left: parent.left
+            anchors.leftMargin: parent.width/24.25
+            anchors.topMargin: parent.height/15
             states: [
                 State {
                     name: "on"
@@ -894,10 +896,9 @@ FlightMap {
                 ]
             Button{
                 text: "On/Off"
-                onClicked: button.state = (button.state === 'on' ? 'off' : "on");
+                onClicked: button.state = (button.state === 'off' ? 'on' : "off");
             }
         }
-    }
 
     /////////////////////////////////////////////////////////////
 
