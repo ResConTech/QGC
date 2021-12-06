@@ -280,9 +280,10 @@ public:
     Q_PROPERTY(Fact* hobbs              READ hobbs              CONSTANT)
     Q_PROPERTY(Fact* throttlePct        READ throttlePct        CONSTANT)
     Q_PROPERTY(Fact* servoRaw           READ servoRaw           CONSTANT)
-    Q_PROPERTY(Fact* servoRaw2           READ servoRaw2           CONSTANT)
-    Q_PROPERTY(Fact* servoRaw3           READ servoRaw3           CONSTANT)
-    Q_PROPERTY(Fact* servoRaw4           READ servoRaw4           CONSTANT)
+    Q_PROPERTY(Fact* servoRaw2          READ servoRaw2          CONSTANT)
+    Q_PROPERTY(Fact* servoRaw3          READ servoRaw3          CONSTANT)
+    Q_PROPERTY(Fact* servoRaw4          READ servoRaw4          CONSTANT)
+    Q_PROPERTY(Fact* pos                READ pos                CONSTANT)
 
     Q_PROPERTY(FactGroup*           gps             READ gpsFactGroup               CONSTANT)
     Q_PROPERTY(FactGroup*           wind            READ windFactGroup              CONSTANT)
@@ -611,6 +612,7 @@ public:
     Fact* servoRaw2                         () { return &_servoRaw2Fact; }
     Fact* servoRaw3                         () { return &_servoRaw3Fact; }
     Fact* servoRaw4                         () { return &_servoRaw4Fact; }
+    Fact* pos                               () { return &_posFact; }
 
     FactGroup* gpsFactGroup                 () { return &_gpsFactGroup; }
     FactGroup* windFactGroup                () { return &_windFactGroup; }
@@ -635,8 +637,8 @@ public:
     VehicleObjectAvoidance*         objectAvoidance     () { return _objectAvoidance; }
 
     static const int cMaxRcChannels = 18;
-
     static const int cMaxServoChannels = 16;
+    static const int cMaxPosChannels = 4;
 
     /// Sends the specified MAV_CMD to the vehicle. If no Ack is received command will be retried. If a sendMavCommand is already in progress
     /// the command will be queued and sent when the previous command completes.
@@ -775,6 +777,7 @@ public slots:
     void _offlineFirmwareTypeSettingChanged (QVariant varFirmwareType); // Should only be used by MissionControler to set firmware from Plan file
     void _offlineVehicleTypeSettingChanged  (QVariant varVehicleType);  // Should only be used by MissionController to set vehicle type from Plan file
     void _handleServoOutputRaw              (const mavlink_message_t& message);
+    void _handleControlSystem               (const mavlink_message_t& message);
 
 signals:
     void coordinateChanged              (QGeoCoordinate coordinate);
@@ -845,6 +848,7 @@ signals:
     ///     @param pwmValues -1 signals channel not available
     void rcChannelsChanged              (int channelCount, int pwmValues[cMaxRcChannels]);
     void servoChannels                  (int channelPort, int rpmValues[cMaxServoChannels]);
+    void posChannels                    (int channelPort, int posValues[cMaxPosChannels]);
 
     /// Remote control RSSI changed  (0% - 100%)
     void remoteControlRSSIChanged       (uint8_t rssi);
@@ -1225,6 +1229,7 @@ private:
     Fact _servoRaw2Fact;
     Fact _servoRaw3Fact;
     Fact _servoRaw4Fact;
+    Fact _posFact;
 
     VehicleGPSFactGroup             _gpsFactGroup;
     VehicleWindFactGroup            _windFactGroup;
@@ -1271,6 +1276,7 @@ private:
     static const char* _servoRaw2FactName;
     static const char* _servoRaw3FactName;
     static const char* _servoRaw4FactName;
+    static const char* _posFactName;
 
     static const char* _gpsFactGroupName;
     static const char* _windFactGroupName;

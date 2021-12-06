@@ -93,6 +93,7 @@ const char* Vehicle::_servoRawFactName =            "servoRaw";
 const char* Vehicle::_servoRaw2FactName =           "servoRaw2";
 const char* Vehicle::_servoRaw3FactName =           "servoRaw3";
 const char* Vehicle::_servoRaw4FactName =           "servoRaw4";
+const char* Vehicle::_posFactName =                 "pos";
 
 const char* Vehicle::_gpsFactGroupName =                "gps";
 const char* Vehicle::_windFactGroupName =               "wind";
@@ -148,9 +149,10 @@ Vehicle::Vehicle(LinkInterface*             link,
     , _hobbsFact                    (0, _hobbsFactName,             FactMetaData::valueTypeString)
     , _throttlePctFact              (0, _throttlePctFactName,       FactMetaData::valueTypeUint16)
     , _servoRawFact                 (0, _servoRawFactName,          FactMetaData::valueTypeUint16)
-    , _servoRaw2Fact                (0, _servoRaw2FactName,          FactMetaData::valueTypeUint16)
-    , _servoRaw3Fact                (0, _servoRaw3FactName,          FactMetaData::valueTypeUint16)
-    , _servoRaw4Fact                (0, _servoRaw4FactName,          FactMetaData::valueTypeUint16)
+    , _servoRaw2Fact                (0, _servoRaw2FactName,         FactMetaData::valueTypeUint16)
+    , _servoRaw3Fact                (0, _servoRaw3FactName,         FactMetaData::valueTypeUint16)
+    , _servoRaw4Fact                (0, _servoRaw4FactName,         FactMetaData::valueTypeUint16)
+    , _posFact                      (0, _posFactName,               FactMetaData::valueTypeDouble)
 
     , _gpsFactGroup                 (this)
     , _windFactGroup                (this)
@@ -299,9 +301,10 @@ Vehicle::Vehicle(MAV_AUTOPILOT              firmwareType,
     , _hobbsFact                        (0, _hobbsFactName,             FactMetaData::valueTypeString)
     , _throttlePctFact                  (0, _throttlePctFactName,       FactMetaData::valueTypeUint16)
     , _servoRawFact                     (0, _servoRawFactName,          FactMetaData::valueTypeUint16)
-    , _servoRaw2Fact                    (0, _servoRaw2FactName,          FactMetaData::valueTypeUint16)
-    , _servoRaw3Fact                    (0, _servoRaw3FactName,          FactMetaData::valueTypeUint16)
-    , _servoRaw4Fact                    (0, _servoRaw4FactName,          FactMetaData::valueTypeUint16)
+    , _servoRaw2Fact                    (0, _servoRaw2FactName,         FactMetaData::valueTypeUint16)
+    , _servoRaw3Fact                    (0, _servoRaw3FactName,         FactMetaData::valueTypeUint16)
+    , _servoRaw4Fact                    (0, _servoRaw4FactName,         FactMetaData::valueTypeUint16)
+    , _posFact                          (0, _posFactName,               FactMetaData::valueTypeDouble)
     , _gpsFactGroup                     (this)
     , _windFactGroup                    (this)
     , _vibrationFactGroup               (this)
@@ -410,6 +413,7 @@ void Vehicle::_commonInit()
     _addFact(&_servoRaw2Fact,           _servoRaw2FactName);
     _addFact(&_servoRaw3Fact,           _servoRaw3FactName);
     _addFact(&_servoRaw4Fact,           _servoRaw4FactName);
+    _addFact(&_posFact,                 _posFactName);
 
     _hobbsFact.setRawValue(QVariant(QString("0000:00:00")));
     _addFact(&_hobbsFact,               _hobbsFactName);
@@ -643,6 +647,9 @@ void Vehicle::_mavlinkMessageReceived(LinkInterface* link, mavlink_message_t mes
         break;
     case MAVLINK_MSG_ID_SERVO_OUTPUT_RAW:
         _handleServoOutputRaw(message);
+        break;
+    case MAVLINK_MSG_ID_CONTROL_SYSTEM_STATE:
+        _handleControlSystem(message);
         break;
     case MAVLINK_MSG_ID_HEARTBEAT:
         _handleHeartbeat(message);
@@ -1517,6 +1524,29 @@ void Vehicle::_handleHeartbeat(mavlink_message_t& message)
         if (previousFlightMode != flightMode()) {
             emit flightModeChanged(flightMode());
         }
+    }
+}
+
+void Vehicle::_handleControlSystem(const mavlink_message_t& message)
+{
+    printf("Fist/n");
+
+    mavlink_control_system_state_t channels;
+
+    mavlink_msg_control_system_state_decode(&message, &channels);
+
+    float_t* _rgChannelvalues[cMaxPosChannels] = {
+        &channels.x_vel,
+        //&channels.y_vel,
+        //&channels.x_acc,
+        //&channels.y_acc,
+    };
+    int posValues[cMaxPosChannels];
+    for (int i=0; i<cMaxPosChannels; i++){
+        uint16_t channelValue = *_rgChannelvalues[i];
+            posValues[i] = channelValue == UINT16_MAX ? -1 : channelValue;
+            _posFact.setRawValue(posValues[i]);
+            printf("Second/n");
     }
 }
 

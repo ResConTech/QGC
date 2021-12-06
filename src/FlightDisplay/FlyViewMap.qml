@@ -584,28 +584,25 @@ FlightMap {
 
     Item{
         id: drone
-        width: parent.width<parent.height?parent.width:parent.height/6
+        width: parent.width<parent.height?parent.width:parent.height/4
         height: width
         anchors.right: parent.right
         anchors.bottom: parent.bottom
-        anchors.rightMargin: width
-        anchors.bottomMargin: width
+        anchors.rightMargin: top_left_prop.width/1.25
+        anchors.bottomMargin: top_left_prop.width/1.25
 
-        Rectangle {
+        Image {
             id: drone_center
             width: drone.width
             height: width
-            color: "gray"
-            border.color: "black"
-            border.width: 1
-            radius: width * 0.25
+            source: "/qml/droneBody.png"
             anchors.verticalCenter: drone.verticalCenter
             anchors.horizontalCenter: drone.horizontalCenter
         }
 
         Rectangle {
             id: top_left_prop
-            width: drone.width / 1.15
+            width: drone.width / 1.5
             height: width
             color: "white"
             states:[
@@ -657,8 +654,8 @@ FlightMap {
             radius: width*0.5
             anchors.top: drone_center.top
             anchors.left: drone_center.left
-            anchors.topMargin: -top_left_prop.height / 1.33
-            anchors.leftMargin: -top_left_prop.width / 1.33
+            anchors.topMargin: -top_left_prop.height / 1.65
+            anchors.leftMargin: -top_left_prop.width / 1.65
             Text {
                     anchors.horizontalCenter: parent.horizontalCenter
                     anchors.verticalCenter: parent.verticalCenter
@@ -721,8 +718,8 @@ FlightMap {
             radius: width*0.5
             anchors.bottom: drone_center.bottom
             anchors.left: drone_center.left
-            anchors.bottomMargin: -bottom_left_prop.height / 1.33
-            anchors.leftMargin: -bottom_left_prop.width / 1.33
+            anchors.bottomMargin: -bottom_left_prop.height / 1.65
+            anchors.leftMargin: -bottom_left_prop.width / 1.65
             Text {
                     anchors.horizontalCenter: parent.horizontalCenter
                     anchors.verticalCenter: parent.verticalCenter
@@ -786,8 +783,8 @@ FlightMap {
             radius: width*0.5
             anchors.bottom: drone_center.bottom
             anchors.right: drone_center.right
-            anchors.bottomMargin: -bottom_right_prop.height / 1.33
-            anchors.rightMargin: -bottom_right_prop.width / 1.33
+            anchors.bottomMargin: -bottom_right_prop.height / 1.65
+            anchors.rightMargin: -bottom_right_prop.width / 1.65
             Text {
                     anchors.horizontalCenter: parent.horizontalCenter
                     anchors.verticalCenter: parent.verticalCenter
@@ -850,8 +847,8 @@ FlightMap {
             radius: width*0.5
             anchors.top: drone_center.top
             anchors.right: drone_center.right
-            anchors.topMargin: -top_right_prop.height / 1.33
-            anchors.rightMargin: -top_right_prop.width / 1.33
+            anchors.topMargin: -top_right_prop.height / 1.65
+            anchors.rightMargin: -top_right_prop.width / 1.65
             Text {
                     anchors.horizontalCenter: parent.horizontalCenter
                     anchors.verticalCenter: parent.verticalCenter
@@ -859,11 +856,26 @@ FlightMap {
                     text:                   _activeVehicle ? _activeVehicle.servoRaw2.value +"%" : null
             }
         }
+        Image {
+            id: upArrow
+            width: top_left_prop.width
+            height: width
+            anchors.bottom: drone.top
+            anchors.horizontalCenter: drone.horizontalCenter
+            source: "/qml/accArrow.png"
+            Text {
+                text: _activeVehicle.pos.value
+                //text:                   _activeVehicle ? (_activeVehicle.pos.value).toFixed(1) : null
+                anchors.bottom: upArrow.bottom
+                anchors.horizontalCenter: upArrow.horizontalCenter
+                anchors.bottomMargin: button.height/2
+            }
+        }
     }
 
         Rectangle{
             id: button
-            width: drone.width/2
+            width: drone.width/3
             height: width/3
             anchors.top: parent.top
             anchors.left: parent.left
@@ -872,6 +884,7 @@ FlightMap {
             states: [
                 State {
                     name: "on"
+                    //PropertyChanges {target: button; Text: "Off"}
                     PropertyChanges {target: drone_center; visible : true}
                     PropertyChanges {target: top_left_prop; visible : true}
                     PropertyChanges {target: top_right_prop; visible : true}
