@@ -267,6 +267,7 @@ public:
     Q_PROPERTY(Fact* pitchRate          READ pitchRate          CONSTANT)
     Q_PROPERTY(Fact* yawRate            READ yawRate            CONSTANT)
     Q_PROPERTY(Fact* groundSpeed        READ groundSpeed        CONSTANT)
+    Q_PROPERTY(Fact* hcs                READ hcs                CONSTANT)
     Q_PROPERTY(Fact* airSpeed           READ airSpeed           CONSTANT)
     Q_PROPERTY(Fact* climbRate          READ climbRate          CONSTANT)
     Q_PROPERTY(Fact* altitudeRelative   READ altitudeRelative   CONSTANT)
@@ -283,7 +284,6 @@ public:
     Q_PROPERTY(Fact* servoRaw2          READ servoRaw2          CONSTANT)
     Q_PROPERTY(Fact* servoRaw3          READ servoRaw3          CONSTANT)
     Q_PROPERTY(Fact* servoRaw4          READ servoRaw4          CONSTANT)
-    Q_PROPERTY(Fact* pos                READ pos                CONSTANT)
 
     Q_PROPERTY(FactGroup*           gps             READ gpsFactGroup               CONSTANT)
     Q_PROPERTY(FactGroup*           wind            READ windFactGroup              CONSTANT)
@@ -597,6 +597,7 @@ public:
     Fact* yawRate                           () { return &_yawRateFact; }
     Fact* airSpeed                          () { return &_airSpeedFact; }
     Fact* groundSpeed                       () { return &_groundSpeedFact; }
+    Fact* hcs                               () { return &_hcsFact; }
     Fact* climbRate                         () { return &_climbRateFact; }
     Fact* altitudeRelative                  () { return &_altitudeRelativeFact; }
     Fact* altitudeAMSL                      () { return &_altitudeAMSLFact; }
@@ -612,7 +613,6 @@ public:
     Fact* servoRaw2                         () { return &_servoRaw2Fact; }
     Fact* servoRaw3                         () { return &_servoRaw3Fact; }
     Fact* servoRaw4                         () { return &_servoRaw4Fact; }
-    Fact* pos                               () { return &_posFact; }
 
     FactGroup* gpsFactGroup                 () { return &_gpsFactGroup; }
     FactGroup* windFactGroup                () { return &_windFactGroup; }
@@ -638,7 +638,7 @@ public:
 
     static const int cMaxRcChannels = 18;
     static const int cMaxServoChannels = 16;
-    static const int cMaxPosChannels = 4;
+    static const int cMaxHCSChannels = 4;
 
     /// Sends the specified MAV_CMD to the vehicle. If no Ack is received command will be retried. If a sendMavCommand is already in progress
     /// the command will be queued and sent when the previous command completes.
@@ -848,7 +848,7 @@ signals:
     ///     @param pwmValues -1 signals channel not available
     void rcChannelsChanged              (int channelCount, int pwmValues[cMaxRcChannels]);
     void servoChannels                  (int channelPort, int rpmValues[cMaxServoChannels]);
-    void posChannels                    (int channelPort, int posValues[cMaxPosChannels]);
+    void hcsChannels                    (int channelPort, int hcsValues[cMaxHCSChannels]);
 
     /// Remote control RSSI changed  (0% - 100%)
     void remoteControlRSSIChanged       (uint8_t rssi);
@@ -1212,6 +1212,7 @@ private:
     Fact _pitchRateFact;
     Fact _yawRateFact;
     Fact _groundSpeedFact;
+    Fact _hcsFact;
     Fact _airSpeedFact;
     Fact _climbRateFact;
     Fact _altitudeRelativeFact;
@@ -1229,7 +1230,6 @@ private:
     Fact _servoRaw2Fact;
     Fact _servoRaw3Fact;
     Fact _servoRaw4Fact;
-    Fact _posFact;
 
     VehicleGPSFactGroup             _gpsFactGroup;
     VehicleWindFactGroup            _windFactGroup;
@@ -1259,6 +1259,7 @@ private:
     static const char* _pitchRateFactName;
     static const char* _yawRateFactName;
     static const char* _groundSpeedFactName;
+    static const char* _hcsFactName;
     static const char* _airSpeedFactName;
     static const char* _climbRateFactName;
     static const char* _altitudeRelativeFactName;
@@ -1276,7 +1277,6 @@ private:
     static const char* _servoRaw2FactName;
     static const char* _servoRaw3FactName;
     static const char* _servoRaw4FactName;
-    static const char* _posFactName;
 
     static const char* _gpsFactGroupName;
     static const char* _windFactGroupName;
