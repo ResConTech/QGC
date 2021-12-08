@@ -777,7 +777,7 @@ public slots:
     void _offlineFirmwareTypeSettingChanged (QVariant varFirmwareType); // Should only be used by MissionControler to set firmware from Plan file
     void _offlineVehicleTypeSettingChanged  (QVariant varVehicleType);  // Should only be used by MissionController to set vehicle type from Plan file
     void _handleServoOutputRaw              (const mavlink_message_t& message);
-    void _handleControlSystem               (const mavlink_message_t& message);
+    void _handleControlSystemState          (const mavlink_message_t& message);
 
 signals:
     void coordinateChanged              (QGeoCoordinate coordinate);
@@ -848,7 +848,7 @@ signals:
     ///     @param pwmValues -1 signals channel not available
     void rcChannelsChanged              (int channelCount, int pwmValues[cMaxRcChannels]);
     void servoChannels                  (int channelPort, int rpmValues[cMaxServoChannels]);
-    void hcsChannels                    (int channelPort, int hcsValues[cMaxHCSChannels]);
+    void hcsChannels                    (int channel, int hcsValues[cMaxHCSChannels]);
 
     /// Remote control RSSI changed  (0% - 100%)
     void remoteControlRSSIChanged       (uint8_t rssi);

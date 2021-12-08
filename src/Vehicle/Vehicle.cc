@@ -646,7 +646,7 @@ void Vehicle::_mavlinkMessageReceived(LinkInterface* link, mavlink_message_t mes
         _handleHomePosition(message);
         break;
     case MAVLINK_MSG_ID_CONTROL_SYSTEM_STATE:
-        _handleControlSystem(message);
+        _handleControlSystemState(message);
         break;
     case MAVLINK_MSG_ID_SERVO_OUTPUT_RAW:
         _handleServoOutputRaw(message);
@@ -1527,9 +1527,9 @@ void Vehicle::_handleHeartbeat(mavlink_message_t& message)
     }
 }
 
-void Vehicle::_handleControlSystem(const mavlink_message_t& message)
+void Vehicle::_handleControlSystemState(const mavlink_message_t& message)
 {
-    printf("Fist/n");
+    printf("Test /n");
 
     mavlink_control_system_state_t channels;
 
@@ -1542,12 +1542,13 @@ void Vehicle::_handleControlSystem(const mavlink_message_t& message)
         &channels.y_acc,
     };
     int hcsValues[cMaxHCSChannels];
-    for (int i=0; i<cMaxHCSChannels; i++){
-        float_t channelValue = *_rgChannelvalues[i];
-            hcsValues[i] = channelValue == UINT16_MAX ? 1 : channelValue;
+    for (int j=0; j < cMaxHCSChannels; j++){
+        uint16_t channelValue = *_rgChannelvalues[j];
+            hcsValues[j] = channelValue == UINT16_MAX ? -1 : channelValue;
             _hcsFact.setRawValue(hcsValues[0]);
-            printf("Second/n");
+            //printf("\n%d", hcsValues[j]);
     }
+    //emit rcChannelsChanged(channels.x_acc, hcsValues);
 }
 
 void Vehicle::_handleServoOutputRaw(const mavlink_message_t& message)

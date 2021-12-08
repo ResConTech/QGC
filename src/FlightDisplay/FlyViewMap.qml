@@ -584,7 +584,9 @@ FlightMap {
 
     Item{
         id: drone
-        width: parent.width<parent.height?parent.width:parent.height/4
+        //width: parent.width<parent.height?parent.width:parent.height/4
+        width: parent.width/9.25
+        x: parent.width<parent.height?parent.width:parent.height
         height: width
         anchors.right: parent.right
         anchors.bottom: parent.bottom
@@ -790,6 +792,7 @@ FlightMap {
                     anchors.verticalCenter: parent.verticalCenter
                     visible:                true
                     text:                   _activeVehicle ? _activeVehicle.servoRaw4.value +"%" : null
+                    //text: drone.x
             }
         }
 
@@ -864,7 +867,7 @@ FlightMap {
             anchors.horizontalCenter: drone.horizontalCenter
             source: "/qml/accArrow.png"
             Text {
-                //text: _activeVehicle.pos.value.toFixed(1)
+                //text:
                 text:                   _activeVehicle ? (_activeVehicle.hcs.value) : null
                 anchors.bottom: upArrow.bottom
                 anchors.horizontalCenter: upArrow.horizontalCenter
@@ -881,6 +884,7 @@ FlightMap {
             anchors.left: parent.left
             anchors.leftMargin: parent.width/24.25
             anchors.topMargin: parent.height/15
+            color: "transparent"
             states: [
                 State {
                     name: "on"
@@ -905,7 +909,6 @@ FlightMap {
                     Transition {
                         from: "on"; to: "off"; reversible: true
                     }
-
                 ]
             Button{
                 text: "On/Off"
