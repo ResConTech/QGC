@@ -866,9 +866,10 @@ FlightMap {
             anchors.bottom: drone.top
             anchors.horizontalCenter: drone.horizontalCenter
             source: "/qml/accArrow.png"
+            visible: false
             Text {
                 //text:
-                text:                   _activeVehicle ? (_activeVehicle.hcs.value) : null
+                //text:                   _activeVehicle ? (_activeVehicle.hcs.value) : null
                 anchors.bottom: upArrow.bottom
                 anchors.horizontalCenter: upArrow.horizontalCenter
                 anchors.bottomMargin: button.height/2

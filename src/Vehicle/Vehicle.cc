@@ -77,7 +77,6 @@ const char* Vehicle::_pitchRateFactName =           "pitchRate";
 const char* Vehicle::_yawRateFactName =             "yawRate";
 const char* Vehicle::_airSpeedFactName =            "airSpeed";
 const char* Vehicle::_groundSpeedFactName =         "groundSpeed";
-const char* Vehicle::_hcsFactName =                 "hcs";
 const char* Vehicle::_climbRateFactName =           "climbRate";
 const char* Vehicle::_altitudeRelativeFactName =    "altitudeRelative";
 const char* Vehicle::_altitudeAMSLFactName =        "altitudeAMSL";
@@ -135,7 +134,6 @@ Vehicle::Vehicle(LinkInterface*             link,
     , _pitchRateFact                (0, _pitchRateFactName,         FactMetaData::valueTypeDouble)
     , _yawRateFact                  (0, _yawRateFactName,           FactMetaData::valueTypeDouble)
     , _groundSpeedFact              (0, _groundSpeedFactName,       FactMetaData::valueTypeDouble)
-    , _hcsFact                      (0, _hcsFactName,               FactMetaData::valueTypeDouble)
     , _airSpeedFact                 (0, _airSpeedFactName,          FactMetaData::valueTypeDouble)
     , _climbRateFact                (0, _climbRateFactName,         FactMetaData::valueTypeDouble)
     , _altitudeRelativeFact         (0, _altitudeRelativeFactName,  FactMetaData::valueTypeDouble)
@@ -287,7 +285,6 @@ Vehicle::Vehicle(MAV_AUTOPILOT              firmwareType,
     , _pitchRateFact                    (0, _pitchRateFactName,         FactMetaData::valueTypeDouble)
     , _yawRateFact                      (0, _yawRateFactName,           FactMetaData::valueTypeDouble)
     , _groundSpeedFact                  (0, _groundSpeedFactName,       FactMetaData::valueTypeDouble)
-    , _hcsFact                          (0, _hcsFactName,               FactMetaData::valueTypeDouble)
     , _airSpeedFact                     (0, _airSpeedFactName,          FactMetaData::valueTypeDouble)
     , _climbRateFact                    (0, _climbRateFactName,         FactMetaData::valueTypeDouble)
     , _altitudeRelativeFact             (0, _altitudeRelativeFactName,  FactMetaData::valueTypeDouble)
@@ -397,7 +394,6 @@ void Vehicle::_commonInit()
     _addFact(&_pitchRateFact,           _pitchRateFactName);
     _addFact(&_yawRateFact,             _yawRateFactName);
     _addFact(&_groundSpeedFact,         _groundSpeedFactName);
-    _addFact(&_hcsFact,                 _hcsFactName);
     _addFact(&_airSpeedFact,            _airSpeedFactName);
     _addFact(&_climbRateFact,           _climbRateFactName);
     _addFact(&_altitudeRelativeFact,    _altitudeRelativeFactName);
@@ -644,9 +640,6 @@ void Vehicle::_mavlinkMessageReceived(LinkInterface* link, mavlink_message_t mes
     switch (message.msgid) {
     case MAVLINK_MSG_ID_HOME_POSITION:
         _handleHomePosition(message);
-        break;
-    case MAVLINK_MSG_ID_CONTROL_SYSTEM_STATE:
-        _handleControlSystemState(message);
         break;
     case MAVLINK_MSG_ID_SERVO_OUTPUT_RAW:
         _handleServoOutputRaw(message);
@@ -1525,30 +1518,6 @@ void Vehicle::_handleHeartbeat(mavlink_message_t& message)
             emit flightModeChanged(flightMode());
         }
     }
-}
-
-void Vehicle::_handleControlSystemState(const mavlink_message_t& message)
-{
-    printf("Test /n");
-
-    mavlink_control_system_state_t channels;
-
-    mavlink_msg_control_system_state_decode(&message, &channels);
-
-    float_t* _rgChannelvalues[cMaxHCSChannels] = {
-        &channels.x_vel,
-        &channels.y_vel,
-        &channels.x_acc,
-        &channels.y_acc,
-    };
-    int hcsValues[cMaxHCSChannels];
-    for (int j=0; j < cMaxHCSChannels; j++){
-        uint16_t channelValue = *_rgChannelvalues[j];
-            hcsValues[j] = channelValue == UINT16_MAX ? -1 : channelValue;
-            _hcsFact.setRawValue(hcsValues[0]);
-            //printf("\n%d", hcsValues[j]);
-    }
-    //emit rcChannelsChanged(channels.x_acc, hcsValues);
 }
 
 void Vehicle::_handleServoOutputRaw(const mavlink_message_t& message)

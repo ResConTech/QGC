@@ -267,7 +267,6 @@ public:
     Q_PROPERTY(Fact* pitchRate          READ pitchRate          CONSTANT)
     Q_PROPERTY(Fact* yawRate            READ yawRate            CONSTANT)
     Q_PROPERTY(Fact* groundSpeed        READ groundSpeed        CONSTANT)
-    Q_PROPERTY(Fact* hcs                READ hcs                CONSTANT)
     Q_PROPERTY(Fact* airSpeed           READ airSpeed           CONSTANT)
     Q_PROPERTY(Fact* climbRate          READ climbRate          CONSTANT)
     Q_PROPERTY(Fact* altitudeRelative   READ altitudeRelative   CONSTANT)
@@ -597,7 +596,6 @@ public:
     Fact* yawRate                           () { return &_yawRateFact; }
     Fact* airSpeed                          () { return &_airSpeedFact; }
     Fact* groundSpeed                       () { return &_groundSpeedFact; }
-    Fact* hcs                               () { return &_hcsFact; }
     Fact* climbRate                         () { return &_climbRateFact; }
     Fact* altitudeRelative                  () { return &_altitudeRelativeFact; }
     Fact* altitudeAMSL                      () { return &_altitudeAMSLFact; }
@@ -638,7 +636,6 @@ public:
 
     static const int cMaxRcChannels = 18;
     static const int cMaxServoChannels = 16;
-    static const int cMaxHCSChannels = 4;
 
     /// Sends the specified MAV_CMD to the vehicle. If no Ack is received command will be retried. If a sendMavCommand is already in progress
     /// the command will be queued and sent when the previous command completes.
@@ -777,7 +774,6 @@ public slots:
     void _offlineFirmwareTypeSettingChanged (QVariant varFirmwareType); // Should only be used by MissionControler to set firmware from Plan file
     void _offlineVehicleTypeSettingChanged  (QVariant varVehicleType);  // Should only be used by MissionController to set vehicle type from Plan file
     void _handleServoOutputRaw              (const mavlink_message_t& message);
-    void _handleControlSystemState          (const mavlink_message_t& message);
 
 signals:
     void coordinateChanged              (QGeoCoordinate coordinate);
@@ -848,7 +844,6 @@ signals:
     ///     @param pwmValues -1 signals channel not available
     void rcChannelsChanged              (int channelCount, int pwmValues[cMaxRcChannels]);
     void servoChannels                  (int channelPort, int rpmValues[cMaxServoChannels]);
-    void hcsChannels                    (int channel, int hcsValues[cMaxHCSChannels]);
 
     /// Remote control RSSI changed  (0% - 100%)
     void remoteControlRSSIChanged       (uint8_t rssi);
@@ -1212,7 +1207,6 @@ private:
     Fact _pitchRateFact;
     Fact _yawRateFact;
     Fact _groundSpeedFact;
-    Fact _hcsFact;
     Fact _airSpeedFact;
     Fact _climbRateFact;
     Fact _altitudeRelativeFact;
@@ -1259,7 +1253,6 @@ private:
     static const char* _pitchRateFactName;
     static const char* _yawRateFactName;
     static const char* _groundSpeedFactName;
-    static const char* _hcsFactName;
     static const char* _airSpeedFactName;
     static const char* _climbRateFactName;
     static const char* _altitudeRelativeFactName;
