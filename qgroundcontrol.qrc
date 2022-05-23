@@ -280,6 +280,8 @@
         <file>../../droneBody.png</file>
         <file>../../arrow.png</file>
         <file>accArrow.png</file>
+        <file>../../newDroneBody.png</file>
+        <file>newDroneBody.png</file>
     </qresource>
     <qresource prefix="/FirstRunPromptDialogs">
         <file alias="UnitsFirstRunPrompt.qml">src/FirstRunPromptDialogs/UnitsFirstRunPrompt.qml</file>

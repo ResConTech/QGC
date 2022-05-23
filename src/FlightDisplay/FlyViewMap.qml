@@ -41,7 +41,6 @@ FlightMap {
     FactPanelController {
         id:             factController
     }
-
     allowGCSLocationCenter:     true
     allowVehicleLocationCenter: !_keepVehicleCentered
     planView:                   false
@@ -585,13 +584,13 @@ FlightMap {
     Item{
         id: drone
         //width: parent.width<parent.height?parent.width:parent.height/4
-        width: parent.width/9.25
+        width: parent.width/15
         x: parent.width<parent.height?parent.width:parent.height
         height: width
         anchors.right: parent.right
         anchors.bottom: parent.bottom
-        anchors.rightMargin: top_left_prop.width/1.25
-        anchors.bottomMargin: top_left_prop.width/1.25
+        anchors.rightMargin: 2.5*(top_left_prop.width)
+        anchors.bottomMargin: top_left_prop.width
 
         Image {
             id: drone_center
@@ -792,7 +791,6 @@ FlightMap {
                     anchors.verticalCenter: parent.verticalCenter
                     visible:                true
                     text:                   _activeVehicle ? _activeVehicle.servoRaw4.value +"%" : null
-                    //text: drone.x
             }
         }
 
@@ -859,22 +857,6 @@ FlightMap {
                     text:                   _activeVehicle ? _activeVehicle.servoRaw2.value +"%" : null
             }
         }
-        Image {
-            id: upArrow
-            width: top_left_prop.width
-            height: width
-            anchors.bottom: drone.top
-            anchors.horizontalCenter: drone.horizontalCenter
-            source: "/qml/accArrow.png"
-            visible: false
-            Text {
-                //text:
-                //text:                   _activeVehicle ? (_activeVehicle.hcs.value) : null
-                anchors.bottom: upArrow.bottom
-                anchors.horizontalCenter: upArrow.horizontalCenter
-                anchors.bottomMargin: button.height/2
-            }
-        }
     }
 
         Rectangle{
@@ -889,13 +871,11 @@ FlightMap {
             states: [
                 State {
                     name: "on"
-                    //PropertyChanges {target: button; Text: "Off"}
                     PropertyChanges {target: drone_center; visible : true}
                     PropertyChanges {target: top_left_prop; visible : true}
                     PropertyChanges {target: top_right_prop; visible : true}
                     PropertyChanges {target: bottom_right_prop; visible : true}
                     PropertyChanges {target: bottom_left_prop; visible : true}
-
                 },
                 State {
                     name: "off"
@@ -915,7 +895,254 @@ FlightMap {
                 text: "On/Off"
                 onClicked: button.state = (button.state === 'off' ? 'on' : "off");
             }
+    }
+        Item{
+            id: buttons
+            width: 2*(drone.width)
+            height: 2.5*(drone.height)
+            anchors.verticalCenter: drone.verticalCenter
+            anchors.horizontalCenter: drone.horizontalCenter
+
+            Rectangle{
+                id: white_background
+                color: "white"
+                opacity: 0.5
+                width: p_dis.width * 6
+                height: p_dis.height * 1.2
+                anchors.left: buttons.right
+                anchors.top: p_dis.top
+                anchors.topMargin: -p_dis.width / 2
+                anchors.leftMargin: -p_dis.width / 4
+            }
+
+            Rectangle{
+                id: p_dis
+                anchors.left: buttons.right
+                anchors.top: buttons.top
+                anchors.topMargin: buttons.width / 3.5
+                height: buttons.height / 2
+                width: buttons.width / 10
+                color: "transparent"
+                border.color: "black"
+                border.width: 2
+                Text{
+                    text: "P"
+                    anchors.top: p_dis.bottom
+                    anchors.horizontalCenter: p_dis.horizontalCenter
+                }
+                Text{
+                    id: roll_est
+                    //text: _activeVehicle ? (Math.abs(_activeVehicle.attitudeRoll.value - _activeVehicle.rollRate.value) / Math.abs((_activeVehicle.attitudeRoll.value + _activeVehicle.rollRate.value) / 2) * 100).toFixed(2) : null
+                    //text: _activeVehicle ? ((_activeVehicle.attitudeRoll.value / _activeVehicle.roll.value) * 100).toFixed(1) + "%" : null
+                    anchors.top: p_dis.top
+                    anchors.horizontalCenter: p_dis.horizontalCenter
+                }
+                Text{
+                    //text: _activeVehicle ? _activeVehicle.roll.value.toFixed(2) : null
+                    anchors.top: roll_est.bottom
+                    anchors.horizontalCenter: roll_est.horizontalCenter
+                }
+            }
+
+            Rectangle{
+                id: r_dis
+                anchors.left: p_dis.right
+                anchors.top: p_dis.top
+                anchors.leftMargin: r_dis.width / 3
+                height: p_dis.height
+                width: p_dis.width
+                color: "transparent"
+                border.color: "black"
+                border.width: 2
+                Text{
+                    text: "R"
+                    anchors.top: r_dis.bottom
+                    anchors.horizontalCenter: r_dis.horizontalCenter
+                }
+                Text{
+                    id: pitch_est
+                    //text: _activeVehicle ? _activeVehicle.attitudePitch.value.toFixed(2) : null
+                    anchors.top: r_dis.top
+                    anchors.horizontalCenter: r_dis.horizontalCenter
+                }
+                Text{
+                    //text: _activeVehicle ? _activeVehicle.pitch.value.toFixed(2) : null
+                    anchors.top: pitch_est.bottom
+                    anchors.horizontalCenter: pitch_est.horizontalCenter
+                }
+            }
+
+            Rectangle{
+                id: y_dis
+                anchors.left: r_dis.right
+                anchors.top: r_dis.top
+                anchors.leftMargin: y_dis.width / 3
+                height: p_dis.height
+                width: p_dis.width
+                color: "transparent"
+                border.color: "black"
+                border.width: 2
+                Text{
+                    text: "Y"
+                    anchors.top: y_dis.bottom
+                    anchors.horizontalCenter: y_dis.horizontalCenter
+                }
+                Text{
+                    id: yaw_est
+                    //text: _activeVehicle ? _activeVehicle.attitudeYaw.value.toFixed(2) : null
+                    //text: _activeVehicle ? (_activeVehicle.yawRate.value * (180/ Math.PI)).toFixed(2) : null
+                    anchors.top: y_dis.top
+                    anchors.horizontalCenter: y_dis.horizontalCenter
+                }
+                Text{
+                    //text: _activeVehicle ? _activeVehicle.yawRate.value.toFixed(2) : null
+                    anchors.top: yaw_est.bottom
+                    anchors.horizontalCenter: yaw_est.horizontalCenter
+                }
+            }
+
+            Rectangle{
+                id: topRef
+                width: p_dis.width
+                height: 2
+                color: "black"
+                anchors.left: y_dis.right
+                anchors.top: p_dis.top
+                anchors.leftMargin: topRef.width / 3
+                Text{
+                    text: "10"
+                    anchors.left: topRef.right
+                    anchors.horizontalCenter: topRef.horizontalCenter
+                }
+            }
+
+            Rectangle{
+                id: sideRef
+                width: 2
+                height: p_dis.height
+                color: "black"
+                anchors.left: y_dis.right
+                anchors.top: p_dis.top
+                anchors.leftMargin: topRef.width / 3
+            }
+
+            Rectangle{
+                id: bottomRef
+                width: p_dis.width
+                height: 2
+                color: "black"
+                anchors.left: y_dis.right
+                anchors.bottom: p_dis.bottom
+                anchors.leftMargin: topRef.width / 3
+                Text{
+                    text: "0"
+                    anchors.left: bottomRef.right
+                    anchors.horizontalCenter: bottomRef.horizontalCenter
+                }
+            }
+
+            Rectangle{
+                id: midRef
+                width: p_dis.width
+                height: 2
+                color: "black"
+                anchors.left: y_dis.right
+                anchors.top: sideRef.top
+                anchors.topMargin: sideRef.height / 2
+                anchors.leftMargin: topRef.width / 3
+                Text{
+                    text: "5"
+                    anchors.left: midRef.right
+                    anchors.horizontalCenter: midRef.horizontalCenter
+                }
+            }
+
+            Rectangle{
+                width: buttons.width
+                height: buttons.height
+                color: "transparent"
+                //border.color: "red"
+                //border.width: 1
+            }
+
+            Rectangle{
+                id: rc_button
+                height: buttons.width / 8
+                width: buttons.width / 2.75
+                anchors.left: buttons.left
+                anchors.top: buttons.top
+                radius: 10
+                border.color: "black"
+                border.width: 2
+                anchors.leftMargin: p_dis.width
+                states: [
+                    State {
+                        name: "on_rc"
+                        PropertyChanges {target: train_button; opacity : 1}
+                        PropertyChanges {target: rc_button_control; text : "RC"}
+                    },
+                    State {
+                        name: "off_rc"
+                        PropertyChanges {target: train_button; opacity : 0.5}
+                        PropertyChanges {target: rc_button_control; text : "PID"}
+                        PropertyChanges {target: rc_button_control; palette.button : "black"}
+                    }
+                ]
+                transitions: [
+                    Transition {
+                        from: "on_rc"; to: "off_rc"; reversible: true
+                    }
+                ]
+                Button{
+                    id: rc_button_control
+                    width: rc_button.width
+                    height: rc_button.height
+                    text: "RC"
+                    palette.buttonText: "white"
+                    palette.button: "steelblue"
+                    onClicked: rc_button.state = (rc_button.state === 'off_rc' ? 'on_rc' : "off_rc");
+                }
         }
+
+            Rectangle{
+                id: train_button
+                height: buttons.width / 8
+                width: buttons.width / 2.75
+                anchors.right: buttons.right
+                anchors.top: buttons.top
+                anchors.rightMargin: p_dis.width
+                color: "black"
+                states: [
+                    State {
+                        name: "train_on"
+                        PropertyChanges {target: train_button_control; palette.button : "green"}
+                        PropertyChanges {target: train_button; opacity : 1}
+                    },
+                    State {
+                        name: "train_off"
+                        PropertyChanges {target: train_button_control; palette.button : "black"}
+                        PropertyChanges {target: train_button; opacity : 1}
+                    }
+                ]
+                transitions: [
+                    Transition {
+                        from: "train_off"; to: "train_on"; reversible: true
+                    }
+                ]
+                Button{
+                    id: train_button_control
+                    width: rc_button.width
+                    height: rc_button.height
+                    text: "Train"
+                    palette.text: "white"
+                    anchors.horizontalCenter: train_button.horizontalCenter
+                    anchors.verticalCenter: train_button.verticalCenter
+                    palette.buttonText: "white"
+                    palette.button: "black"
+                    onClicked: train_button.state = (train_button.state === 'train_on' ? 'train_off' : "train_on");
+                }
+            }
+    }
 
     /////////////////////////////////////////////////////////////
 
