@@ -927,16 +927,6 @@ FlightMap {
                     border.color: "black"
                     border.width: 2
 
-                    Item {
-                        Timer {
-                            interval: 1000; running: true; repeat: true
-                            onTriggered: rollRate.text =  (((Math.abs(_activeVehicle.setpoint.rollRate.value - _activeVehicle.rollRate.value)) / Math.abs(_activeVehicle.rollRate.value)) * 100).toFixed(0)
-                        }
-
-                        Text { id: rollRate; opacity: 0  }
-                    }
-
-
                     Text{
                         //text: _activeVehicle ? Math.abs(Math.abs(_activeVehicle.setpoint.rollRate.value.toFixed(2) - _activeVehicle.rollRate.value.toFixed(2)) / (_activeVehicle.rollRate.value.toFixed(2)) * 100).toFixed(0) : null
                         anchors.top: p_dis.bottom
@@ -966,16 +956,6 @@ FlightMap {
                     border.color: "black"
                     border.width: 2
 
-                    Item {
-                        Timer {
-                            interval: 1000; running: true; repeat: true
-                            onTriggered: pitchRate.text =  (((Math.abs(_activeVehicle.setpoint.pitchRate.value - _activeVehicle.pitchRate.value)) / Math.abs(_activeVehicle.pitchRate.value)) * 100).toFixed(0)
-                        }
-
-                        Text { id: pitchRate; opacity: 0  }
-                    }
-
-
                     Text{
                         //text: _activeVehicle ? Math.abs(Math.abs(_activeVehicle.setpoint.pitchRate.value.toFixed(2) - _activeVehicle.pitchRate.value.toFixed(2)) / (_activeVehicle.pitchRate.value.toFixed(2)) * 100).toFixed(0) : null
                         anchors.top: r_dis.bottom
@@ -1004,17 +984,6 @@ FlightMap {
                     color: "transparent"
                     border.color: "black"
                     border.width: 2
-
-
-                    Item {
-                        Timer {
-                            interval: 1000; running: true; repeat: true
-                            onTriggered: yawRate.text =  (((Math.abs(_activeVehicle.setpoint.yawRate.value - _activeVehicle.yawRate.value)) / Math.abs(_activeVehicle.yawRate.value)) * 100).toFixed(0)
-                        }
-
-                        Text { id: yawRate; opacity: 0  }
-                    }
-
 
                     Text{
                         //text: (((Math.abs(_activeVehicle.setpoint.yawRate.value - _activeVehicle.yawRate.value)) / Math.abs(_activeVehicle.yawRate.value)) * 100).toFixed(0)
@@ -1222,19 +1191,19 @@ FlightMap {
                 Text{
                     id: nRollPercent
                     anchors.top: estYaw.bottom
-                    text: "Accurate Roll %: " + rollRate.text
+                    text: _activeVehicle ? "Accurate Roll %: " + _activeVehicle.rollRate.value.toFixed(2) : null
                     color: "green"
                 }
                 Text{
                     id: nPitchPercent
                     anchors.top: nRollPercent.bottom
-                    text: "Accurate Pitch %: " + pitchRate.text
+                    text: _activeVehicle ? "Accurate Pitch %: " + _activeVehicle.pitchRate.value.toFixed(2) : null
                     color: "green"
                 }
                 Text{
                     id: nYawPercent
                     anchors.top: nPitchPercent.bottom
-                    text: "Accurate Yaw %: " + yawRate.text
+                    text: _activeVehicle ? "Accurate Yaw %: " + _activeVehicle.yawRate.value.toFixed(2) : null
                     color: "green"
                 }
                 Text{
@@ -1258,7 +1227,7 @@ FlightMap {
                 Text{
                     id: rateController
                     anchors.top: oYawPercent.bottom
-                    text: instrumentValueData.fact.enumOrValueString
+                    //text: instrumentValueData.fact.enumOrValueString
                     color: "blue"
                 }
             }
