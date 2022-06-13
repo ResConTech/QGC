@@ -72,7 +72,7 @@ const char* Vehicle::_joystickEnabledSettingsKey =  "JoystickEnabled";
 const char* Vehicle::_rollFactName =                "roll";
 const char* Vehicle::_pitchFactName =               "pitch";
 const char* Vehicle::_headingFactName =             "heading";
-const char* Vehicle::_rollRateFactName =             "rollRate";
+const char* Vehicle::_rollRateFactName =            "rollRate";
 const char* Vehicle::_pitchRateFactName =           "pitchRate";
 const char* Vehicle::_yawRateFactName =             "yawRate";
 const char* Vehicle::_airSpeedFactName =            "airSpeed";
@@ -90,6 +90,16 @@ const char* Vehicle::_distanceToGCSFactName =       "distanceToGCS";
 const char* Vehicle::_hobbsFactName =               "hobbs";
 const char* Vehicle::_throttlePctFactName =         "throttlePct";
 const char* Vehicle::_servoRawFactName =            "servoRaw";
+const char* Vehicle::_servoRaw2FactName =           "servoRaw2";
+const char* Vehicle::_servoRaw3FactName =           "servoRaw3";
+const char* Vehicle::_servoRaw4FactName =           "servoRaw4";
+const char* Vehicle::_attitudeRollFactName =        "attitudeRoll";
+const char* Vehicle::_attitudePitchFactName =       "attitudePitch";
+const char* Vehicle::_attitudeYawFactName =         "attitudeYaw";
+const char* Vehicle::_posValueFactName =            "posValue";
+const char* Vehicle::_posValue2FactName =           "posValue2";
+const char* Vehicle::_posValue3FactName =           "posValue3";
+const char* Vehicle::_posValue4FactName =           "posValue4";
 
 const char* Vehicle::_gpsFactGroupName =                "gps";
 const char* Vehicle::_windFactGroupName =               "wind";
@@ -145,6 +155,16 @@ Vehicle::Vehicle(LinkInterface*             link,
     , _hobbsFact                    (0, _hobbsFactName,             FactMetaData::valueTypeString)
     , _throttlePctFact              (0, _throttlePctFactName,       FactMetaData::valueTypeUint16)
     , _servoRawFact                 (0, _servoRawFactName,          FactMetaData::valueTypeUint16)
+    , _servoRaw2Fact                (0, _servoRaw2FactName,         FactMetaData::valueTypeUint16)
+    , _servoRaw3Fact                (0, _servoRaw3FactName,         FactMetaData::valueTypeUint16)
+    , _servoRaw4Fact                (0, _servoRaw4FactName,         FactMetaData::valueTypeUint16)
+    , _attitudeRollFact             (0, _attitudeRollFactName,      FactMetaData::valueTypeFloat)
+    , _attitudePitchFact            (0, _attitudePitchFactName,     FactMetaData::valueTypeFloat)
+    , _attitudeYawFact              (0, _attitudeYawFactName,       FactMetaData::valueTypeFloat)
+    , _posValueFact                 (0, _posValueFactName,          FactMetaData::valueTypeFloat)
+    , _posValue2Fact                (0, _posValue2FactName,         FactMetaData::valueTypeFloat)
+    , _posValue3Fact                (0, _posValue3FactName,         FactMetaData::valueTypeFloat)
+    , _posValue4Fact                (0, _posValue4FactName,         FactMetaData::valueTypeFloat)
 
     , _gpsFactGroup                 (this)
     , _windFactGroup                (this)
@@ -293,6 +313,16 @@ Vehicle::Vehicle(MAV_AUTOPILOT              firmwareType,
     , _hobbsFact                        (0, _hobbsFactName,             FactMetaData::valueTypeString)
     , _throttlePctFact                  (0, _throttlePctFactName,       FactMetaData::valueTypeUint16)
     , _servoRawFact                     (0, _servoRawFactName,          FactMetaData::valueTypeUint16)
+    , _servoRaw2Fact                    (0, _servoRaw2FactName,         FactMetaData::valueTypeUint16)
+    , _servoRaw3Fact                    (0, _servoRaw3FactName,         FactMetaData::valueTypeUint16)
+    , _servoRaw4Fact                    (0, _servoRaw4FactName,         FactMetaData::valueTypeUint16)
+    , _attitudeRollFact                 (0, _attitudeRollFactName,      FactMetaData::valueTypeFloat)
+    , _attitudePitchFact                (0, _attitudePitchFactName,     FactMetaData::valueTypeFloat)
+    , _attitudeYawFact                  (0, _attitudeYawFactName,       FactMetaData::valueTypeFloat)
+    , _posValueFact                     (0, _posValueFactName,          FactMetaData::valueTypeFloat)
+    , _posValue2Fact                    (0, _posValue2FactName,         FactMetaData::valueTypeFloat)
+    , _posValue3Fact                    (0, _posValue3FactName,         FactMetaData::valueTypeFloat)
+    , _posValue4Fact                    (0, _posValue4FactName,         FactMetaData::valueTypeFloat)
     , _gpsFactGroup                     (this)
     , _windFactGroup                    (this)
     , _vibrationFactGroup               (this)
@@ -305,7 +335,6 @@ Vehicle::Vehicle(MAV_AUTOPILOT              firmwareType,
     if (_firmwareType == MAV_AUTOPILOT_TRACK) {
         trackFirmwareVehicleTypeChanges();
     }
-
     _commonInit();
 
     connect(_settingsManager->appSettings()->offlineEditingCruiseSpeed(),   &Fact::rawValueChanged, this, &Vehicle::_offlineCruiseSpeedSettingChanged);
@@ -357,7 +386,7 @@ void Vehicle::_commonInit()
 
     _componentInformationManager    = new ComponentInformationManager   (this);
     _initialConnectStateMachine     = new InitialConnectStateMachine    (this);
-    _ftpManager                     = new FTPManager                    (this);    
+    _ftpManager                     = new FTPManager                    (this);
     _vehicleLinkManager             = new VehicleLinkManager            (this);
 
     _parameterManager = new ParameterManager(this);
@@ -399,6 +428,16 @@ void Vehicle::_commonInit()
     _addFact(&_distanceToGCSFact,       _distanceToGCSFactName);
     _addFact(&_throttlePctFact,         _throttlePctFactName);
     _addFact(&_servoRawFact,            _servoRawFactName);
+    _addFact(&_servoRaw2Fact,           _servoRaw2FactName);
+    _addFact(&_servoRaw3Fact,           _servoRaw3FactName);
+    _addFact(&_servoRaw4Fact,           _servoRaw4FactName);
+    _addFact(&_attitudeRollFact,        _attitudeRollFactName);
+    _addFact(&_attitudePitchFact,       _attitudePitchFactName);
+    _addFact(&_attitudeYawFact,         _attitudeYawFactName);
+    _addFact(&_posValueFact,            _posValueFactName);
+    _addFact(&_posValue2Fact,           _posValue2FactName);
+    _addFact(&_posValue3Fact,           _posValue3FactName);
+    _addFact(&_posValue4Fact,           _posValue4FactName);
 
     _hobbsFact.setRawValue(QVariant(QString("0000:00:00")));
     _addFact(&_hobbsFact,               _hobbsFactName);
@@ -630,8 +669,13 @@ void Vehicle::_mavlinkMessageReceived(LinkInterface* link, mavlink_message_t mes
     case MAVLINK_MSG_ID_HOME_POSITION:
         _handleHomePosition(message);
         break;
+    case MAVLINK_MSG_ID_ATTITUDE_TARGET:
+        _handleAttitudeTarget(message);
     case MAVLINK_MSG_ID_SERVO_OUTPUT_RAW:
         _handleServoOutputRaw(message);
+        break;
+    case MAVLINK_MSG_ID_POSITION_TARGET_LOCAL_NED:
+        _handlePosValue(message);
         break;
     case MAVLINK_MSG_ID_HEARTBEAT:
         _handleHeartbeat(message);
@@ -1143,6 +1187,9 @@ void Vehicle::_handleHighLatency2(mavlink_message_t& message)
     _altitudeRelativeFact.setRawValue(qQNaN());
     _altitudeAMSLFact.setRawValue(highLatency2.altitude);
 
+    int heading = highLatency2.heading;
+    printf("%d\n", heading);
+
     struct failure2Sensor_s {
         HL_FAILURE_FLAG         failureBit;
         MAV_SYS_STATUS_SENSOR   sensorBit;
@@ -1509,9 +1556,29 @@ void Vehicle::_handleHeartbeat(mavlink_message_t& message)
     }
 }
 
+void Vehicle::_handleAttitudeTarget(const mavlink_message_t& message)
+{
+    mavlink_attitude_target_t channels;
+    mavlink_msg_attitude_target_decode(&message, &channels);
+
+    float_t* _rgChannelvalue[cMaxAttitudeChannels] = {
+        &channels.body_roll_rate,
+        &channels.body_pitch_rate,
+        &channels.body_yaw_rate,
+    };
+    double attValues[cMaxAttitudeChannels];
+    for (int i=0; i<cMaxAttitudeChannels; i++){
+        double_t channelValue = *_rgChannelvalue[i];
+            attValues[i] = channelValue == UINT16_MAX ? -1 : channelValue;
+            _attitudeRollFact.setRawValue(attValues[0]);
+            _attitudePitchFact.setRawValue(attValues[1]);
+            _attitudeYawFact.setRawValue(attValues[2]);
+    }
+}
+
 void Vehicle::_handleServoOutputRaw(const mavlink_message_t& message)
 {
-    //printf("I GOT TO THE SERVO FUNCTION!!!/n");
+
     mavlink_servo_output_raw_t channels;
 
     mavlink_msg_servo_output_raw_decode(&message, &channels);
@@ -1521,34 +1588,49 @@ void Vehicle::_handleServoOutputRaw(const mavlink_message_t& message)
         &channels.servo2_raw,
         &channels.servo3_raw,
         &channels.servo4_raw,
-        //&channels.servo5_raw,
-        //&channels.servo6_raw,
-        //&channels.servo7_raw,
-        //&channels.servo8_raw,
-        //&channels.servo9_raw,
-        //&channels.servo10_raw,
-        //&channels.servo11_raw,
-        //&channels.servo12_raw,
-       // &channels.servo13_raw,
-       // &channels.servo14_raw,
-       // &channels.servo15_raw,
-        //&channels.servo16_raw,
+        &channels.servo5_raw,
+        &channels.servo6_raw,
+        &channels.servo7_raw,
+        &channels.servo8_raw,
+        &channels.servo9_raw,
+        &channels.servo10_raw,
+        &channels.servo11_raw,
+        &channels.servo12_raw,
+        &channels.servo13_raw,
+        &channels.servo14_raw,
+        &channels.servo15_raw,
+        &channels.servo16_raw,
     };
-    int pwmValues[cMaxServoChannels];
-
-    //_servoRawFact.setRawValue(qQNaN());
-
+    int rpmValues[cMaxServoChannels];
     for (int i=0; i<cMaxServoChannels; i++){
         uint16_t channelValue = *_rgChannelvalues[i];
-        //if(i < channels.){
-            pwmValues[i] = channelValue == UINT16_MAX ? -1 : channelValue;
-            //printf("\n%d", pwmValues[i]);
-      //  }
-      //  else {
-       //     pwmValues[i] = -1;
-       // }
+            rpmValues[i] = channelValue == UINT16_MAX ? -1 : channelValue;
+            _servoRawFact.setRawValue(rpmValues[0]/20);
+            _servoRaw2Fact.setRawValue(rpmValues[1]/20);
+            _servoRaw3Fact.setRawValue(rpmValues[2]/20);
+            _servoRaw4Fact.setRawValue(rpmValues[3]/20);
+    }
 }
-    emit rcChannelsChanged(channels.servo1_raw, pwmValues);
+
+void Vehicle::_handlePosValue(const mavlink_message_t& message)
+{
+    __mavlink_local_position_ned_t channels;
+    mavlink_msg_local_position_ned_decode(&message, &channels);
+
+    float_t* _rgChannelvalue[cMaxPosChannels] = {
+        &channels.vx,
+        &channels.vy,
+        &channels.x,
+        &channels.y,
+    };
+
+    double posValues[cMaxPosChannels];
+    for (int i=0; i<cMaxPosChannels; i++){
+        double_t channelValue = *_rgChannelvalue[i];
+            posValues[i] = channelValue == UINT16_MAX ? -1 : channelValue;
+            _posValueFact.setRawValue(posValues[0]);
+            _posValue2Fact.setRawValue(posValues[1]);
+    }
 }
 
 void Vehicle::_handleRadioStatus(mavlink_message_t& message)

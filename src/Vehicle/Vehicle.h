@@ -186,9 +186,6 @@ public:
     Q_PROPERTY(bool               supportsMotorInterference     READ supportsMotorInterference                                      CONSTANT)
     Q_PROPERTY(QString              prearmError                 READ prearmError                WRITE setPrearmError                NOTIFY prearmErrorChanged)
     Q_PROPERTY(int                  motorCount                  READ motorCount                                                     CONSTANT)
-
-    //Q_PROPERTY(int                  _handleServoOutputRaw       READ _handleServoOutputRaw                                          CONSTANT)
-
     Q_PROPERTY(bool                 coaxialMotors               READ coaxialMotors                                                  CONSTANT)
     Q_PROPERTY(bool                 xConfigMotors               READ xConfigMotors                                                  CONSTANT)
     Q_PROPERTY(bool                 isOfflineEditingVehicle     READ isOfflineEditingVehicle                                        CONSTANT)
@@ -283,6 +280,16 @@ public:
     Q_PROPERTY(Fact* hobbs              READ hobbs              CONSTANT)
     Q_PROPERTY(Fact* throttlePct        READ throttlePct        CONSTANT)
     Q_PROPERTY(Fact* servoRaw           READ servoRaw           CONSTANT)
+    Q_PROPERTY(Fact* servoRaw2          READ servoRaw2          CONSTANT)
+    Q_PROPERTY(Fact* servoRaw3          READ servoRaw3          CONSTANT)
+    Q_PROPERTY(Fact* servoRaw4          READ servoRaw4          CONSTANT)
+    Q_PROPERTY(Fact* attitudeRoll       READ attitudeRoll       CONSTANT)
+    Q_PROPERTY(Fact* attitudePitch      READ attitudePitch      CONSTANT)
+    Q_PROPERTY(Fact* attitudeYaw        READ attitudeYaw        CONSTANT)
+    Q_PROPERTY(Fact* posValue           READ posValue           CONSTANT)
+    Q_PROPERTY(Fact* posValue2          READ posValue2          CONSTANT)
+    Q_PROPERTY(Fact* posValue3          READ posValue3          CONSTANT)
+    Q_PROPERTY(Fact* posValue4          READ posValue4          CONSTANT)
 
     Q_PROPERTY(FactGroup*           gps             READ gpsFactGroup               CONSTANT)
     Q_PROPERTY(FactGroup*           wind            READ windFactGroup              CONSTANT)
@@ -608,6 +615,16 @@ public:
     Fact* hobbs                             () { return &_hobbsFact; }
     Fact* throttlePct                       () { return &_throttlePctFact; }
     Fact* servoRaw                          () { return &_servoRawFact; }
+    Fact* servoRaw2                         () { return &_servoRaw2Fact; }
+    Fact* servoRaw3                         () { return &_servoRaw3Fact; }
+    Fact* servoRaw4                         () { return &_servoRaw4Fact; }
+    Fact* attitudeRoll                      () { return &_attitudeRollFact; }
+    Fact* attitudePitch                     () { return &_attitudePitchFact; }
+    Fact* attitudeYaw                       () { return &_attitudeYawFact; }
+    Fact* posValue                          () { return &_posValueFact; }
+    Fact* posValue2                         () { return &_posValue2Fact; }
+    Fact* posValue3                         () { return &_posValue3Fact; }
+    Fact* posValue4                         () { return &_posValue4Fact; }
 
     FactGroup* gpsFactGroup                 () { return &_gpsFactGroup; }
     FactGroup* windFactGroup                () { return &_windFactGroup; }
@@ -632,8 +649,9 @@ public:
     VehicleObjectAvoidance*         objectAvoidance     () { return _objectAvoidance; }
 
     static const int cMaxRcChannels = 18;
-
-    static const int cMaxServoChannels = 4;
+    static const int cMaxServoChannels = 16;
+    static const int cMaxAttitudeChannels = 3;
+    static const int cMaxPosChannels = 4;
 
     /// Sends the specified MAV_CMD to the vehicle. If no Ack is received command will be retried. If a sendMavCommand is already in progress
     /// the command will be queued and sent when the previous command completes.
@@ -772,9 +790,10 @@ public slots:
     void _offlineFirmwareTypeSettingChanged (QVariant varFirmwareType); // Should only be used by MissionControler to set firmware from Plan file
     void _offlineVehicleTypeSettingChanged  (QVariant varVehicleType);  // Should only be used by MissionController to set vehicle type from Plan file
     void _handleServoOutputRaw              (const mavlink_message_t& message);
+    void _handleAttitudeTarget              (const mavlink_message_t& message);
+    void _handlePosValue                    (const mavlink_message_t& message);
 
 signals:
-    //void _handleServoOutputRaw          (const mavlink_message_t& message);
     void coordinateChanged              (QGeoCoordinate coordinate);
     void joystickEnabledChanged         (bool enabled);
     void mavlinkMessageReceived         (const mavlink_message_t& message);
@@ -842,8 +861,9 @@ signals:
     ///     @param channelCount Number of available channels, cMaxRcChannels max
     ///     @param pwmValues -1 signals channel not available
     void rcChannelsChanged              (int channelCount, int pwmValues[cMaxRcChannels]);
-
     void servoChannels                  (int channelPort, int rpmValues[cMaxServoChannels]);
+    void attitudeChannels               (int channelPort, int attValues[cMaxAttitudeChannels]);
+    void posChannels                    (int channelIn, int posValues[cMaxPosChannels]);
 
     /// Remote control RSSI changed  (0% - 100%)
     void remoteControlRSSIChanged       (uint8_t rssi);
@@ -936,7 +956,6 @@ private:
     void _handleMessageInterval         (const mavlink_message_t& message);
     void _handleGimbalOrientation       (const mavlink_message_t& message);
     void _handleObstacleDistance        (const mavlink_message_t& message);
-    //void _handleServoOutputRaw          (const mavlink_message_t& message);
     // ArduPilot dialect messages
 #if !defined(NO_ARDUPILOT_DIALECT)
     void _handleCameraFeedback          (const mavlink_message_t& message);
@@ -1222,6 +1241,16 @@ private:
     Fact _hobbsFact;
     Fact _throttlePctFact;
     Fact _servoRawFact;
+    Fact _servoRaw2Fact;
+    Fact _servoRaw3Fact;
+    Fact _servoRaw4Fact;
+    Fact _attitudeRollFact;
+    Fact _attitudePitchFact;
+    Fact _attitudeYawFact;
+    Fact _posValueFact;
+    Fact _posValue2Fact;
+    Fact _posValue3Fact;
+    Fact _posValue4Fact;
 
     VehicleGPSFactGroup             _gpsFactGroup;
     VehicleWindFactGroup            _windFactGroup;
@@ -1265,6 +1294,16 @@ private:
     static const char* _hobbsFactName;
     static const char* _throttlePctFactName;
     static const char* _servoRawFactName;
+    static const char* _servoRaw2FactName;
+    static const char* _servoRaw3FactName;
+    static const char* _servoRaw4FactName;
+    static const char* _attitudeRollFactName;
+    static const char* _attitudePitchFactName;
+    static const char* _attitudeYawFactName;
+    static const char* _posValueFactName;
+    static const char* _posValue2FactName;
+    static const char* _posValue3FactName;
+    static const char* _posValue4FactName;
 
     static const char* _gpsFactGroupName;
     static const char* _windFactGroupName;
