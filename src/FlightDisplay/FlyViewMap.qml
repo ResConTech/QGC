@@ -41,6 +41,7 @@ FlightMap {
     FactPanelController {
         id:             factController
     }
+
     allowGCSLocationCenter:     true
     allowVehicleLocationCenter: !_keepVehicleCentered
     planView:                   false
@@ -582,190 +583,366 @@ FlightMap {
     ///////////////////////////////////////////////////////////////////////////
 
     Item{
-        id: drone
-        //width: parent.width<parent.height?parent.width:parent.height/4
-        width: parent.width/15
-        x: parent.width<parent.height?parent.width:parent.height
-        height: width
-        anchors.right: parent.right
-        anchors.bottom: parent.bottom
-        anchors.rightMargin: 2.5*(top_left_prop.width)
-        anchors.bottomMargin: top_left_prop.width
-
-        Image {
-            id: drone_center
-            width: drone.width
+            id: drone
+            //width: parent.width<parent.height?parent.width:parent.height/4
+            width: parent.width/15
+            x: parent.width<parent.height?parent.width:parent.height
             height: width
-            source: "/qml/droneBody.png"
-            anchors.verticalCenter: drone.verticalCenter
-            anchors.horizontalCenter: drone.horizontalCenter
-        }
+            anchors.right: parent.right
+            anchors.bottom: parent.bottom
+            anchors.rightMargin: 2.5*(top_left_prop.width)
+            anchors.bottomMargin: top_left_prop.width
 
-        Rectangle {
-            id: top_left_prop
-            width: drone.width / 1.5
-            height: width
-            color: "white"
-            states:[
-                State {
-                    name: "green"; when: _activeVehicle.servoRaw.value < 75
-                    PropertyChanges {target: top_left_prop; color: "green"}
-                },
-                State {
-                    name: "yellow"; when: _activeVehicle.servoRaw.value >= 75 && _activeVehicle.servoRaw.value <90
-                    PropertyChanges {target: top_left_prop; color: "yellow"}
-                },
-                State {
-                    name: "orange"; when: _activeVehicle.servoRaw.value >= 90 && _activeVehicle.servoRaw.value <95
-                    PropertyChanges {target: top_left_prop; color: "orange"}
-                },
-                State {
-                    name: "red"; when: _activeVehicle.servoRaw.value >= 95
-                    PropertyChanges {target: top_left_prop; color: "red"}
+            Image {
+                id: drone_center
+                width: drone.width
+                height: width
+                //source: "/qml/droneBody.png"
+                anchors.verticalCenter: drone.verticalCenter
+                anchors.horizontalCenter: drone.horizontalCenter
+            }
+
+            Rectangle {
+                id: top_left_prop
+                width: drone.width / 1.5
+                height: width
+                color: "white"
+                states:[
+                    State {
+                        name: "green"; when: _activeVehicle.servoRaw.value < 75
+                        PropertyChanges {target: top_left_prop; color: "green"}
+                    },
+                    State {
+                        name: "yellow"; when: _activeVehicle.servoRaw.value >= 75 && _activeVehicle.servoRaw.value <90
+                        PropertyChanges {target: top_left_prop; color: "yellow"}
+                    },
+                    State {
+                        name: "orange"; when: _activeVehicle.servoRaw.value >= 90 && _activeVehicle.servoRaw.value <95
+                        PropertyChanges {target: top_left_prop; color: "orange"}
+                    },
+                    State {
+                        name: "red"; when: _activeVehicle.servoRaw.value >= 95
+                        PropertyChanges {target: top_left_prop; color: "red"}
+                    }
+                ]
+                transitions:[
+                    Transition{
+                        from: "yellow"; to: "green"; reversible: true
+                        ParallelAnimation{
+                            ColorAnimation { duration: 500 }
+                        }
+                    },
+                    Transition{
+                        from: "green"; to: "yellow"; reversible: true
+                        ParallelAnimation{
+                            ColorAnimation { duration: 500 }
+                        }
+                    },
+                    Transition{
+                        from: "yellow"; to: "orange"; reversible: true
+                        ParallelAnimation{
+                            ColorAnimation { duration: 500 }
+                        }
+                    },
+                    Transition{
+                        from: "orange"; to: "red"; reversible: true
+                        ParallelAnimation{
+                            ColorAnimation { duration: 500 }
+                        }
+                    }
+                ]
+                border.color: "black"
+                border.width: 1
+                radius: width*0.5
+                anchors.top: drone_center.top
+                anchors.left: drone_center.left
+                anchors.topMargin: -top_left_prop.height / 1.65
+                anchors.leftMargin: -top_left_prop.width / 1.65
+                Text {
+                        anchors.horizontalCenter: parent.horizontalCenter
+                        anchors.verticalCenter: parent.verticalCenter
+                        visible:                true
+                        text:                   _activeVehicle ? _activeVehicle.servoRaw.value +"%" : null
                 }
-            ]
-            transitions:[
-                Transition{
-                    from: "yellow"; to: "green"; reversible: true
-                    ParallelAnimation{
-                        ColorAnimation { duration: 500 }
+            }
+
+            Rectangle {
+                id: bottom_left_prop
+                width: top_left_prop.width
+                height: width
+                color: "white"
+                states:[
+                    State {
+                        name: "green"; when: _activeVehicle.servoRaw3.value < 75
+                        PropertyChanges {target: bottom_left_prop; color: "green"}
+                    },
+                    State {
+                        name: "yellow"; when: _activeVehicle.servoRaw3.value >= 75 && _activeVehicle.servoRaw3.value <90
+                        PropertyChanges {target: bottom_left_prop; color: "yellow"}
+                    },
+                    State {
+                        name: "orange"; when: _activeVehicle.servoRaw3.value >= 90 && _activeVehicle.servoRaw3.value <95
+                        PropertyChanges {target: bottom_left_prop; color: "orange"}
+                    },
+                    State {
+                        name: "red"; when: _activeVehicle.servoRaw3.value >= 95
+                        PropertyChanges {target: bottom_left_prop; color: "red"}
                     }
-                },
-                Transition{
-                    from: "green"; to: "yellow"; reversible: true
-                    ParallelAnimation{
-                        ColorAnimation { duration: 500 }
+                ]
+                transitions:[
+                    Transition{
+                        from: "yellow"; to: "green"; reversible: true
+                        ParallelAnimation{
+                            ColorAnimation { duration: 500 }
+                        }
+                    },
+                    Transition{
+                        from: "green"; to: "yellow"; reversible: true
+                        ParallelAnimation{
+                            ColorAnimation { duration: 500 }
+                        }
+                    },
+                    Transition{
+                        from: "yellow"; to: "orange"; reversible: true
+                        ParallelAnimation{
+                            ColorAnimation { duration: 500 }
+                        }
+                    },
+                    Transition{
+                        from: "orange"; to: "red"; reversible: true
+                        ParallelAnimation{
+                            ColorAnimation { duration: 500 }
+                        }
                     }
-                },
-                Transition{
-                    from: "yellow"; to: "orange"; reversible: true
-                    ParallelAnimation{
-                        ColorAnimation { duration: 500 }
-                    }
-                },
-                Transition{
-                    from: "orange"; to: "red"; reversible: true
-                    ParallelAnimation{
-                        ColorAnimation { duration: 500 }
-                    }
+                ]
+                border.color: "black"
+                border.width: 1
+                radius: width*0.5
+                anchors.bottom: drone_center.bottom
+                anchors.left: drone_center.left
+                anchors.bottomMargin: -bottom_left_prop.height / 1.65
+                anchors.leftMargin: -bottom_left_prop.width / 1.65
+                Text {
+                        anchors.horizontalCenter: parent.horizontalCenter
+                        anchors.verticalCenter: parent.verticalCenter
+                        //color: "black"
+                        visible:                true
+                        text:                   _activeVehicle ? _activeVehicle.servoRaw3.value +"%" : null
                 }
-            ]
-            border.color: "black"
-            border.width: 1
-            radius: width*0.5
-            anchors.top: drone_center.top
-            anchors.left: drone_center.left
-            anchors.topMargin: -top_left_prop.height / 1.65
-            anchors.leftMargin: -top_left_prop.width / 1.65
-            Text {
-                    anchors.horizontalCenter: parent.horizontalCenter
-                    anchors.verticalCenter: parent.verticalCenter
-                    visible:                true
-                    text:                   _activeVehicle ? _activeVehicle.servoRaw.value +"%" : null
+            }
+
+            Rectangle {
+                id: bottom_right_prop
+                width: top_left_prop.width
+                height: width
+                color: "white"
+                states:[
+                    State {
+                        name: "green"; when: _activeVehicle.servoRaw4.value < 75
+                        PropertyChanges {target: bottom_right_prop; color: "green"}
+                    },
+                    State {
+                        name: "yellow"; when: _activeVehicle.servoRaw4.value >= 75 && _activeVehicle.servoRaw4.value <90
+                        PropertyChanges {target: bottom_right_prop; color: "yellow"}
+                    },
+                    State {
+                        name: "orange"; when: _activeVehicle.servoRaw4.value >= 90 && _activeVehicle.servoRaw4.value <95
+                        PropertyChanges {target: bottom_right_prop; color: "orange"}
+                    },
+                    State {
+                        name: "red"; when: _activeVehicle.servoRaw4.value >= 95
+                        PropertyChanges {target: bottom_right_prop; color: "red"}
+                    }
+                ]
+                transitions:[
+                    Transition{
+                        from: "yellow"; to: "green"; reversible: true
+                        ParallelAnimation{
+                            ColorAnimation { duration: 500 }
+                        }
+                    },
+                    Transition{
+                        from: "green"; to: "yellow"; reversible: true
+                        ParallelAnimation{
+                            ColorAnimation { duration: 500 }
+                        }
+                    },
+                    Transition{
+                        from: "yellow"; to: "orange"; reversible: true
+                        ParallelAnimation{
+                            ColorAnimation { duration: 500 }
+                        }
+                    },
+                    Transition{
+                        from: "orange"; to: "red"; reversible: true
+                        ParallelAnimation{
+                            ColorAnimation { duration: 500 }
+                        }
+                    }
+                ]
+                border.color: "black"
+                border.width: 1
+                radius: width*0.5
+                anchors.bottom: drone_center.bottom
+                anchors.right: drone_center.right
+                anchors.bottomMargin: -bottom_right_prop.height / 1.65
+                anchors.rightMargin: -bottom_right_prop.width / 1.65
+                Text {
+                        anchors.horizontalCenter: parent.horizontalCenter
+                        anchors.verticalCenter: parent.verticalCenter
+                        visible:                true
+                        text:                   _activeVehicle ? _activeVehicle.servoRaw4.value +"%" : null
+                }
+            }
+
+            Rectangle {
+                id: top_right_prop
+                width: top_left_prop.width
+                height: width
+                color: "white"
+                states:[
+                    State {
+                        name: "green"; when: _activeVehicle.servoRaw2.value < 75
+                        PropertyChanges {target: top_right_prop; color: "green"}
+                    },
+                    State {
+                        name: "yellow"; when: _activeVehicle.servoRaw2.value >= 75 && _activeVehicle.servoRaw2.value <90
+                        PropertyChanges {target: top_right_prop; color: "yellow"}
+                    },
+                    State {
+                        name: "orange"; when: _activeVehicle.servoRaw2.value >= 90 && _activeVehicle.servoRaw2.value <95
+                        PropertyChanges {target: top_right_prop; color: "orange"}
+                    },
+                    State {
+                        name: "red"; when: _activeVehicle.servoRaw2.value >= 95
+                        PropertyChanges {target: top_right_prop; color: "red"}
+                    }
+                ]
+                transitions:[
+                    Transition{
+                        from: "yellow"; to: "green"; reversible: true
+                        ParallelAnimation{
+                            ColorAnimation { duration: 500 }
+                        }
+                    },
+                    Transition{
+                        from: "green"; to: "yellow"; reversible: true
+                        ParallelAnimation{
+                            ColorAnimation { duration: 500 }
+                        }
+                    },
+                    Transition{
+                        from: "yellow"; to: "orange"; reversible: true
+                        ParallelAnimation{
+                            ColorAnimation { duration: 500 }
+                        }
+                    },
+                    Transition{
+                        from: "orange"; to: "red"; reversible: true
+                        ParallelAnimation{
+                            ColorAnimation { duration: 500 }
+                        }
+                    }
+                ]
+                border.color: "black"
+                border.width: 1
+                radius: width*0.5
+                anchors.top: drone_center.top
+                anchors.right: drone_center.right
+                anchors.topMargin: -top_right_prop.height / 1.65
+                anchors.rightMargin: -top_right_prop.width / 1.65
+                Text {
+                        anchors.horizontalCenter: parent.horizontalCenter
+                        anchors.verticalCenter: parent.verticalCenter
+                        visible:                true
+                        text:                   _activeVehicle ? _activeVehicle.servoRaw2.value +"%" : null
+                }
             }
         }
 
-        Rectangle {
-            id: bottom_left_prop
-            width: top_left_prop.width
-            height: width
-            color: "white"
-            states:[
-                State {
-                    name: "green"; when: _activeVehicle.servoRaw3.value < 75
-                    PropertyChanges {target: bottom_left_prop; color: "green"}
-                },
-                State {
-                    name: "yellow"; when: _activeVehicle.servoRaw3.value >= 75 && _activeVehicle.servoRaw3.value <90
-                    PropertyChanges {target: bottom_left_prop; color: "yellow"}
-                },
-                State {
-                    name: "orange"; when: _activeVehicle.servoRaw3.value >= 90 && _activeVehicle.servoRaw3.value <95
-                    PropertyChanges {target: bottom_left_prop; color: "orange"}
-                },
-                State {
-                    name: "red"; when: _activeVehicle.servoRaw3.value >= 95
-                    PropertyChanges {target: bottom_left_prop; color: "red"}
+            Rectangle{
+                id: button
+                width: drone.width/3
+                height: width/3
+                anchors.top: parent.top
+                anchors.left: parent.left
+                anchors.leftMargin: parent.width/24.25
+                anchors.topMargin: parent.height/15
+                color: "transparent"
+                states: [
+                    State {
+                        name: "on"
+                        PropertyChanges {target: drone_center; visible : true}
+                        PropertyChanges {target: top_left_prop; visible : true}
+                        PropertyChanges {target: top_right_prop; visible : true}
+                        PropertyChanges {target: bottom_right_prop; visible : true}
+                        PropertyChanges {target: bottom_left_prop; visible : true}
+                    },
+                    State {
+                        name: "off"
+                        PropertyChanges {target: drone_center; visible : false}
+                        PropertyChanges {target: top_left_prop; visible : false}
+                        PropertyChanges {target: top_right_prop; visible : false}
+                        PropertyChanges {target: bottom_right_prop; visible : false}
+                        PropertyChanges {target: bottom_left_prop; visible : false}
+                    }
+                ]
+                    transitions: [
+                        Transition {
+                            from: "on"; to: "off"; reversible: true
+                        }
+                    ]
+                Button{
+                    text: "On/Off"
+                    onClicked: button.state = (button.state === 'off' ? 'on' : "off");
                 }
-            ]
-            transitions:[
-                Transition{
-                    from: "yellow"; to: "green"; reversible: true
-                    ParallelAnimation{
-                        ColorAnimation { duration: 500 }
-                    }
-                },
-                Transition{
-                    from: "green"; to: "yellow"; reversible: true
-                    ParallelAnimation{
-                        ColorAnimation { duration: 500 }
-                    }
-                },
-                Transition{
-                    from: "yellow"; to: "orange"; reversible: true
-                    ParallelAnimation{
-                        ColorAnimation { duration: 500 }
-                    }
-                },
-                Transition{
-                    from: "orange"; to: "red"; reversible: true
-                    ParallelAnimation{
-                        ColorAnimation { duration: 500 }
-                    }
-                }
-            ]
-            border.color: "black"
-            border.width: 1
-            radius: width*0.5
-            anchors.bottom: drone_center.bottom
-            anchors.left: drone_center.left
-            anchors.bottomMargin: -bottom_left_prop.height / 1.65
-            anchors.leftMargin: -bottom_left_prop.width / 1.65
-            Text {
-                    anchors.horizontalCenter: parent.horizontalCenter
-                    anchors.verticalCenter: parent.verticalCenter
-                    //color: "black"
-                    visible:                true
-                    text:                   _activeVehicle ? _activeVehicle.servoRaw3.value +"%" : null
-            }
         }
+            Item{
+                id: buttons
+                width: 2*(drone.width)
+                height: 2.5*(drone.height)
+                anchors.verticalCenter: drone.verticalCenter
+                anchors.horizontalCenter: drone.horizontalCenter
 
-        Rectangle {
-            id: bottom_right_prop
-            width: top_left_prop.width
-            height: width
-            color: "white"
-            states:[
-                State {
-                    name: "green"; when: _activeVehicle.servoRaw4.value < 75
-                    PropertyChanges {target: bottom_right_prop; color: "green"}
-                },
-                State {
-                    name: "yellow"; when: _activeVehicle.servoRaw4.value >= 75 && _activeVehicle.servoRaw4.value <90
-                    PropertyChanges {target: bottom_right_prop; color: "yellow"}
-                },
-                State {
-                    name: "orange"; when: _activeVehicle.servoRaw4.value >= 90 && _activeVehicle.servoRaw4.value <95
-                    PropertyChanges {target: bottom_right_prop; color: "orange"}
-                },
-                State {
-                    name: "red"; when: _activeVehicle.servoRaw4.value >= 95
-                    PropertyChanges {target: bottom_right_prop; color: "red"}
+                Rectangle{
+                    id: white_background
+                    color: "white"
+                    opacity: 0.5
+                    width: p_dis.width * 6
+                    height: p_dis.height * 1.2
+                    anchors.left: buttons.right
+                    anchors.top: p_dis.top
+                    anchors.topMargin: -p_dis.width / 2
+                    anchors.leftMargin: -p_dis.width / 4
                 }
-            ]
-            transitions:[
-                Transition{
-                    from: "yellow"; to: "green"; reversible: true
-                    ParallelAnimation{
-                        ColorAnimation { duration: 500 }
+
+                Rectangle{
+                    id: p_dis
+                    anchors.left: buttons.right
+                    anchors.top: buttons.top
+                    anchors.topMargin: buttons.width / 3.5
+                    height: buttons.height / 2
+                    width: buttons.width / 10
+                    color: "transparent"
+                    border.color: "black"
+                    border.width: 2
+
+                    Text{
+                        //text: _activeVehicle ? Math.abs(Math.abs(_activeVehicle.setpoint.rollRate.value.toFixed(2) - _activeVehicle.rollRate.value.toFixed(2)) / (_activeVehicle.rollRate.value.toFixed(2)) * 100).toFixed(0) : null
+                        anchors.top: p_dis.bottom
+                        anchors.horizontalCenter: p_dis.horizontalCenter
                     }
-<<<<<<< Updated upstream
-                },
-                Transition{
-                    from: "green"; to: "yellow"; reversible: true
-                    ParallelAnimation{
-                        ColorAnimation { duration: 500 }
-=======
+                    Text{
+                        id: roll_est
+                        //text: _activeVehicle ? _activeVehicle.rollRate.value.toFixed(2) : null
+                        anchors.top: p_dis.top
+                        anchors.horizontalCenter: p_dis.horizontalCenter
+                    }
+                    Text{
+                        //text: _activeVehicle ? _activeVehicle.setpoint.rollRate.value.toFixed(3) : null
+                        anchors.top: roll_est.bottom
+                        anchors.horizontalCenter: roll_est.horizontalCenter
+                    }
                     Rectangle{
                         property int rollError: _activeVehicle ? (((Math.abs(_activeVehicle.attitudeRoll.value - _activeVehicle.rollRate.value)) / Math.abs(_activeVehicle.rollRate.value)) * 100) : 0
                         id: p_error
@@ -775,7 +952,6 @@ FlightMap {
                         anchors.bottomMargin: 2
                         color: "green"
                         height: (rollError >= p_dis.height) ? p_error.height : rollError
-                        //height: _activeVehicle ? (((Math.abs(_activeVehicle.attitudeRoll.value - _activeVehicle.rollRate.value)) / Math.abs(_activeVehicle.rollRate.value)) * 100) : 0
                     }
                 }
 
@@ -794,19 +970,17 @@ FlightMap {
                         //text: _activeVehicle ? Math.abs(Math.abs(_activeVehicle.setpoint.pitchRate.value.toFixed(2) - _activeVehicle.pitchRate.value.toFixed(2)) / (_activeVehicle.pitchRate.value.toFixed(2)) * 100).toFixed(0) : null
                         anchors.top: r_dis.bottom
                         anchors.horizontalCenter: r_dis.horizontalCenter
->>>>>>> Stashed changes
                     }
-                },
-                Transition{
-                    from: "yellow"; to: "orange"; reversible: true
-                    ParallelAnimation{
-                        ColorAnimation { duration: 500 }
+                    Text{
+                        id: pitch_est
+                        //text: _activeVehicle ? _activeVehicle.actualPitch.value.toFixed(1) : null
+                        anchors.top: r_dis.top
+                        anchors.horizontalCenter: r_dis.horizontalCenter
                     }
-                },
-                Transition{
-                    from: "orange"; to: "red"; reversible: true
-                    ParallelAnimation{
-                        ColorAnimation { duration: 500 }
+                    Text{
+                        //text: _activeVehicle ? _activeVehicle.desiredPitch.value.toFixed(1) : null
+                        anchors.top: pitch_est.bottom
+                        anchors.horizontalCenter: pitch_est.horizontalCenter
                     }
                     Rectangle{
                         property int pitchError: _activeVehicle ? (((Math.abs(_activeVehicle.attitudePitch.value - _activeVehicle.pitchRate.value)) / Math.abs(_activeVehicle.pitchRate.value)) * 100) : 0
@@ -819,45 +993,7 @@ FlightMap {
                         height: (pitchError >= r_dis.height) ? r_error.height : pitchError
                     }
                 }
-            ]
-            border.color: "black"
-            border.width: 1
-            radius: width*0.5
-            anchors.bottom: drone_center.bottom
-            anchors.right: drone_center.right
-            anchors.bottomMargin: -bottom_right_prop.height / 1.65
-            anchors.rightMargin: -bottom_right_prop.width / 1.65
-            Text {
-                    anchors.horizontalCenter: parent.horizontalCenter
-                    anchors.verticalCenter: parent.verticalCenter
-                    visible:                true
-                    text:                   _activeVehicle ? _activeVehicle.servoRaw4.value +"%" : null
-            }
-        }
 
-<<<<<<< Updated upstream
-        Rectangle {
-            id: top_right_prop
-            width: top_left_prop.width
-            height: width
-            color: "white"
-            states:[
-                State {
-                    name: "green"; when: _activeVehicle.servoRaw2.value < 75
-                    PropertyChanges {target: top_right_prop; color: "green"}
-                },
-                State {
-                    name: "yellow"; when: _activeVehicle.servoRaw2.value >= 75 && _activeVehicle.servoRaw2.value <90
-                    PropertyChanges {target: top_right_prop; color: "yellow"}
-                },
-                State {
-                    name: "orange"; when: _activeVehicle.servoRaw2.value >= 90 && _activeVehicle.servoRaw2.value <95
-                    PropertyChanges {target: top_right_prop; color: "orange"}
-                },
-                State {
-                    name: "red"; when: _activeVehicle.servoRaw2.value >= 95
-                    PropertyChanges {target: top_right_prop; color: "red"}
-=======
                 Rectangle{
                     id: y_dis
                     anchors.left: r_dis.right
@@ -893,363 +1029,238 @@ FlightMap {
                         color: "green"
                         height: _activeVehicle ? (((Math.abs(_activeVehicle.attitudeYaw.value - _activeVehicle.yawRate.value)) / Math.abs(_activeVehicle.yawRate.value)) * 100) : 0
                     }
->>>>>>> Stashed changes
                 }
-            ]
-            transitions:[
-                Transition{
-                    from: "yellow"; to: "green"; reversible: true
-                    ParallelAnimation{
-                        ColorAnimation { duration: 500 }
-                    }
-                },
-                Transition{
-                    from: "green"; to: "yellow"; reversible: true
-                    ParallelAnimation{
-                        ColorAnimation { duration: 500 }
-                    }
-                },
-                Transition{
-                    from: "yellow"; to: "orange"; reversible: true
-                    ParallelAnimation{
-                        ColorAnimation { duration: 500 }
-                    }
-                },
-                Transition{
-                    from: "orange"; to: "red"; reversible: true
-                    ParallelAnimation{
-                        ColorAnimation { duration: 500 }
-                    }
-                }
-            ]
-            border.color: "black"
-            border.width: 1
-            radius: width*0.5
-            anchors.top: drone_center.top
-            anchors.right: drone_center.right
-            anchors.topMargin: -top_right_prop.height / 1.65
-            anchors.rightMargin: -top_right_prop.width / 1.65
-            Text {
-                    anchors.horizontalCenter: parent.horizontalCenter
-                    anchors.verticalCenter: parent.verticalCenter
-                    visible:                true
-                    text:                   _activeVehicle ? _activeVehicle.servoRaw2.value +"%" : null
-            }
-        }
-    }
 
-        Rectangle{
-            id: button
-            width: drone.width/3
-            height: width/3
-            anchors.top: parent.top
-            anchors.left: parent.left
-            anchors.leftMargin: parent.width/24.25
-            anchors.topMargin: parent.height/15
-            color: "transparent"
-            states: [
-                State {
-                    name: "on"
-                    PropertyChanges {target: drone_center; visible : true}
-                    PropertyChanges {target: top_left_prop; visible : true}
-                    PropertyChanges {target: top_right_prop; visible : true}
-                    PropertyChanges {target: bottom_right_prop; visible : true}
-                    PropertyChanges {target: bottom_left_prop; visible : true}
-                },
-                State {
-                    name: "off"
-                    PropertyChanges {target: drone_center; visible : false}
-                    PropertyChanges {target: top_left_prop; visible : false}
-                    PropertyChanges {target: top_right_prop; visible : false}
-                    PropertyChanges {target: bottom_right_prop; visible : false}
-                    PropertyChanges {target: bottom_left_prop; visible : false}
-                }
-            ]
-                transitions: [
-                    Transition {
-                        from: "on"; to: "off"; reversible: true
-                    }
-                ]
-            Button{
-                text: "On/Off"
-                onClicked: button.state = (button.state === 'off' ? 'on' : "off");
-            }
-    }
-        Item{
-            id: buttons
-            width: 2*(drone.width)
-            height: 2.5*(drone.height)
-            anchors.verticalCenter: drone.verticalCenter
-            anchors.horizontalCenter: drone.horizontalCenter
-
-            Rectangle{
-                id: white_background
-                color: "white"
-                opacity: 0.5
-                width: p_dis.width * 6
-                height: p_dis.height * 1.2
-                anchors.left: buttons.right
-                anchors.top: p_dis.top
-                anchors.topMargin: -p_dis.width / 2
-                anchors.leftMargin: -p_dis.width / 4
-            }
-
-            Rectangle{
-                id: p_dis
-                anchors.left: buttons.right
-                anchors.top: buttons.top
-                anchors.topMargin: buttons.width / 3.5
-                height: buttons.height / 2
-                width: buttons.width / 10
-                color: "transparent"
-                border.color: "black"
-                border.width: 2
-                Text{
-                    text: "P"
-                    anchors.top: p_dis.bottom
-                    anchors.horizontalCenter: p_dis.horizontalCenter
-                }
-                Text{
-                    id: roll_est
-                    //text: _activeVehicle ? (Math.abs(_activeVehicle.attitudeRoll.value - _activeVehicle.rollRate.value) / Math.abs((_activeVehicle.attitudeRoll.value + _activeVehicle.rollRate.value) / 2) * 100).toFixed(2) : null
-                    //text: _activeVehicle ? ((_activeVehicle.attitudeRoll.value / _activeVehicle.roll.value) * 100).toFixed(1) + "%" : null
+                Rectangle{
+                    id: topRef
+                    width: p_dis.width
+                    height: 2
+                    color: "black"
+                    anchors.left: y_dis.right
                     anchors.top: p_dis.top
-                    anchors.horizontalCenter: p_dis.horizontalCenter
+                    anchors.leftMargin: topRef.width / 3
+                    Text{
+                        text: "10"
+                        anchors.left: topRef.right
+                        anchors.horizontalCenter: topRef.horizontalCenter
+                    }
+                }
+
+                Rectangle{
+                    id: sideRef
+                    width: 2
+                    height: p_dis.height
+                    color: "black"
+                    anchors.left: y_dis.right
+                    anchors.top: p_dis.top
+                    anchors.leftMargin: topRef.width / 3
+                }
+
+                Rectangle{
+                    id: bottomRef
+                    width: p_dis.width
+                    height: 2
+                    color: "black"
+                    anchors.left: y_dis.right
+                    anchors.bottom: p_dis.bottom
+                    anchors.leftMargin: topRef.width / 3
+                    Text{
+                        text: "0"
+                        anchors.left: bottomRef.right
+                        anchors.horizontalCenter: bottomRef.horizontalCenter
+                    }
+                }
+
+                Rectangle{
+                    id: midRef
+                    width: p_dis.width
+                    height: 2
+                    color: "black"
+                    anchors.left: y_dis.right
+                    anchors.top: sideRef.top
+                    anchors.topMargin: sideRef.height / 2
+                    anchors.leftMargin: topRef.width / 3
+                    Text{
+                        text: "5"
+                        anchors.left: midRef.right
+                        anchors.horizontalCenter: midRef.horizontalCenter
+                    }
+                }
+
+                Rectangle{
+                    width: buttons.width
+                    height: buttons.height
+                    color: "transparent"
+                    //border.color: "red"
+                    //border.width: 1
+                }
+
+                Rectangle{
+                    id: rc_button
+                    height: buttons.width / 8
+                    width: buttons.width / 2.75
+                    anchors.left: buttons.left
+                    anchors.top: buttons.top
+                    radius: 10
+                    border.color: "black"
+                    border.width: 2
+                    anchors.leftMargin: p_dis.width
+                    states: [
+                        State {
+                            name: "on_rc"
+                            PropertyChanges {target: train_button; opacity : 1}
+                            PropertyChanges {target: rc_button_control; text : "RC"}
+                            //PropertyChanges {target:  }
+                        },
+                        State {
+                            name: "off_rc"
+                            PropertyChanges {target: train_button; opacity : 0.5}
+                            PropertyChanges {target: rc_button_control; text : "PID"}
+                            PropertyChanges {target: rc_button_control; palette.button : "black"}
+                        }
+                    ]
+                    transitions: [
+                        Transition {
+                            from: "on_rc"; to: "off_rc"; reversible: true
+                        }
+                    ]
+                    Button{
+                        id: rc_button_control
+                        width: rc_button.width
+                        height: rc_button.height
+                        text: "RC"
+                        palette.buttonText: "white"
+                        palette.button: "steelblue"
+                        onClicked: rc_button.state = (rc_button.state === 'off_rc' ? 'on_rc' : "off_rc");
+                    }
+            }
+
+                Rectangle{
+                    id: train_button
+                    height: buttons.width / 8
+                    width: buttons.width / 2.75
+                    anchors.right: buttons.right
+                    anchors.top: buttons.top
+                    anchors.rightMargin: p_dis.width
+                    color: "black"
+                    states: [
+                        State {
+                            name: "train_on"
+                            PropertyChanges {target: train_button_control; palette.button : "green"}
+                            PropertyChanges {target: train_button; opacity : 1}
+                        },
+                        State {
+                            name: "train_off"
+                            PropertyChanges {target: train_button_control; palette.button : "black"}
+                            PropertyChanges {target: train_button; opacity : 1}
+                        }
+                    ]
+                    transitions: [
+                        Transition {
+                            from: "train_off"; to: "train_on"; reversible: true
+                        }
+                    ]
+                    Button{
+                        id: train_button_control
+                        width: rc_button.width
+                        height: rc_button.height
+                        text: "Train"
+                        palette.text: "white"
+                        anchors.horizontalCenter: train_button.horizontalCenter
+                        anchors.verticalCenter: train_button.verticalCenter
+                        palette.buttonText: "white"
+                        palette.button: "black"
+                        onClicked: train_button.state = (train_button.state === 'train_on' ? 'train_off' : "train_on");
+                    }
+                }
+        }
+            Rectangle{
+                id: valueDisplay
+                width: drone.width * 2
+                height: drone.height * 1.75
+                anchors.right: drone.left
+                anchors.bottom: drone.bottom
+                anchors.rightMargin: drone.width
+                anchors.bottomMargin: drone.width / -4
+                color: "white"
+                //opacity: .5
+                Text{
+                    id: actRoll
+                    text: _activeVehicle ? "Roll: " + _activeVehicle.rollRate.value.toFixed(2) : null
                 }
                 Text{
-<<<<<<< Updated upstream
-                    //text: _activeVehicle ? _activeVehicle.roll.value.toFixed(2) : null
-                    anchors.top: roll_est.bottom
-                    anchors.horizontalCenter: roll_est.horizontalCenter
-=======
+                    id: actPitch
+                    anchors.top: actRoll.bottom
+                    text: _activeVehicle ? "Pitch: " + _activeVehicle.pitchRate.value.toFixed(2) : null
+                }
+                Text{
+                    id: actYaw
+                    anchors.top: actPitch.bottom
+                    text: _activeVehicle ? "Yaw: " + _activeVehicle.yawRate.value.toFixed(2) : null
+                }
+                Text{
                     id: estRoll
                     anchors.top: actYaw.bottom
                     text: _activeVehicle ? "Setpoint Roll: " + _activeVehicle.attitudeRoll.value.toFixed(2) : null
                     color: "orange"
->>>>>>> Stashed changes
-                }
-            }
-
-            Rectangle{
-                id: r_dis
-                anchors.left: p_dis.right
-                anchors.top: p_dis.top
-                anchors.leftMargin: r_dis.width / 3
-                height: p_dis.height
-                width: p_dis.width
-                color: "transparent"
-                border.color: "black"
-                border.width: 2
-                Text{
-                    text: "R"
-                    anchors.top: r_dis.bottom
-                    anchors.horizontalCenter: r_dis.horizontalCenter
                 }
                 Text{
-                    id: pitch_est
-                    //text: _activeVehicle ? _activeVehicle.attitudePitch.value.toFixed(2) : null
-                    anchors.top: r_dis.top
-                    anchors.horizontalCenter: r_dis.horizontalCenter
+                    id: estPitch
+                    anchors.top: estRoll.bottom
+                    text: _activeVehicle ? "Setpoint Pitch: " + _activeVehicle.setpoint.pitchRate.value.toFixed(2) : null
+                    color: "orange"
                 }
                 Text{
-                    //text: _activeVehicle ? _activeVehicle.pitch.value.toFixed(2) : null
-                    anchors.top: pitch_est.bottom
-                    anchors.horizontalCenter: pitch_est.horizontalCenter
-                }
-            }
-
-            Rectangle{
-                id: y_dis
-                anchors.left: r_dis.right
-                anchors.top: r_dis.top
-                anchors.leftMargin: y_dis.width / 3
-                height: p_dis.height
-                width: p_dis.width
-                color: "transparent"
-                border.color: "black"
-                border.width: 2
-                Text{
-                    text: "Y"
-                    anchors.top: y_dis.bottom
-                    anchors.horizontalCenter: y_dis.horizontalCenter
+                    id: estYaw
+                    anchors.top: estPitch.bottom
+                    text: _activeVehicle ? "Setpoint Yaw: " + _activeVehicle.setpoint.yawRate.value.toFixed(2) : null
+                    color: "orange"
                 }
                 Text{
-                    id: yaw_est
-                    //text: _activeVehicle ? _activeVehicle.attitudeYaw.value.toFixed(2) : null
-                    //text: _activeVehicle ? (_activeVehicle.yawRate.value * (180/ Math.PI)).toFixed(2) : null
-                    anchors.top: y_dis.top
-                    anchors.horizontalCenter: y_dis.horizontalCenter
+                    id: nRollPercent
+                    anchors.top: estYaw.bottom
+                    text: _activeVehicle ? "Accurate Roll %: " + _activeVehicle.rollRate.value.toFixed(2) : null
+                    color: "green"
                 }
                 Text{
-<<<<<<< Updated upstream
-                    //text: _activeVehicle ? _activeVehicle.yawRate.value.toFixed(2) : null
-                    anchors.top: yaw_est.bottom
-                    anchors.horizontalCenter: yaw_est.horizontalCenter
-=======
+                    id: nPitchPercent
+                    anchors.top: nRollPercent.bottom
+                    text: _activeVehicle ? "Accurate Pitch %: " + _activeVehicle.pitchRate.value.toFixed(2) : null
+                    color: "green"
+                }
+                Text{
+                    id: nYawPercent
+                    anchors.top: nPitchPercent.bottom
+                    text: _activeVehicle ? "Accurate Yaw %: " + _activeVehicle.yawRate.value.toFixed(2) : null
+                    color: "green"
+                }
+                Text{
                     id: oRollPercent
                     anchors.top: nYawPercent.bottom
                     text: _activeVehicle ? "Inaccurate Roll %: " + (((Math.abs(_activeVehicle.attitudeRoll.value - _activeVehicle.rollRate.value)) / Math.abs(_activeVehicle.rollRate.value)) * 100).toFixed(0) : null
                     color: "red"
->>>>>>> Stashed changes
                 }
-            }
-
-            Rectangle{
-                id: topRef
-                width: p_dis.width
-                height: 2
-                color: "black"
-                anchors.left: y_dis.right
-                anchors.top: p_dis.top
-                anchors.leftMargin: topRef.width / 3
                 Text{
-<<<<<<< Updated upstream
-                    text: "10"
-                    anchors.left: topRef.right
-                    anchors.horizontalCenter: topRef.horizontalCenter
-=======
                     id: oPitchPercent
                     anchors.top: oRollPercent.bottom
                     text: _activeVehicle ? "inaccurate Pitch %: " + (((Math.abs(_activeVehicle.attitudePitch.value - _activeVehicle.pitchRate.value)) / Math.abs(_activeVehicle.pitchRate.value)) * 100).toFixed(0) : null
                     color: "red"
->>>>>>> Stashed changes
                 }
-            }
-
-            Rectangle{
-                id: sideRef
-                width: 2
-                height: p_dis.height
-                color: "black"
-                anchors.left: y_dis.right
-                anchors.top: p_dis.top
-                anchors.leftMargin: topRef.width / 3
-            }
-
-            Rectangle{
-                id: bottomRef
-                width: p_dis.width
-                height: 2
-                color: "black"
-                anchors.left: y_dis.right
-                anchors.bottom: p_dis.bottom
-                anchors.leftMargin: topRef.width / 3
                 Text{
-<<<<<<< Updated upstream
-                    text: "0"
-                    anchors.left: bottomRef.right
-                    anchors.horizontalCenter: bottomRef.horizontalCenter
-=======
                     id: oYawPercent
                     anchors.top: oPitchPercent.bottom
                     text: _activeVehicle ? "Inaccurate Yaw %: " + (((Math.abs(_activeVehicle.attitudeYaw.value - _activeVehicle.yawRate.value)) / Math.abs(_activeVehicle.yawRate.value)) * 100).toFixed(0) : null
                     color: "red"
->>>>>>> Stashed changes
                 }
-            }
-
-            Rectangle{
-                id: midRef
-                width: p_dis.width
-                height: 2
-                color: "black"
-                anchors.left: y_dis.right
-                anchors.top: sideRef.top
-                anchors.topMargin: sideRef.height / 2
-                anchors.leftMargin: topRef.width / 3
                 Text{
-                    text: "5"
-                    anchors.left: midRef.right
-                    anchors.horizontalCenter: midRef.horizontalCenter
+                    id: rateController
+                    anchors.top: oYawPercent.bottom
+                    //text: instrumentValueData.fact.enumOrValueString
+                    color: "blue"
                 }
             }
 
-            Rectangle{
-                width: buttons.width
-                height: buttons.height
-                color: "transparent"
-                //border.color: "red"
-                //border.width: 1
-            }
 
-            Rectangle{
-                id: rc_button
-                height: buttons.width / 8
-                width: buttons.width / 2.75
-                anchors.left: buttons.left
-                anchors.top: buttons.top
-                radius: 10
-                border.color: "black"
-                border.width: 2
-                anchors.leftMargin: p_dis.width
-                states: [
-                    State {
-                        name: "on_rc"
-                        PropertyChanges {target: train_button; opacity : 1}
-                        PropertyChanges {target: rc_button_control; text : "RC"}
-                    },
-                    State {
-                        name: "off_rc"
-                        PropertyChanges {target: train_button; opacity : 0.5}
-                        PropertyChanges {target: rc_button_control; text : "PID"}
-                        PropertyChanges {target: rc_button_control; palette.button : "black"}
-                    }
-                ]
-                transitions: [
-                    Transition {
-                        from: "on_rc"; to: "off_rc"; reversible: true
-                    }
-                ]
-                Button{
-                    id: rc_button_control
-                    width: rc_button.width
-                    height: rc_button.height
-                    text: "RC"
-                    palette.buttonText: "white"
-                    palette.button: "steelblue"
-                    onClicked: rc_button.state = (rc_button.state === 'off_rc' ? 'on_rc' : "off_rc");
-                }
-        }
-
-            Rectangle{
-                id: train_button
-                height: buttons.width / 8
-                width: buttons.width / 2.75
-                anchors.right: buttons.right
-                anchors.top: buttons.top
-                anchors.rightMargin: p_dis.width
-                color: "black"
-                states: [
-                    State {
-                        name: "train_on"
-                        PropertyChanges {target: train_button_control; palette.button : "green"}
-                        PropertyChanges {target: train_button; opacity : 1}
-                    },
-                    State {
-                        name: "train_off"
-                        PropertyChanges {target: train_button_control; palette.button : "black"}
-                        PropertyChanges {target: train_button; opacity : 1}
-                    }
-                ]
-                transitions: [
-                    Transition {
-                        from: "train_off"; to: "train_on"; reversible: true
-                    }
-                ]
-                Button{
-                    id: train_button_control
-                    width: rc_button.width
-                    height: rc_button.height
-                    text: "Train"
-                    palette.text: "white"
-                    anchors.horizontalCenter: train_button.horizontalCenter
-                    anchors.verticalCenter: train_button.verticalCenter
-                    palette.buttonText: "white"
-                    palette.button: "black"
-                    onClicked: train_button.state = (train_button.state === 'train_on' ? 'train_off' : "train_on");
-                }
-            }
-    }
 
     /////////////////////////////////////////////////////////////
 
