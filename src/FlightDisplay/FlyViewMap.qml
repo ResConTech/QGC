@@ -759,11 +759,42 @@ FlightMap {
                     ParallelAnimation{
                         ColorAnimation { duration: 500 }
                     }
+<<<<<<< Updated upstream
                 },
                 Transition{
                     from: "green"; to: "yellow"; reversible: true
                     ParallelAnimation{
                         ColorAnimation { duration: 500 }
+=======
+                    Rectangle{
+                        property int rollError: _activeVehicle ? (((Math.abs(_activeVehicle.attitudeRoll.value - _activeVehicle.rollRate.value)) / Math.abs(_activeVehicle.rollRate.value)) * 100) : 0
+                        id: p_error
+                        width: p_dis.width / 1.25
+                        anchors.bottom: p_dis.bottom
+                        anchors.horizontalCenter: p_dis.horizontalCenter
+                        anchors.bottomMargin: 2
+                        color: "green"
+                        height: (rollError >= p_dis.height) ? p_error.height : rollError
+                        //height: _activeVehicle ? (((Math.abs(_activeVehicle.attitudeRoll.value - _activeVehicle.rollRate.value)) / Math.abs(_activeVehicle.rollRate.value)) * 100) : 0
+                    }
+                }
+
+                Rectangle{
+                    id: r_dis
+                    anchors.left: p_dis.right
+                    anchors.top: p_dis.top
+                    anchors.leftMargin: r_dis.width / 3
+                    height: p_dis.height
+                    width: p_dis.width
+                    color: "transparent"
+                    border.color: "black"
+                    border.width: 2
+
+                    Text{
+                        //text: _activeVehicle ? Math.abs(Math.abs(_activeVehicle.setpoint.pitchRate.value.toFixed(2) - _activeVehicle.pitchRate.value.toFixed(2)) / (_activeVehicle.pitchRate.value.toFixed(2)) * 100).toFixed(0) : null
+                        anchors.top: r_dis.bottom
+                        anchors.horizontalCenter: r_dis.horizontalCenter
+>>>>>>> Stashed changes
                     }
                 },
                 Transition{
@@ -776,6 +807,16 @@ FlightMap {
                     from: "orange"; to: "red"; reversible: true
                     ParallelAnimation{
                         ColorAnimation { duration: 500 }
+                    }
+                    Rectangle{
+                        property int pitchError: _activeVehicle ? (((Math.abs(_activeVehicle.attitudePitch.value - _activeVehicle.pitchRate.value)) / Math.abs(_activeVehicle.pitchRate.value)) * 100) : 0
+                        id: r_error
+                        width: r_dis.width / 1.25
+                        anchors.bottom: r_dis.bottom
+                        anchors.horizontalCenter: r_dis.horizontalCenter
+                        anchors.bottomMargin: 2
+                        color: "green"
+                        height: (pitchError >= r_dis.height) ? r_error.height : pitchError
                     }
                 }
             ]
@@ -794,6 +835,7 @@ FlightMap {
             }
         }
 
+<<<<<<< Updated upstream
         Rectangle {
             id: top_right_prop
             width: top_left_prop.width
@@ -815,6 +857,43 @@ FlightMap {
                 State {
                     name: "red"; when: _activeVehicle.servoRaw2.value >= 95
                     PropertyChanges {target: top_right_prop; color: "red"}
+=======
+                Rectangle{
+                    id: y_dis
+                    anchors.left: r_dis.right
+                    anchors.top: r_dis.top
+                    anchors.leftMargin: y_dis.width / 3
+                    height: p_dis.height
+                    width: p_dis.width
+                    color: "transparent"
+                    border.color: "black"
+                    border.width: 2
+
+                    Text{
+                        //text: (((Math.abs(_activeVehicle.setpoint.yawRate.value - _activeVehicle.yawRate.value)) / Math.abs(_activeVehicle.yawRate.value)) * 100).toFixed(0)
+                        anchors.top: y_dis.bottom
+                        anchors.horizontalCenter: y_dis.horizontalCenter
+                    }
+                    Text{
+                        id: yaw_est
+                        //text:  _activeVehicle ? _activeVehicle.yawRate.value.toFixed(2) : null
+                        anchors.top: y_dis.top
+                        anchors.horizontalCenter: y_dis.horizontalCenter
+                    }
+                    Text{
+                        //text: _activeVehicle ? _activeVehicle.setpoint.yawRate.value.toFixed(3) : null
+                        anchors.top: yaw_est.bottom
+                        anchors.horizontalCenter: yaw_est.horizontalCenter
+                    }
+                    Rectangle{
+                        width: y_dis.width / 1.25
+                        anchors.bottom: y_dis.bottom
+                        anchors.horizontalCenter: y_dis.horizontalCenter
+                        anchors.bottomMargin: 2
+                        color: "green"
+                        height: _activeVehicle ? (((Math.abs(_activeVehicle.attitudeYaw.value - _activeVehicle.yawRate.value)) / Math.abs(_activeVehicle.yawRate.value)) * 100) : 0
+                    }
+>>>>>>> Stashed changes
                 }
             ]
             transitions:[
@@ -938,9 +1017,16 @@ FlightMap {
                     anchors.horizontalCenter: p_dis.horizontalCenter
                 }
                 Text{
+<<<<<<< Updated upstream
                     //text: _activeVehicle ? _activeVehicle.roll.value.toFixed(2) : null
                     anchors.top: roll_est.bottom
                     anchors.horizontalCenter: roll_est.horizontalCenter
+=======
+                    id: estRoll
+                    anchors.top: actYaw.bottom
+                    text: _activeVehicle ? "Setpoint Roll: " + _activeVehicle.attitudeRoll.value.toFixed(2) : null
+                    color: "orange"
+>>>>>>> Stashed changes
                 }
             }
 
@@ -995,9 +1081,16 @@ FlightMap {
                     anchors.horizontalCenter: y_dis.horizontalCenter
                 }
                 Text{
+<<<<<<< Updated upstream
                     //text: _activeVehicle ? _activeVehicle.yawRate.value.toFixed(2) : null
                     anchors.top: yaw_est.bottom
                     anchors.horizontalCenter: yaw_est.horizontalCenter
+=======
+                    id: oRollPercent
+                    anchors.top: nYawPercent.bottom
+                    text: _activeVehicle ? "Inaccurate Roll %: " + (((Math.abs(_activeVehicle.attitudeRoll.value - _activeVehicle.rollRate.value)) / Math.abs(_activeVehicle.rollRate.value)) * 100).toFixed(0) : null
+                    color: "red"
+>>>>>>> Stashed changes
                 }
             }
 
@@ -1010,9 +1103,16 @@ FlightMap {
                 anchors.top: p_dis.top
                 anchors.leftMargin: topRef.width / 3
                 Text{
+<<<<<<< Updated upstream
                     text: "10"
                     anchors.left: topRef.right
                     anchors.horizontalCenter: topRef.horizontalCenter
+=======
+                    id: oPitchPercent
+                    anchors.top: oRollPercent.bottom
+                    text: _activeVehicle ? "inaccurate Pitch %: " + (((Math.abs(_activeVehicle.attitudePitch.value - _activeVehicle.pitchRate.value)) / Math.abs(_activeVehicle.pitchRate.value)) * 100).toFixed(0) : null
+                    color: "red"
+>>>>>>> Stashed changes
                 }
             }
 
@@ -1035,9 +1135,16 @@ FlightMap {
                 anchors.bottom: p_dis.bottom
                 anchors.leftMargin: topRef.width / 3
                 Text{
+<<<<<<< Updated upstream
                     text: "0"
                     anchors.left: bottomRef.right
                     anchors.horizontalCenter: bottomRef.horizontalCenter
+=======
+                    id: oYawPercent
+                    anchors.top: oPitchPercent.bottom
+                    text: _activeVehicle ? "Inaccurate Yaw %: " + (((Math.abs(_activeVehicle.attitudeYaw.value - _activeVehicle.yawRate.value)) / Math.abs(_activeVehicle.yawRate.value)) * 100).toFixed(0) : null
+                    color: "red"
+>>>>>>> Stashed changes
                 }
             }
 
