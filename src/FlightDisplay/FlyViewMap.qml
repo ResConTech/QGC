@@ -928,20 +928,18 @@ FlightMap {
                     border.width: 2
 
                     Text{
-                        //text: _activeVehicle ? Math.abs(Math.abs(_activeVehicle.setpoint.rollRate.value.toFixed(2) - _activeVehicle.rollRate.value.toFixed(2)) / (_activeVehicle.rollRate.value.toFixed(2)) * 100).toFixed(0) : null
+                        text: "P"
                         anchors.top: p_dis.bottom
                         anchors.horizontalCenter: p_dis.horizontalCenter
                     }
-                    Text{
-                        id: roll_est
-                        //text: _activeVehicle ? _activeVehicle.rollRate.value.toFixed(2) : null
-                        anchors.top: p_dis.top
+                    Rectangle{
+                        property int rollError: _activeVehicle ? (((Math.abs(_activeVehicle.attitudeRoll.value - _activeVehicle.rollRate.value)) / Math.abs(_activeVehicle.rollRate.value)) * 100) : 0
+                        width: p_dis.width / 1.25
+                        anchors.bottom: p_dis.bottom
                         anchors.horizontalCenter: p_dis.horizontalCenter
-                    }
-                    Text{
-                        //text: _activeVehicle ? _activeVehicle.setpoint.rollRate.value.toFixed(3) : null
-                        anchors.top: roll_est.bottom
-                        anchors.horizontalCenter: roll_est.horizontalCenter
+                        anchors.bottomMargin: 2
+                        color: "green"
+                        height: (rollError >= p_dis.height) ? p_dis.height : rollError
                     }
                 }
 
@@ -957,20 +955,18 @@ FlightMap {
                     border.width: 2
 
                     Text{
-                        //text: _activeVehicle ? Math.abs(Math.abs(_activeVehicle.setpoint.pitchRate.value.toFixed(2) - _activeVehicle.pitchRate.value.toFixed(2)) / (_activeVehicle.pitchRate.value.toFixed(2)) * 100).toFixed(0) : null
+                        text: "R"
                         anchors.top: r_dis.bottom
                         anchors.horizontalCenter: r_dis.horizontalCenter
                     }
-                    Text{
-                        id: pitch_est
-                        //text: _activeVehicle ? _activeVehicle.actualPitch.value.toFixed(1) : null
-                        anchors.top: r_dis.top
+                    Rectangle{
+                        property int pitchError: _activeVehicle ? (((Math.abs(_activeVehicle.attitudePitch.value - _activeVehicle.pitchRate.value)) / Math.abs(_activeVehicle.pitchRate.value)) * 100) : 0
+                        width: r_dis.width / 1.25
+                        anchors.bottom: r_dis.bottom
                         anchors.horizontalCenter: r_dis.horizontalCenter
-                    }
-                    Text{
-                        //text: _activeVehicle ? _activeVehicle.desiredPitch.value.toFixed(1) : null
-                        anchors.top: pitch_est.bottom
-                        anchors.horizontalCenter: pitch_est.horizontalCenter
+                        anchors.bottomMargin: 2
+                        color: "green"
+                        height: (pitchError >= r_dis.height) ? r_dis.height : pitchError
                     }
                 }
 
@@ -986,20 +982,18 @@ FlightMap {
                     border.width: 2
 
                     Text{
-                        //text: (((Math.abs(_activeVehicle.setpoint.yawRate.value - _activeVehicle.yawRate.value)) / Math.abs(_activeVehicle.yawRate.value)) * 100).toFixed(0)
+                        text: "Y"
                         anchors.top: y_dis.bottom
                         anchors.horizontalCenter: y_dis.horizontalCenter
                     }
-                    Text{
-                        id: yaw_est
-                        //text:  _activeVehicle ? _activeVehicle.yawRate.value.toFixed(2) : null
-                        anchors.top: y_dis.top
+                    Rectangle{
+                        property int yawError: _activeVehicle ? (((Math.abs(_activeVehicle.attitudeYaw.value - _activeVehicle.yawRate.value)) / Math.abs(_activeVehicle.yawRate.value)) * 100) : 0
+                        width: y_dis.width / 1.25
+                        anchors.bottom: y_dis.bottom
                         anchors.horizontalCenter: y_dis.horizontalCenter
-                    }
-                    Text{
-                        //text: _activeVehicle ? _activeVehicle.setpoint.yawRate.value.toFixed(3) : null
-                        anchors.top: yaw_est.bottom
-                        anchors.horizontalCenter: yaw_est.horizontalCenter
+                        anchors.bottomMargin: 2
+                        color: "green"
+                        height: (yawError >= y_dis.height) ? y_dis.height : yawError
                     }
                 }
 
@@ -1063,8 +1057,6 @@ FlightMap {
                     width: buttons.width
                     height: buttons.height
                     color: "transparent"
-                    //border.color: "red"
-                    //border.width: 1
                 }
 
                 Rectangle{
@@ -1082,7 +1074,6 @@ FlightMap {
                             name: "on_rc"
                             PropertyChanges {target: train_button; opacity : 1}
                             PropertyChanges {target: rc_button_control; text : "RC"}
-                            //PropertyChanges {target:  }
                         },
                         State {
                             name: "off_rc"
@@ -1209,19 +1200,19 @@ FlightMap {
                 Text{
                     id: oRollPercent
                     anchors.top: nYawPercent.bottom
-                    text: _activeVehicle ? "Inaccurate Roll %: " + (((Math.abs(_activeVehicle.setpoint.rollRate.value - _activeVehicle.rollRate.value)) / Math.abs(_activeVehicle.rollRate.value)) * 100).toFixed(0) : null
+                    text: _activeVehicle ? "Inaccurate Roll %: " + (((Math.abs(_activeVehicle.attitudeRoll.value - _activeVehicle.rollRate.value)) / Math.abs(_activeVehicle.rollRate.value)) * 100).toFixed(2) : 0
                     color: "red"
                 }
                 Text{
                     id: oPitchPercent
                     anchors.top: oRollPercent.bottom
-                    text: _activeVehicle ? "inaccurate Pitch %: " + (((Math.abs(_activeVehicle.setpoint.pitchRate.value - _activeVehicle.pitchRate.value)) / Math.abs(_activeVehicle.pitchRate.value)) * 100).toFixed(0) : null
+                    text: _activeVehicle ? "inaccurate Pitch %: " + (((Math.abs(_activeVehicle.attitudePitch.value - _activeVehicle.pitchRate.value)) / Math.abs(_activeVehicle.pitchRate.value)) * 100).toFixed(2) : 0
                     color: "red"
                 }
                 Text{
                     id: oYawPercent
                     anchors.top: oPitchPercent.bottom
-                    text: _activeVehicle ? "Inaccurate Yaw %: " + (((Math.abs(_activeVehicle.setpoint.yawRate.value - _activeVehicle.yawRate.value)) / Math.abs(_activeVehicle.yawRate.value)) * 100).toFixed(0) : null
+                    text: _activeVehicle ? "Inaccurate Yaw %: " +  (((Math.abs(_activeVehicle.attitudeYaw.value - _activeVehicle.yawRate.value)) / Math.abs(_activeVehicle.yawRate.value)) * 100).toFixed(2) : 0
                     color: "red"
                 }
                 Text{
