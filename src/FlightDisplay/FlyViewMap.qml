@@ -1164,37 +1164,37 @@ FlightMap {
                 Text{
                     id: estRoll
                     anchors.top: actYaw.bottom
-                    text: _activeVehicle ? "Setpoint Roll: " + _activeVehicle.setpoint.rollRate.value.toFixed(2) : null
+                    text: _activeVehicle ? "Setpoint Roll: " + _activeVehicle.attitudeRoll.value.toFixed(5) : null
                     color: "orange"
                 }
                 Text{
                     id: estPitch
                     anchors.top: estRoll.bottom
-                    text: _activeVehicle ? "Setpoint Pitch: " + _activeVehicle.setpoint.pitchRate.value.toFixed(2) : null
+                    text: _activeVehicle ? "Setpoint Pitch: " + _activeVehicle.attitudePitch.value.toFixed(5) : null
                     color: "orange"
                 }
                 Text{
                     id: estYaw
                     anchors.top: estPitch.bottom
-                    text: _activeVehicle ? "Setpoint Yaw: " + _activeVehicle.setpoint.yawRate.value.toFixed(2) : null
+                    text: _activeVehicle ? "Setpoint Yaw: " + _activeVehicle.attitudeYaw.value.toFixed(5) : null
                     color: "orange"
                 }
                 Text{
                     id: nRollPercent
                     anchors.top: estYaw.bottom
-                    text: _activeVehicle ? "Accurate Roll %: " + _activeVehicle.rollRate.value.toFixed(2) : null
+                    //text: _activeVehicle ? "Accurate Roll %: " + _activeVehicle.rollRate.value.toFixed(2) : null
                     color: "green"
                 }
                 Text{
                     id: nPitchPercent
                     anchors.top: nRollPercent.bottom
-                    text: _activeVehicle ? "Accurate Pitch %: " + _activeVehicle.pitchRate.value.toFixed(2) : null
+                    //text: _activeVehicle ? "Accurate Pitch %: " + _activeVehicle.pitchRate.value.toFixed(2) : null
                     color: "green"
                 }
                 Text{
                     id: nYawPercent
                     anchors.top: nPitchPercent.bottom
-                    text: _activeVehicle ? "Accurate Yaw %: " + _activeVehicle.yawRate.value.toFixed(2) : null
+                    //text: _activeVehicle ? "Accurate Yaw %: " + _activeVehicle.yawRate.value.toFixed(2) : null
                     color: "green"
                 }
                 Text{
