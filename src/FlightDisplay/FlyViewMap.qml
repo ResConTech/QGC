@@ -34,6 +34,13 @@ FlightMap {
     property var    curMessage:         curSystem && curSystem.messages.count ? curSystem.messages.get(curSystem.selected) : null
     property int    curCompID:          0
     property real   maxButtonWidth:     0
+    //variable to keep track of rc/pid state
+    property int rc_or_pid:1
+    //use parameter editor controller
+    ParameterEditorController{
+        id: paramController
+    }
+    //
     MAVLinkInspectorController {
         id: controller
     }
@@ -1069,17 +1076,22 @@ FlightMap {
                     border.color: "black"
                     border.width: 2
                     anchors.leftMargin: p_dis.width
+
                     states: [
                         State {
                             name: "on_rc"
                             PropertyChanges {target: train_button; opacity : 1}
                             PropertyChanges {target: rc_button_control; text : "RC"}
+                            //switch to rc
+                            onCompleted: _root.rc_or_pid=1
                         },
                         State {
                             name: "off_rc"
                             PropertyChanges {target: train_button; opacity : 0.5}
                             PropertyChanges {target: rc_button_control; text : "PID"}
                             PropertyChanges {target: rc_button_control; palette.button : "black"}
+                            //switch to pid
+                            onCompleted: _root.rc_or_pid=0
                         }
                     ]
                     transitions: [
@@ -1094,7 +1106,11 @@ FlightMap {
                         text: "RC"
                         palette.buttonText: "white"
                         palette.button: "steelblue"
-                        onClicked: rc_button.state = (rc_button.state === 'off_rc' ? 'on_rc' : "off_rc");
+                        onClicked: {
+                            rc_button.state = (rc_button.state === 'off_rc' ? 'on_rc' : "off_rc");
+                            //switch rc pid
+                            paramController.changeValue(_root.rc_to_pid)
+                        }
                     }
             }
 
