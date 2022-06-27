@@ -1109,7 +1109,7 @@ FlightMap {
                         onClicked: {
                             rc_button.state = (rc_button.state === 'off_rc' ? 'on_rc' : "off_rc");
                             //switch rc pid
-                            paramController.changeValue(_root.rc_to_pid)
+                            paramController.changeValue(_root.rc_or_pid)
                         }
                     }
             }
@@ -1165,17 +1165,17 @@ FlightMap {
                 //opacity: .5
                 Text{
                     id: actRoll
-                    text: _activeVehicle ? "Roll: " + _activeVehicle.rollRate.value.toFixed(2) : null
+                    text: _activeVehicle ? "Roll: " + _activeVehicle.rollRate.value.toFixed(5) : null
                 }
                 Text{
                     id: actPitch
                     anchors.top: actRoll.bottom
-                    text: _activeVehicle ? "Pitch: " + _activeVehicle.pitchRate.value.toFixed(2) : null
+                    text: _activeVehicle ? "Pitch: " + _activeVehicle.pitchRate.value.toFixed(5) : null
                 }
                 Text{
                     id: actYaw
                     anchors.top: actPitch.bottom
-                    text: _activeVehicle ? "Yaw: " + _activeVehicle.yawRate.value.toFixed(2) : null
+                    text: _activeVehicle ? "Yaw: " + _activeVehicle.yawRate.value.toFixed(5) : null
                 }
                 Text{
                     id: estRoll
@@ -1198,13 +1198,13 @@ FlightMap {
                 Text{
                     id: nRollPercent
                     anchors.top: estYaw.bottom
-                    //text: _activeVehicle ? "Accurate Roll %: " + _activeVehicle.rollRate.value.toFixed(2) : null
+                    text: _root ? _root.rc_or_pid : null
                     color: "green"
                 }
                 Text{
                     id: nPitchPercent
                     anchors.top: nRollPercent.bottom
-                    //text: _activeVehicle ? "Accurate Pitch %: " + _activeVehicle.pitchRate.value.toFixed(2) : null
+                    text: _activeVehicle ? _activeVehicle.armed : false
                     color: "green"
                 }
                 Text{
