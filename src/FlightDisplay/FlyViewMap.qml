@@ -1114,6 +1114,7 @@ FlightMap {
                     }
             }
 
+
                 Rectangle{
                     id: train_button
                     height: buttons.width / 8
@@ -1152,7 +1153,35 @@ FlightMap {
                         onClicked: train_button.state = (train_button.state === 'train_on' ? 'train_off' : "train_on");
                     }
                 }
+
+                QGCButton {
+                    anchors.bottom: buttons.top
+                    anchors.horizontalCenter: buttons.horizontalCenter
+                    anchors.bottomMargin: train_button.height / 3
+                    property bool   _armed:         _activeVehicle ? _activeVehicle.armed : false
+                    Layout.alignment:   Qt.AlignHCenter
+                    text:               _armed ?  qsTr("Disarm") : (forceArm ? qsTr("Force Arm") : qsTr("Arm"))
+
+                    property bool forceArm: false
+
+                    onPressAndHold: forceArm = true
+
+                    onClicked: {
+                        if (_armed) {
+                            mainWindow.disarmVehicleRequest()
+                        } else {
+                            if (forceArm) {
+                                mainWindow.forceArmVehicleRequest()
+                            } else {
+                                mainWindow.armVehicleRequest()
+                            }
+                        }
+                        forceArm = false
+                        mainWindow.hideIndicatorPopup()
+                    }
+                }
         }
+
             Rectangle{
                 id: valueDisplay
                 width: drone.width * 2
