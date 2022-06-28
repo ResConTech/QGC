@@ -1588,18 +1588,6 @@ void Vehicle::_handleServoOutputRaw(const mavlink_message_t& message)
         &channels.servo2_raw,
         &channels.servo3_raw,
         &channels.servo4_raw,
-        &channels.servo5_raw,
-        &channels.servo6_raw,
-        &channels.servo7_raw,
-        &channels.servo8_raw,
-        &channels.servo9_raw,
-        &channels.servo10_raw,
-        &channels.servo11_raw,
-        &channels.servo12_raw,
-        &channels.servo13_raw,
-        &channels.servo14_raw,
-        &channels.servo15_raw,
-        &channels.servo16_raw,
     };
     int rpmValues[cMaxServoChannels];
     for (int i=0; i<cMaxServoChannels; i++){

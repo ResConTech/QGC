@@ -34,6 +34,13 @@ FlightMap {
     property var    curMessage:         curSystem && curSystem.messages.count ? curSystem.messages.get(curSystem.selected) : null
     property int    curCompID:          0
     property real   maxButtonWidth:     0
+    //variable to keep track of rc/pid state
+    property int rc_or_pid:1
+    //use parameter editor controller
+    ParameterEditorController{
+        id: paramController
+    }
+    //
     MAVLinkInspectorController {
         id: controller
     }
@@ -1069,17 +1076,22 @@ FlightMap {
                     border.color: "black"
                     border.width: 2
                     anchors.leftMargin: p_dis.width
+
                     states: [
                         State {
                             name: "on_rc"
                             PropertyChanges {target: train_button; opacity : 1}
                             PropertyChanges {target: rc_button_control; text : "RC"}
+                            //switch to rc
+                            onCompleted: _root.rc_or_pid=1
                         },
                         State {
                             name: "off_rc"
                             PropertyChanges {target: train_button; opacity : 0.5}
                             PropertyChanges {target: rc_button_control; text : "PID"}
                             PropertyChanges {target: rc_button_control; palette.button : "black"}
+                            //switch to pid
+                            onCompleted: _root.rc_or_pid=0
                         }
                     ]
                     transitions: [
@@ -1094,9 +1106,14 @@ FlightMap {
                         text: "RC"
                         palette.buttonText: "white"
                         palette.button: "steelblue"
-                        onClicked: rc_button.state = (rc_button.state === 'off_rc' ? 'on_rc' : "off_rc");
+                        onClicked: {
+                            rc_button.state = (rc_button.state === 'off_rc' ? 'on_rc' : "off_rc");
+                            //switch rc pid
+                            paramController.changeValue(_root.rc_or_pid)
+                        }
                     }
             }
+
 
                 Rectangle{
                     id: train_button
@@ -1136,7 +1153,35 @@ FlightMap {
                         onClicked: train_button.state = (train_button.state === 'train_on' ? 'train_off' : "train_on");
                     }
                 }
+
+                QGCButton {
+                    anchors.bottom: buttons.top
+                    anchors.horizontalCenter: buttons.horizontalCenter
+                    anchors.bottomMargin: train_button.height / 3
+                    property bool   _armed:         _activeVehicle ? _activeVehicle.armed : false
+                    Layout.alignment:   Qt.AlignHCenter
+                    text:               _armed ?  qsTr("Disarm") : (forceArm ? qsTr("Force Arm") : qsTr("Arm"))
+
+                    property bool forceArm: false
+
+                    onPressAndHold: forceArm = true
+
+                    onClicked: {
+                        if (_armed) {
+                            mainWindow.disarmVehicleRequest()
+                        } else {
+                            if (forceArm) {
+                                mainWindow.forceArmVehicleRequest()
+                            } else {
+                                mainWindow.armVehicleRequest()
+                            }
+                        }
+                        forceArm = false
+                        mainWindow.hideIndicatorPopup()
+                    }
+                }
         }
+
             Rectangle{
                 id: valueDisplay
                 width: drone.width * 2
@@ -1149,17 +1194,17 @@ FlightMap {
                 //opacity: .5
                 Text{
                     id: actRoll
-                    text: _activeVehicle ? "Roll: " + _activeVehicle.rollRate.value.toFixed(2) : null
+                    text: _activeVehicle ? "Roll: " + _activeVehicle.rollRate.value.toFixed(5) : null
                 }
                 Text{
                     id: actPitch
                     anchors.top: actRoll.bottom
-                    text: _activeVehicle ? "Pitch: " + _activeVehicle.pitchRate.value.toFixed(2) : null
+                    text: _activeVehicle ? "Pitch: " + _activeVehicle.pitchRate.value.toFixed(5) : null
                 }
                 Text{
                     id: actYaw
                     anchors.top: actPitch.bottom
-                    text: _activeVehicle ? "Yaw: " + _activeVehicle.yawRate.value.toFixed(2) : null
+                    text: _activeVehicle ? "Yaw: " + _activeVehicle.yawRate.value.toFixed(5) : null
                 }
                 Text{
                     id: estRoll
@@ -1182,13 +1227,13 @@ FlightMap {
                 Text{
                     id: nRollPercent
                     anchors.top: estYaw.bottom
-                    //text: _activeVehicle ? "Accurate Roll %: " + _activeVehicle.rollRate.value.toFixed(2) : null
+                    text: _root ? _root.rc_or_pid : null
                     color: "green"
                 }
                 Text{
                     id: nPitchPercent
                     anchors.top: nRollPercent.bottom
-                    //text: _activeVehicle ? "Accurate Pitch %: " + _activeVehicle.pitchRate.value.toFixed(2) : null
+                    text: _activeVehicle ? _activeVehicle.armed : false
                     color: "green"
                 }
                 Text{

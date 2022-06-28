@@ -36,7 +36,14 @@ Item {
     ParameterEditorController {
         id: controller
     }
-
+    //rc button update
+    Timer {
+        interval:       1
+        running:        true
+        repeat:         true
+        onTriggered:    controller.rcToPid()
+    }
+    //
     ExclusiveGroup { id: sectionGroup }
 
     //---------------------------------------------

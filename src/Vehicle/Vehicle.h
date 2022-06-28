@@ -649,7 +649,7 @@ public:
     VehicleObjectAvoidance*         objectAvoidance     () { return _objectAvoidance; }
 
     static const int cMaxRcChannels = 18;
-    static const int cMaxServoChannels = 16;
+    static const int cMaxServoChannels = 4;
     static const int cMaxAttitudeChannels = 3;
     static const int cMaxPosChannels = 4;
 
