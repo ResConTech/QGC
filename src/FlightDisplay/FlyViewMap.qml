@@ -1076,40 +1076,87 @@ FlightMap {
                     border.color: "black"
                     border.width: 2
                     anchors.leftMargin: p_dis.width
-
+                    property bool pending: false
+                    property string current: "RC"
+                    property bool msg_confirmed: false
                     states: [
                         State {
                             name: "on_rc"
                             PropertyChanges {target: train_button; opacity : 1}
-                            PropertyChanges {target: rc_button_control; text : "RC"}
+                            PropertyChanges {target: rc_button_control; text : rc_button.current}
+                            PropertyChanges {target: rc_button_control; palette.buttonText: "white"}
+                            PropertyChanges {target: rc_button; border.color: "green"}
+                            PropertyChanges {target: rc_button_control; palette.button : "steelblue"}
                             //switch to rc
-                            onCompleted: _root.rc_or_pid=1
+                            onCompleted: {
+                                rc_button.current="RC"
+                                rc_button.pending = false
+                                _root.rc_or_pid = 0
+                            }
+                        },
+                        State {
+                            name: "pending"
+                            PropertyChanges {target: train_button; opacity : 0.5}
+                            PropertyChanges {target: rc_button_control; text : rc_button.current}
+                            PropertyChanges {target: rc_button_control; palette.buttonText: "white"}
+                            PropertyChanges {target: rc_button; border.color: "red"}
+                            PropertyChanges {target: rc_button_control; palette.button : "black"}
+                            onCompleted: {
+                                rc_button.pending = true
+                            }
                         },
                         State {
                             name: "off_rc"
                             PropertyChanges {target: train_button; opacity : 0.5}
-                            PropertyChanges {target: rc_button_control; text : "PID"}
-                            PropertyChanges {target: rc_button_control; palette.button : "black"}
+                            PropertyChanges {target: rc_button_control; text : rc_button.current}
+                            PropertyChanges {target: rc_button_control; palette.buttonText: "black"}
+                            PropertyChanges {target: rc_button; border.color: "black"}
+                            PropertyChanges {target: rc_button_control; palette.button : "white"}
                             //switch to pid
-                            onCompleted: _root.rc_or_pid=0
+                            onCompleted: {
+                                rc_button.current="PID"
+                                rc_button.pending = false
+                                _root.rc_or_pid = 1
+                            }
                         }
                     ]
+                    state: "on_rc"
                     transitions: [
                         Transition {
-                            from: "on_rc"; to: "off_rc"; reversible: true
+                            from: "on_rc"; to: "pending"; reversible: true
+                        },
+                        Transition {
+                            from: "pending"; to: "off_rc"; reversible: true
                         }
                     ]
                     Button{
                         id: rc_button_control
                         width: rc_button.width
                         height: rc_button.height
-                        text: "RC"
-                        palette.buttonText: "white"
-                        palette.button: "steelblue"
                         onClicked: {
                             rc_button.state = (rc_button.state === 'off_rc' ? 'on_rc' : "off_rc");
                             //switch rc pid
-                            paramController.changeValue(_root.rc_or_pid)
+                                paramController.changeValue(_root.rc_or_pid)
+                                if(_root.rc_or_pid===1){
+                                    if(rc_button.pending){
+                                        //wait for message to confirm
+                                        //while(!rc_button.msg_confirmed);
+                                        rc_button.state = "on_rc"
+                                    }
+                                    else{
+                                        rc_button.state = "pending"
+                                    }
+                                }
+                                else if(_root.rc_or_pid===0){
+                                    if(rc_button.pending){
+                                        //wait for message to confirm
+                                        //while(!rc_button.msg_confirmed);
+                                        rc_button.state = "off_rc"
+                                    }
+                                    else{
+                                        rc_button.state = "pending"
+                                    }
+                                }
                         }
                     }
             }
