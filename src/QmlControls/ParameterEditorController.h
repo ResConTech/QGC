@@ -103,10 +103,11 @@ public:
 
     Q_INVOKABLE QStringList searchParameters(const QString& searchText, bool searchInName=true, bool searchInDescriptions=true);
 
-    //rc button functions declarations
+    //button functions declarations
     Q_INVOKABLE Fact* getParam(const QString& paramName);
     Q_INVOKABLE void rcToPid();
-    Q_INVOKABLE void changeValue(int value);
+    Q_INVOKABLE void train();
+    Q_INVOKABLE void changeValue(QString var, int value);
     //
     Q_INVOKABLE void saveToFile                     (const QString& filename);
     Q_INVOKABLE bool buildDiffFromFile              (const QString& filename);
