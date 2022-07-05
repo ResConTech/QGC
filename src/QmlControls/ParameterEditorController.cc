@@ -14,8 +14,9 @@
 #include "AppSettings.h"
 
 #include <QStandardPaths>
-//variables for rc button
+//variables for buttons
 int rc_or_pid=1;
+int _train=0;
 //
 ParameterEditorController::ParameterEditorController(void)
     : _parameterMgr(_vehicle->parameterManager())
@@ -37,7 +38,7 @@ ParameterEditorController::~ParameterEditorController()
 {
 
 }
-//functions for rc button
+//functions for buttons
 Fact* ParameterEditorController::getParam(const QString& paramName)
 {
     return _parameterMgr->getParameter(_vehicle->defaultComponentId(), paramName);
@@ -47,8 +48,18 @@ void ParameterEditorController::rcToPid()
     Fact* fact=getParam("MC_RC_CTRL_EN");
     fact->_containerRawValueChanged(rc_or_pid);
 }
-void ParameterEditorController::changeValue(int value){
-    rc_or_pid=value;
+void ParameterEditorController::train()
+{
+    Fact* fact=getParam("XXXXX");
+    fact->_containerRawValueChanged(_train);
+}
+void ParameterEditorController::changeValue(QString var, int value){
+    if(var == "RC_OR_PID"){
+        rc_or_pid=value;
+    }
+    if(var == "TRAIN"){
+        _train=value;
+    }
 }
 //
 void ParameterEditorController::_buildListsForComponent(int compId)
