@@ -27,6 +27,7 @@ import QGroundControl.Palette       1.0
 import QGroundControl.ScreenTools   1.0
 import QGroundControl.Vehicle       1.0
 
+import QtQuick.Controls.Styles 1.4
 FlightMap {
     id:                         _root
 
@@ -36,6 +37,7 @@ FlightMap {
     property real   maxButtonWidth:     0
     //variable to keep track of rc/pid state
     property int rc_or_pid:1
+    property int train:0
     //use parameter editor controller
     ParameterEditorController{
         id: paramController
@@ -1072,132 +1074,133 @@ FlightMap {
                     width: buttons.width / 2.75
                     anchors.left: buttons.left
                     anchors.top: buttons.top
-                    radius: 10
-                    border.color: "black"
-                    border.width: 2
                     anchors.leftMargin: p_dis.width
-                    property bool pending: false
-                    property string current: "RC"
-                    property bool msg_confirmed: false
+                    property string rc_border_color: "lime"
                     states: [
                         State {
                             name: "on_rc"
                             PropertyChanges {target: train_button; opacity : 1}
-                            PropertyChanges {target: rc_button_control; text : rc_button.current}
+                            PropertyChanges {target: rc_button_control; text : "RC"}
                             PropertyChanges {target: rc_button_control; palette.buttonText: "white"}
-                            PropertyChanges {target: rc_button; border.color: "green"}
+                            PropertyChanges {target: rc_button; rc_border_color: "lime"}
                             PropertyChanges {target: rc_button_control; palette.button : "steelblue"}
+                            PropertyChanges {target: rc_button_control; text : "RC"}
                             //switch to rc
-                            onCompleted: {
-                                rc_button.current="RC"
-                                rc_button.pending = false
-                                _root.rc_or_pid = 0
-                            }
-                        },
-                        State {
-                            name: "pending"
-                            PropertyChanges {target: train_button; opacity : 0.5}
-                            PropertyChanges {target: rc_button_control; text : rc_button.current}
-                            PropertyChanges {target: rc_button_control; palette.buttonText: "white"}
-                            PropertyChanges {target: rc_button; border.color: "red"}
-                            PropertyChanges {target: rc_button_control; palette.button : "black"}
-                            onCompleted: {
-                                rc_button.pending = true
-                            }
+                            onCompleted: _root.rc_or_pid=1
                         },
                         State {
                             name: "off_rc"
                             PropertyChanges {target: train_button; opacity : 0.5}
-                            PropertyChanges {target: rc_button_control; text : rc_button.current}
+                            PropertyChanges {target: rc_button_control; text : "PID"}
                             PropertyChanges {target: rc_button_control; palette.buttonText: "black"}
-                            PropertyChanges {target: rc_button; border.color: "black"}
+                            PropertyChanges {target: rc_button; rc_border_color: "black"}
                             PropertyChanges {target: rc_button_control; palette.button : "white"}
                             //switch to pid
-                            onCompleted: {
-                                rc_button.current="PID"
-                                rc_button.pending = false
-                                _root.rc_or_pid = 1
-                            }
+                            onCompleted: _root.rc_or_pid=0
                         }
                     ]
-                    state: "on_rc"
                     transitions: [
                         Transition {
-                            from: "on_rc"; to: "pending"; reversible: true
-                        },
-                        Transition {
-                            from: "pending"; to: "off_rc"; reversible: true
+                            from: "on_rc"; to: "off_rc"; reversible: true
                         }
                     ]
                     Button{
                         id: rc_button_control
                         width: rc_button.width
                         height: rc_button.height
+                        text: "RC"
+                        palette.buttonText: "white"
+                        palette.button: "steelblue"
+                        Rectangle{
+                            height: buttons.width / 8
+                            width: buttons.width / 2.75
+                            border.color: rc_button.rc_border_color
+                            border.width: 1.25
+                            color: "transparent"
+                        }
+
                         onClicked: {
                             rc_button.state = (rc_button.state === 'off_rc' ? 'on_rc' : "off_rc");
+                            if(_root.rc_or_pid===0){
+                                train_button.state = "train_off"
+                            }
+                            else{
+                                train_button.state = "train_on"
+                            }
                             //switch rc pid
-                                paramController.changeValue(_root.rc_or_pid)
-                                if(_root.rc_or_pid===1){
-                                    if(rc_button.pending){
-                                        //wait for message to confirm
-                                        //while(!rc_button.msg_confirmed);
-                                        rc_button.state = "on_rc"
-                                    }
-                                    else{
-                                        rc_button.state = "pending"
-                                    }
-                                }
-                                else if(_root.rc_or_pid===0){
-                                    if(rc_button.pending){
-                                        //wait for message to confirm
-                                        //while(!rc_button.msg_confirmed);
-                                        rc_button.state = "off_rc"
-                                    }
-                                    else{
-                                        rc_button.state = "pending"
-                                    }
-                                }
+                            paramController.changeValue("RC_OR_PID", _root.rc_or_pid);
                         }
                     }
-            }
+                }
 
 
                 Rectangle{
                     id: train_button
-                    height: buttons.width / 8
-                    width: buttons.width / 2.75
+                    height: (buttons.width / 8)
+                    width: (buttons.width / 2.75)
                     anchors.right: buttons.right
                     anchors.top: buttons.top
                     anchors.rightMargin: p_dis.width
-                    color: "black"
+                    property string train_border_color: "black"
                     states: [
                         State {
                             name: "train_on"
-                            PropertyChanges {target: train_button_control; palette.button : "green"}
+                            PropertyChanges {target: train_button_control; palette.button : "white"}
+                            PropertyChanges {target: train_button_control; palette.buttonText: "black"}
+                            PropertyChanges {target: train_button; train_border_color: "black"}
                             PropertyChanges {target: train_button; opacity : 1}
+                            onCompleted: _root.train =  0
                         },
                         State {
                             name: "train_off"
-                            PropertyChanges {target: train_button_control; palette.button : "black"}
+                            PropertyChanges {target: train_button_control; palette.button : "grey"}
+                            PropertyChanges {target: train_button_control; palette.buttonText: "white"}
+                            PropertyChanges {target: train_button; train_border_color: "grey"}
+                            PropertyChanges {target: train_button; opacity : .5}
+                        },
+                        State {
+                            name: "training"
                             PropertyChanges {target: train_button; opacity : 1}
+                            PropertyChanges {target: train_button_control; palette.buttonText: "white"}
+                            PropertyChanges {target: train_button_control; palette.button : "steelblue"}
+                            PropertyChanges {target: train_button; train_border_color: "lime"}
+                            onCompleted: _root.train = 1
                         }
                     ]
                     transitions: [
+                        Transition {
+                            from: "train_on"; to: "training"; reversible: true
+                        },
+                        Transition {
+                            from: "training"; to: "train_off"; reversible: true
+                        },
                         Transition {
                             from: "train_off"; to: "train_on"; reversible: true
                         }
                     ]
                     Button{
                         id: train_button_control
-                        width: rc_button.width
-                        height: rc_button.height
-                        text: "Train"
-                        palette.text: "white"
+                        width: buttons.width / 2.75
+                        height: buttons.width /8
+                        text: "TRAIN"
                         anchors.horizontalCenter: train_button.horizontalCenter
                         anchors.verticalCenter: train_button.verticalCenter
-                        palette.buttonText: "white"
-                        palette.button: "black"
-                        onClicked: train_button.state = (train_button.state === 'train_on' ? 'train_off' : "train_on");
+                        Rectangle{
+                            height: buttons.width / 8
+                            width: buttons.width / 2.75
+                            border.color: train_button.train_border_color
+                            border.width: 1.25
+                            color: "transparent"
+                        }
+                        onClicked: {
+                            paramController.changeValue("TRAIN", _root.train);
+                            if(_root.rc_or_pid===1){
+                                if(_root.train===0){
+                                    train_button.state = "training"
+                                }
+                            }
+                        }
+
                     }
                 }
 
