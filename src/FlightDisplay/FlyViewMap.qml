@@ -908,7 +908,7 @@ FlightMap {
         }
             Item{
                 id: buttons
-                width: 2*(drone.width)
+                width: 2.75*(drone.width)
                 height: 2.5*(drone.height)
                 anchors.verticalCenter: drone.verticalCenter
                 anchors.horizontalCenter: drone.horizontalCenter
@@ -1070,8 +1070,8 @@ FlightMap {
 
                 Rectangle{
                     id: rc_button
-                    height: buttons.width / 8
-                    width: buttons.width / 2.75
+                    height: 15
+                    width: 60
                     anchors.left: buttons.left
                     anchors.top: buttons.top
                     anchors.leftMargin: p_dis.width
@@ -1106,14 +1106,14 @@ FlightMap {
                     ]
                     Button{
                         id: rc_button_control
-                        width: rc_button.width
-                        height: rc_button.height
+                        height: 15
+                        width: 60
                         text: "RC"
                         palette.buttonText: "white"
                         palette.button: "steelblue"
                         Rectangle{
-                            height: buttons.width / 8
-                            width: buttons.width / 2.75
+                            height: 15
+                            width: 60
                             border.color: rc_button.rc_border_color
                             border.width: 1.25
                             color: "transparent"
@@ -1136,8 +1136,8 @@ FlightMap {
 
                 Rectangle{
                     id: train_button
-                    height: (buttons.width / 8)
-                    width: (buttons.width / 2.75)
+                    height: 15
+                    width: 60
                     anchors.right: buttons.right
                     anchors.top: buttons.top
                     anchors.rightMargin: p_dis.width
@@ -1180,14 +1180,14 @@ FlightMap {
                     ]
                     Button{
                         id: train_button_control
-                        width: buttons.width / 2.75
-                        height: buttons.width /8
+                        height: 15
+                        width: 60
                         text: "TRAIN"
                         anchors.horizontalCenter: train_button.horizontalCenter
                         anchors.verticalCenter: train_button.verticalCenter
                         Rectangle{
-                            height: buttons.width / 8
-                            width: buttons.width / 2.75
+                            height: 15
+                            width: 60
                             border.color: train_button.train_border_color
                             border.width: 1.25
                             color: "transparent"
