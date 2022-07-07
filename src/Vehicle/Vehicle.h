@@ -792,7 +792,11 @@ public slots:
     void _handleServoOutputRaw              (const mavlink_message_t& message);
     void _handleAttitudeTarget              (const mavlink_message_t& message);
     void _handlePosValue                    (const mavlink_message_t& message);
-
+    //Setpoint roll pitch yaw retrieve
+    QVariant getSetpointRoll                    ();
+    QVariant getSetpointPitch                   ();
+    QVariant getSetpointYaw                     ();
+    //
 signals:
     void coordinateChanged              (QGeoCoordinate coordinate);
     void joystickEnabledChanged         (bool enabled);
