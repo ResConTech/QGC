@@ -1583,20 +1583,22 @@ void Vehicle::_handleServoOutputRaw(const mavlink_message_t& message)
 
     mavlink_msg_servo_output_raw_decode(&message, &channels);
 
-    uint16_t* _rgChannelvalues[cMaxServoChannels] = {
+    uint16_t* _rcChannelvalues[cMaxServoChannels] = {
         &channels.servo1_raw,
         &channels.servo2_raw,
         &channels.servo3_raw,
         &channels.servo4_raw,
     };
+
     int rpmValues[cMaxServoChannels];
-    for (int i=0; i<cMaxServoChannels; i++){
-        uint16_t channelValue = *_rgChannelvalues[i];
+
+    for (int i=0; i<cMaxServoChannels; i++) {
+        uint16_t channelValue = *_rcChannelvalues[i];
             rpmValues[i] = channelValue == UINT16_MAX ? -1 : channelValue;
-            _servoRawFact.setRawValue(rpmValues[0]/20);
-            _servoRaw2Fact.setRawValue(rpmValues[1]/20);
-            _servoRaw3Fact.setRawValue(rpmValues[2]/20);
-            _servoRaw4Fact.setRawValue(rpmValues[3]/20);
+            _servoRawFact.setRawValue((rpmValues[0])/20);
+            _servoRaw2Fact.setRawValue((rpmValues[1])/20);
+            _servoRaw3Fact.setRawValue((rpmValues[2])/20);
+            _servoRaw4Fact.setRawValue((rpmValues[3])/20);
     }
 }
 
