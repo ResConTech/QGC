@@ -44,6 +44,7 @@ Item {
         onTriggered:    {
             //controller.train()
             controller.rcToPid()
+        }
     }
     //
     ExclusiveGroup { id: sectionGroup }
