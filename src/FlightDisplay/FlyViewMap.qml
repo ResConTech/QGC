@@ -38,6 +38,55 @@ FlightMap {
     //variable to keep track of rc/pid state
     property int rc_or_pid:1
     property int train:0
+    property int setpoint_pitch: _activeVehicle.getSetpointPitch()
+    property int setpoint_roll: _activeVehicle.getSetpointRoll()
+    property int setpoint_yaw: _activeVehicle.getSetpointYaw()
+    property string roll_graph_color: "green"
+    property string pitch_graph_color: "green"
+    property string yaw_graph_color: "green"
+    function updateSetpoints(){
+        setpoint_pitch = _activeVehicle.getSetpointPitch()
+        setpoint_roll = _activeVehicle.getSetpointRoll()
+        setpoint_yaw = _activeVehicle.getSetpointYaw()
+    }
+    function updateGraph(){
+        if(roll_graph.height<33){
+            roll_graph_color = "green"
+        }
+        else if(roll_graph.height<66){
+            roll_graph_color = "yellow"
+        }
+        else{
+            roll_graph_color = "red"
+        }
+        if(pitch_graph.height<33){
+            pitch_graph_color = "green"
+        }
+        else if(pitch_graph.height<66){
+            pitch_graph_color = "yellow"
+        }
+        else{
+            pitch_graph_color = "red"
+        }
+        if(yaw_graph.height<33){
+            yaw_graph_color = "green"
+        }
+        else if(yaw_graph.height<66){
+            yaw_graph_color = "yellow"
+        }
+        else{
+            yaw_graph_color = "red"
+        }
+    }
+    Timer {
+        interval:       1
+        running:        true
+        repeat:         true
+        onTriggered:    {
+            updateGraph()
+            updateSetpoints()
+        }
+    }
     //use parameter editor controller
     ParameterEditorController{
         id: paramController
@@ -908,7 +957,7 @@ FlightMap {
         }
             Item{
                 id: buttons
-                width: 2.75*(drone.width)
+                width: 1.75*(drone.width)
                 height: 2.5*(drone.height)
                 anchors.verticalCenter: drone.verticalCenter
                 anchors.horizontalCenter: drone.horizontalCenter
@@ -942,12 +991,15 @@ FlightMap {
                         anchors.horizontalCenter: p_dis.horizontalCenter
                     }
                     Rectangle{
-                        property int rollError: _activeVehicle ? (((Math.abs(_activeVehicle.attitudeRoll.value - _activeVehicle.rollRate.value)) / Math.abs(_activeVehicle.rollRate.value)) * 100) : 0
+                        id: roll_graph
+                        property int rollError: _activeVehicle ? (((Math.abs(_activeVehicle.roll.value - setpoint_roll)) / Math.abs(setpoint_roll)) * 100) : 0
+                        //RATE
+                        //property int rollError: _activeVehicle ? (((Math.abs(_activeVehicle.attitudeRoll.value - _activeVehicle.rollRate.value)) / Math.abs(_activeVehicle.rollRate.value)) * 100) : 0
                         width: p_dis.width / 1.25
                         anchors.bottom: p_dis.bottom
                         anchors.horizontalCenter: p_dis.horizontalCenter
                         anchors.bottomMargin: 2
-                        color: "green"
+                        color: roll_graph_color
                         height: (rollError >= p_dis.height) ? p_dis.height : rollError
                     }
                 }
@@ -969,12 +1021,15 @@ FlightMap {
                         anchors.horizontalCenter: r_dis.horizontalCenter
                     }
                     Rectangle{
-                        property int pitchError: _activeVehicle ? (((Math.abs(_activeVehicle.attitudePitch.value - _activeVehicle.pitchRate.value)) / Math.abs(_activeVehicle.pitchRate.value)) * 100) : 0
+                        id: pitch_graph
+                        property int pitchError: _activeVehicle ? (((Math.abs(_activeVehicle.pitch.value - setpoint_pitch)) / Math.abs(setpoint_pitch)) * 100) : 0
+                        //RATE
+                        //property int pitchError: _activeVehicle ? (((Math.abs(_activeVehicle.attitudePitch.value - _activeVehicle.pitchRate.value)) / Math.abs(_activeVehicle.pitchRate.value)) * 100) : 0
                         width: r_dis.width / 1.25
                         anchors.bottom: r_dis.bottom
                         anchors.horizontalCenter: r_dis.horizontalCenter
                         anchors.bottomMargin: 2
-                        color: "green"
+                        color: pitch_graph_color
                         height: (pitchError >= r_dis.height) ? r_dis.height : pitchError
                     }
                 }
@@ -996,12 +1051,15 @@ FlightMap {
                         anchors.horizontalCenter: y_dis.horizontalCenter
                     }
                     Rectangle{
-                        property int yawError: _activeVehicle ? (((Math.abs(_activeVehicle.attitudeYaw.value - _activeVehicle.yawRate.value)) / Math.abs(_activeVehicle.yawRate.value)) * 100) : 0
+                        id: yaw_graph
+                        property int yawError: _activeVehicle ? (((Math.abs(_activeVehicle.yaw.value - setpoint_yaw)) / Math.abs(setpoint_yaw)) * 100) : 0
+                        //RATE
+                        //property int yawError: _activeVehicle ? (((Math.abs(_activeVehicle.attitudeYaw.value - _activeVehicle.yawRate.value)) / Math.abs(_activeVehicle.yawRate.value)) * 100) : 0
                         width: y_dis.width / 1.25
                         anchors.bottom: y_dis.bottom
                         anchors.horizontalCenter: y_dis.horizontalCenter
                         anchors.bottomMargin: 2
-                        color: "green"
+                        color: yaw_graph_color
                         height: (yawError >= y_dis.height) ? y_dis.height : yawError
                     }
                 }
@@ -1072,7 +1130,7 @@ FlightMap {
                     id: rc_button
                     height: 15
                     width: 60
-                    anchors.left: buttons.left
+                    anchors.right: buttons.horizontalCenter
                     anchors.top: buttons.top
                     anchors.leftMargin: p_dis.width
                     property string rc_border_color: "lime"
@@ -1138,7 +1196,7 @@ FlightMap {
                     id: train_button
                     height: 15
                     width: 60
-                    anchors.right: buttons.right
+                    anchors.left: buttons.horizontalCenter
                     anchors.top: buttons.top
                     anchors.rightMargin: p_dis.width
                     property string train_border_color: "black"
