@@ -1182,15 +1182,44 @@ FlightMap {
                         }
                     }
 
-                    QGCButton {
+                    Button {
+                        background: Rectangle{
+                            id: button_comp
+                        }
+
+                        states: [
+                            State {
+                                name: "armed"
+                                PropertyChanges { target: button_comp; color: "red" }
+                            },
+                            State {
+                                name: "disarmed"
+                                PropertyChanges { target: button_comp; color: "green" }
+                            }
+                        ]
+
+                        transitions: [
+                            Transition {
+                                from: "disarmed"; to: "armed"; reversible: true
+                            }
+                        ]
+
                         anchors.bottom: buttons.top
                         anchors.horizontalCenter: buttons.horizontalCenter
                         anchors.bottomMargin: train_button.height / 3
                         property bool   _armed:         _activeVehicle ? _activeVehicle.armed : false
                         Layout.alignment:   Qt.AlignHCenter
-                        text:               _armed ?  qsTr("Disarm") : (forceArm ? qsTr("Force Arm") : qsTr("Arm"))
+                        text:               _armed ?  qsTr("Armed") : (forceArm ? qsTr("Force Arm") : qsTr("Disarmed"))
 
                         property bool forceArm: false
+
+                        onTextChanged: {
+                            if (_armed == true) {
+                            button_comp.state = 'armed'
+                            } else {
+                                button_comp.state = 'disarmed'
+                            }
+                        }
 
                         onPressAndHold: forceArm = true
 
