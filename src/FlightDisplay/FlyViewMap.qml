@@ -1052,7 +1052,7 @@ FlightMap {
                     }
                     Rectangle{
                         id: yaw_graph
-                        property int yawError: _activeVehicle ? (((Math.abs(_activeVehicle.yaw.value - setpoint_yaw)) / Math.abs(setpoint_yaw)) * 100) : 0
+                        property int yawError: _activeVehicle ? (((Math.abs(_activeVehicle.heading.value - setpoint_yaw)) / Math.abs(setpoint_yaw)) * 100) : 0
                         //RATE
                         //property int yawError: _activeVehicle ? (((Math.abs(_activeVehicle.attitudeYaw.value - _activeVehicle.yawRate.value)) / Math.abs(_activeVehicle.yawRate.value)) * 100) : 0
                         width: y_dis.width / 1.25
@@ -1302,34 +1302,34 @@ FlightMap {
                 //opacity: .5
                 Text{
                     id: actRoll
-                    text: _activeVehicle ? "Roll: " + _activeVehicle.rollRate.value.toFixed(5) : null
+                    text: _activeVehicle ? "Roll: " + _activeVehicle.roll.value.toFixed(5) : null
                 }
                 Text{
                     id: actPitch
                     anchors.top: actRoll.bottom
-                    text: _activeVehicle ? "Pitch: " + _activeVehicle.pitchRate.value.toFixed(5) : null
+                    text: _activeVehicle ? "Pitch: " + _activeVehicle.pitch.value.toFixed(5) : null
                 }
                 Text{
                     id: actYaw
                     anchors.top: actPitch.bottom
-                    text: _activeVehicle ? "Yaw: " + _activeVehicle.yawRate.value.toFixed(5) : null
+                    text: _activeVehicle ? "Yaw: " + _activeVehicle.heading.value.toFixed(5) : null
                 }
                 Text{
                     id: estRoll
                     anchors.top: actYaw.bottom
-                    text: _activeVehicle ? "Setpoint Roll: " + _activeVehicle.attitudeRoll.value.toFixed(5) : null
+                    text: _activeVehicle ? "Setpoint Roll: " + setpoint_roll.toFixed(5) : null
                     color: "orange"
                 }
                 Text{
                     id: estPitch
                     anchors.top: estRoll.bottom
-                    text: _activeVehicle ? "Setpoint Pitch: " + _activeVehicle.attitudePitch.value.toFixed(5) : null
+                    text: _activeVehicle ? "Setpoint Pitch: " + setpoint_pitch.toFixed(5) : null
                     color: "orange"
                 }
                 Text{
                     id: estYaw
                     anchors.top: estPitch.bottom
-                    text: _activeVehicle ? "Setpoint Yaw: " + _activeVehicle.attitudeYaw.value.toFixed(5) : null
+                    text: _activeVehicle ? "Setpoint Yaw: " + setpoint_yaw.toFixed(5) : null
                     color: "orange"
                 }
                 Text{
