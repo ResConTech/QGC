@@ -1191,8 +1191,8 @@ FlightMap {
                     Button {
                         id: armed_button
                         background: Rectangle{
+                            color: "green"
                             id: button_comp
-                        }
 
                         states: [
                             State {
@@ -1210,6 +1210,7 @@ FlightMap {
                                 from: "disarmed"; to: "armed"; reversible: true
                             }
                         ]
+                        }
 
                         anchors.bottom: buttons.top
                         anchors.horizontalCenter: buttons.horizontalCenter
