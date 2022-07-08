@@ -1082,6 +1082,7 @@ FlightMap {
                                 name: "on_rc"
                                 PropertyChanges {target: train_button; opacity : 1}
                                 PropertyChanges {target: rc_button_control; text : "RC"}
+                                PropertyChanges {target: train_button; enabled: true }
                                 //switch to rc
                                 onCompleted: _root.rc_or_pid=1
                             },
@@ -1090,6 +1091,7 @@ FlightMap {
                                 PropertyChanges {target: train_button; opacity : 0.5}
                                 PropertyChanges {target: rc_button_control; text : "PID"}
                                 PropertyChanges {target: rc_button_control; palette.button : "black"}
+                                PropertyChanges {target: train_button; enabled: false }
                                 //switch to pid
                                 onCompleted: _root.rc_or_pid=0
                             }
@@ -1110,35 +1112,7 @@ FlightMap {
                                 rc_button.state = (rc_button.state === 'off_rc' ? 'on_rc' : "off_rc");
                                 //switch rc pid
                                 paramController.changeValue(_root.rc_or_pid)
-
-                                if (slider.value <= 15 ) {
-                                    timer_value.interval = slider.value * 1000
-                                    timer_value.start()
-                                } else {
-                                    timer_value.interval = 10000
-                                    timer_value.start()
-                                }
                             }
-                        }
-
-                        Slider {
-                            id: slider
-                            anchors.right: rc_button.left
-                            anchors.bottom: rc_button.top
-                            anchors.horizontalCenterOffset: rc_button.width
-                            from: 0; to: 15; stepSize: 5
-                            value: 0
-                            ToolTip {
-                                    parent: slider.handle
-                                    visible: slider.pressed
-                                    text: slider.valueAt(slider.position).toFixed(1)
-                                }
-                        }
-
-                        Timer{
-                            id: timer_value
-                            running: false; repeat: false
-                            onTriggered: rc_button.state = 'on_rc'
                         }
                     }
 
@@ -1156,11 +1130,14 @@ FlightMap {
                                 name: "train_on"
                                 PropertyChanges {target: train_button_control; palette.button : "green"}
                                 PropertyChanges {target: train_button; opacity : 1}
+                                PropertyChanges {target: train_button; enabled: false }
+                                PropertyChanges {target: rc_button; enabled: false }
                             },
                             State {
                                 name: "train_off"
                                 PropertyChanges {target: train_button_control; palette.button : "black"}
                                 PropertyChanges {target: train_button; opacity : 1}
+                                PropertyChanges {target: train_button; enabled: false }
                             }
                         ]
                         transitions: [
@@ -1178,11 +1155,41 @@ FlightMap {
                             anchors.verticalCenter: train_button.verticalCenter
                             palette.buttonText: "white"
                             palette.button: "black"
-                            onClicked: train_button.state = (train_button.state === 'train_on' ? 'train_off' : "train_on");
+                            onClicked: {
+                                train_button.state = (train_button.state === 'train_on' ? 'train_off' : "train_on");
+
+                                if (slider.value <= 15 ) {
+                                    timer_value.interval = slider.value * 1000
+                                    timer_value.start()
+                                } else {
+                                    timer_value.interval = 10000
+                                    timer_value.start()
+                                }
+                            }
                         }
+
+                        Timer{
+                            id: timer_value
+                            running: false; repeat: false
+                            onTriggered: train_button.state = 'on_rc'
+                        }
+                    }
+                    Slider {
+                        id: slider
+                        anchors.bottom: rc_button.top
+                        anchors.right: rc_button.left
+                        anchors.horizontalCenterOffset: rc_button.width
+                        from: 0; to: 15; stepSize: 5
+                        value: 0
+                        ToolTip {
+                                parent: slider.handle
+                                visible: slider.pressed
+                                text: slider.valueAt(slider.position).toFixed(1)
+                            }
                     }
 
                     Button {
+                        id: armed_button
                         background: Rectangle{
                             id: button_comp
                         }
