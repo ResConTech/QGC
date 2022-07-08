@@ -1127,7 +1127,7 @@ FlightMap {
                             anchors.bottom: rc_button.top
                             anchors.horizontalCenterOffset: rc_button.width
                             from: 0; to: 15; stepSize: 5
-                            value: 5
+                            value: 0
                             ToolTip {
                                     parent: slider.handle
                                     visible: slider.pressed
