@@ -38,52 +38,91 @@ FlightMap {
     //variable to keep track of rc/pid state
     property int rc_or_pid:1
     property int train:0
-    property int setpoint_pitch: _activeVehicle.getSetpointPitch()
-    property int setpoint_roll: _activeVehicle.getSetpointRoll()
-    property int setpoint_yaw: _activeVehicle.getSetpointYaw()
-    property string roll_graph_color: "green"
-    property string pitch_graph_color: "green"
-    property string yaw_graph_color: "green"
+    property var setpoint_pitch: _activeVehicle ? _activeVehicle.getSetpointPitch() : 0
+    property var setpoint_roll: _activeVehicle ? _activeVehicle.getSetpointRoll() : 0
+    property var setpoint_yaw: _activeVehicle ? _activeVehicle.getSetpointYaw() : 0
+    property bool maximum_error: [false, false, false]
+    function errorHeight(error, height, index){
+        updateWeightedAvg(index,error)
+        if(weighted_moving_average[index] * height * 20 > height){
+            maximum_error[index] = true
+            return height
+        }
+        else{
+            maximum_error[index] = false
+            return weighted_moving_average[index] * height * 20
+        }
+    }
+
+    function actualNormalize(actual){
+        if(Math.abs(actual) > 180){
+            return (180 - Math.abs(180 - actual))
+        }
+        return actual
+    }
+
     function updateSetpoints(){
-        setpoint_pitch = _activeVehicle.getSetpointPitch()
-        setpoint_roll = _activeVehicle.getSetpointRoll()
-        setpoint_yaw = _activeVehicle.getSetpointYaw()
+        setpoint_pitch = _activeVehicle ? _activeVehicle.getSetpointPitch() : 0
+        setpoint_roll = _activeVehicle ? _activeVehicle.getSetpointRoll() : 0
+        setpoint_yaw = _activeVehicle ? _activeVehicle.getSetpointYaw() : 0
     }
-    function updateGraph(){
-        if(roll_graph.height<33){
-            roll_graph_color = "green"
+    property real weight: 100000
+    property variant n:[0,0,0]
+    property variant numerator: [0,0,0]
+    property variant denominator: [0,0,0]
+    property variant  weighted_moving_average: [0,0,0]
+
+    function updateN(index){
+        if(n[index] > weight){
+            n[index] = 0
+            numerator[index] = 0
+            denominator[index] = 0
         }
-        else if(roll_graph.height<66){
-            roll_graph_color = "yellow"
+        n[index] = n[index]+1
+        return n[index]
+    }
+
+    function updateNumerator(index, input){
+        numerator[index] = numerator[index] + input * n[index]
+        return numerator[index]
+    }
+    function updateDenominator(index){
+        denominator[index] = (n[index] * (n[index]+1))/2
+        return denominator[index]
+    }
+    function division(num1, num2){
+        return Math.abs(num1/num2)
+    }
+
+    function updateWeightedAvg(index,error){
+        if(index===0){
+            updateN(index)
+            updateNumerator(index, error)
+            updateDenominator(index)
+            weighted_moving_average[index] = division(numerator[index],denominator[index])
+            return weighted_moving_average[index]
         }
-        else{
-            roll_graph_color = "red"
+        else if(index===1){
+            updateN(index)
+            updateNumerator(index, error)
+            updateDenominator(index)
+            weighted_moving_average[index] = division(numerator[index],denominator[index])
+            return weighted_moving_average[index]
         }
-        if(pitch_graph.height<33){
-            pitch_graph_color = "green"
-        }
-        else if(pitch_graph.height<66){
-            pitch_graph_color = "yellow"
-        }
-        else{
-            pitch_graph_color = "red"
-        }
-        if(yaw_graph.height<33){
-            yaw_graph_color = "green"
-        }
-        else if(yaw_graph.height<66){
-            yaw_graph_color = "yellow"
-        }
-        else{
-            yaw_graph_color = "red"
+        else if(index===2){
+            updateN(index)
+            updateNumerator(index, error)
+            updateDenominator(index)
+            weighted_moving_average[index] = division(_root.numerator[index],denominator[index])
+            return weighted_moving_average[index]
         }
     }
+
     Timer {
         interval:       1
         running:        true
         repeat:         true
         onTriggered:    {
-            updateGraph()
             updateSetpoints()
         }
     }
@@ -992,15 +1031,51 @@ FlightMap {
                     }
                     Rectangle{
                         id: roll_graph
-                        property int rollError: _activeVehicle ? (((Math.abs(_activeVehicle.roll.value - setpoint_roll)) / Math.abs(setpoint_roll)) * 100) : 0
-                        //RATE
-                        //property int rollError: _activeVehicle ? (((Math.abs(_activeVehicle.attitudeRoll.value - _activeVehicle.rollRate.value)) / Math.abs(_activeVehicle.rollRate.value)) * 100) : 0
+                        property real rollError: _activeVehicle ? ((Math.abs(actualNormalize(_activeVehicle.roll.value) - setpoint_roll)) / 180) : 0
                         width: p_dis.width / 1.25
                         anchors.bottom: p_dis.bottom
                         anchors.horizontalCenter: p_dis.horizontalCenter
                         anchors.bottomMargin: 2
-                        color: roll_graph_color
-                        height: (rollError >= p_dis.height) ? p_dis.height : rollError
+                        color: "green"
+                        height: errorHeight(rollError, p_dis.height, 0)
+                        states:[
+                            State {
+                                name: "green"; when: roll_graph.height / p_dis.height < .333
+                                PropertyChanges {target: roll_graph; color: "green"}
+                            },
+                            State {
+                                name: "yellow"; when: roll_graph.height / p_dis.height >= .333 && roll_graph.height / p_dis.height < .667
+                                PropertyChanges {target: roll_graph; color: "yellow"}
+                            },
+                            State {
+                                name: "red"; when: roll_graph.height / p_dis.height <= 1 && roll_graph.height / p_dis.height >= .667
+                                PropertyChanges {target: roll_graph; color: "red"}
+                            },
+                            State {
+                                name: "max"; when: maximum_error[0]
+                                PropertyChanges {target: pitch_graph; color: "darkred"}
+                            }
+                        ]
+                        transitions:[
+                            Transition{
+                                from: "green"; to: "yellow"; reversible: true
+                                ParallelAnimation{
+                                    ColorAnimation { duration: 20 }
+                                }
+                            },
+                            Transition{
+                                from: "yellow"; to: "red"; reversible: true
+                                ParallelAnimation{
+                                    ColorAnimation { duration: 20 }
+                                }
+                            },
+                            Transition{
+                                from: "red"; to: "max"; reversible: true
+                                ParallelAnimation{
+                                    ColorAnimation { duration: 20 }
+                                }
+                            }
+                        ]
                     }
                 }
 
@@ -1022,15 +1097,51 @@ FlightMap {
                     }
                     Rectangle{
                         id: pitch_graph
-                        property int pitchError: _activeVehicle ? (((Math.abs(_activeVehicle.pitch.value - setpoint_pitch)) / Math.abs(setpoint_pitch)) * 100) : 0
-                        //RATE
-                        //property int pitchError: _activeVehicle ? (((Math.abs(_activeVehicle.attitudePitch.value - _activeVehicle.pitchRate.value)) / Math.abs(_activeVehicle.pitchRate.value)) * 100) : 0
+                        property real pitchError: _activeVehicle ? ((Math.abs(actualNormalize(_activeVehicle.pitch.value) - setpoint_pitch)) / 180) : 0
                         width: r_dis.width / 1.25
                         anchors.bottom: r_dis.bottom
                         anchors.horizontalCenter: r_dis.horizontalCenter
                         anchors.bottomMargin: 2
-                        color: pitch_graph_color
-                        height: (pitchError >= r_dis.height) ? r_dis.height : pitchError
+                        color: "green"
+                        height: errorHeight(pitchError, r_dis.height, 1)
+                        states:[
+                            State {
+                                name: "green"; when: pitch_graph.height / r_dis.height < .333
+                                PropertyChanges {target: pitch_graph; color: "green"}
+                            },
+                            State {
+                                name: "yellow"; when: pitch_graph.height / r_dis.height >= .333 && pitch_graph.height / r_dis.height < .667
+                                PropertyChanges {target: pitch_graph; color: "yellow"}
+                            },
+                            State {
+                                name: "red"; when: pitch_graph.height / r_dis.height <= 1 && pitch_graph.height / r_dis.height >= .667
+                                PropertyChanges {target: pitch_graph; color: "red"}
+                            },
+                            State {
+                                name: "max"; when: maximum_error[1]
+                                PropertyChanges {target: pitch_graph; color: "darkred"}
+                            }
+                        ]
+                        transitions:[
+                            Transition{
+                                from: "green"; to: "yellow"; reversible: true
+                                ParallelAnimation{
+                                    ColorAnimation { duration: 20 }
+                                }
+                            },
+                            Transition{
+                                from: "yellow"; to: "red"; reversible: true
+                                ParallelAnimation{
+                                    ColorAnimation { duration: 20 }
+                                }
+                            },
+                            Transition{
+                                from: "red"; to: "max"; reversible: true
+                                ParallelAnimation{
+                                    ColorAnimation { duration: 20 }
+                                }
+                            }
+                        ]
                     }
                 }
 
@@ -1052,15 +1163,51 @@ FlightMap {
                     }
                     Rectangle{
                         id: yaw_graph
-                        property int yawError: _activeVehicle ? (((Math.abs(_activeVehicle.heading.value - setpoint_yaw)) / Math.abs(setpoint_yaw)) * 100) : 0
-                        //RATE
-                        //property int yawError: _activeVehicle ? (((Math.abs(_activeVehicle.attitudeYaw.value - _activeVehicle.yawRate.value)) / Math.abs(_activeVehicle.yawRate.value)) * 100) : 0
+                        property real yawError: _activeVehicle ? ((Math.abs(actualNormalize(_activeVehicle.heading.value) - Math.abs(setpoint_yaw))) / 180) : 0
                         width: y_dis.width / 1.25
                         anchors.bottom: y_dis.bottom
                         anchors.horizontalCenter: y_dis.horizontalCenter
                         anchors.bottomMargin: 2
-                        color: yaw_graph_color
-                        height: (yawError >= y_dis.height) ? y_dis.height : yawError
+                        color: "green"
+                        height: errorHeight(yawError, y_dis.height, 2)
+                        states:[
+                            State {
+                                name: "green"; when: yaw_graph.height / y_dis.height < .333
+                                PropertyChanges {target: yaw_graph; color: "green"}
+                            },
+                            State {
+                                name: "yellow"; when: yaw_graph.height / y_dis.height >= .333 && yaw_graph.height / y_dis.height < .667
+                                PropertyChanges {target: yaw_graph; color: "yellow"}
+                            },
+                            State {
+                                name: "red"; when: yaw_graph.height / y_dis.height <= 1 && yaw_graph.height / y_dis.height >= .667
+                                PropertyChanges {target: yaw_graph; color: "red"}
+                            },
+                            State {
+                                name: "max"; when: maximum_error[2]
+                                PropertyChanges {target: pitch_graph; color: "darkred"}
+                            }
+                        ]
+                        transitions:[
+                            Transition{
+                                from: "green"; to: "yellow"; reversible: true
+                                ParallelAnimation{
+                                    ColorAnimation { duration: 20 }
+                                }
+                            },
+                            Transition{
+                                from: "yellow"; to: "red"; reversible: true
+                                ParallelAnimation{
+                                    ColorAnimation { duration: 20 }
+                                }
+                            },
+                            Transition{
+                                from: "red"; to: "max"; reversible: true
+                                ParallelAnimation{
+                                    ColorAnimation { duration: 20 }
+                                }
+                            }
+                        ]
                     }
                 }
 
@@ -1073,7 +1220,7 @@ FlightMap {
                     anchors.top: p_dis.top
                     anchors.leftMargin: topRef.width / 3
                     Text{
-                        text: "10"
+                        text: "5%"
                         anchors.left: topRef.right
                         anchors.horizontalCenter: topRef.horizontalCenter
                     }
@@ -1098,7 +1245,7 @@ FlightMap {
                     anchors.bottom: p_dis.bottom
                     anchors.leftMargin: topRef.width / 3
                     Text{
-                        text: "0"
+                        text: "0%"
                         anchors.left: bottomRef.right
                         anchors.horizontalCenter: bottomRef.horizontalCenter
                     }
@@ -1114,7 +1261,7 @@ FlightMap {
                     anchors.topMargin: sideRef.height / 2
                     anchors.leftMargin: topRef.width / 3
                     Text{
-                        text: "5"
+                        text: "2.5%"
                         anchors.left: midRef.right
                         anchors.horizontalCenter: midRef.horizontalCenter
                     }
@@ -1302,17 +1449,17 @@ FlightMap {
                 //opacity: .5
                 Text{
                     id: actRoll
-                    text: _activeVehicle ? "Roll: " + _activeVehicle.roll.value.toFixed(5) : null
+                    text: _activeVehicle ? "Roll: " + actualNormalize(_activeVehicle.roll.value).toFixed(5) : null
                 }
                 Text{
                     id: actPitch
                     anchors.top: actRoll.bottom
-                    text: _activeVehicle ? "Pitch: " + _activeVehicle.pitch.value.toFixed(5) : null
+                    text: _activeVehicle ? "Pitch: " + actualNormalize(_activeVehicle.pitch.value).toFixed(5) : null
                 }
                 Text{
                     id: actYaw
                     anchors.top: actPitch.bottom
-                    text: _activeVehicle ? "Yaw: " + _activeVehicle.heading.value.toFixed(5) : null
+                    text: _activeVehicle ? "Yaw: " + actualNormalize(_activeVehicle.heading.value).toFixed(5) : null
                 }
                 Text{
                     id: estRoll
@@ -1329,7 +1476,7 @@ FlightMap {
                 Text{
                     id: estYaw
                     anchors.top: estPitch.bottom
-                    text: _activeVehicle ? "Setpoint Yaw: " + setpoint_yaw.toFixed(5) : null
+                    text: _activeVehicle ? "Setpoint Yaw: " + Math.abs(setpoint_yaw).toFixed(5) : null
                     color: "orange"
                 }
                 Text{
@@ -1347,25 +1494,25 @@ FlightMap {
                 Text{
                     id: nYawPercent
                     anchors.top: nPitchPercent.bottom
-                    //text: _activeVehicle ? "Accurate Yaw %: " + _activeVehicle.yawRate.value.toFixed(2) : null
+                    text: _activeVehicle ? "Weighted Yaw Error %: " + errorHeight(yaw_graph.yawError, y_dis.height, 2) / 20 : null
                     color: "green"
                 }
                 Text{
                     id: oRollPercent
                     anchors.top: nYawPercent.bottom
-                    text: _activeVehicle ? "Inaccurate Roll %: " + (((Math.abs(_activeVehicle.attitudeRoll.value - _activeVehicle.rollRate.value)) / Math.abs(_activeVehicle.rollRate.value)) * 100).toFixed(2) : 0
+                    text: _activeVehicle ? "Yaw Error %: " + yaw_graph.yawError * 100 : 0
                     color: "red"
                 }
                 Text{
                     id: oPitchPercent
                     anchors.top: oRollPercent.bottom
-                    text: _activeVehicle ? "inaccurate Pitch %: " + (((Math.abs(_activeVehicle.attitudePitch.value - _activeVehicle.pitchRate.value)) / Math.abs(_activeVehicle.pitchRate.value)) * 100).toFixed(2) : 0
+                    text: _activeVehicle ? "Roll Error %: " + roll_graph.rollError * 100 : 0
                     color: "red"
                 }
                 Text{
                     id: oYawPercent
                     anchors.top: oPitchPercent.bottom
-                    text: _activeVehicle ? "Inaccurate Yaw %: " +  (((Math.abs(_activeVehicle.attitudeYaw.value - _activeVehicle.yawRate.value)) / Math.abs(_activeVehicle.yawRate.value)) * 100).toFixed(2) : 0
+                    text: _activeVehicle ? "Pitch Error %: " + pitch_graph.pitchError * 100 : 0
                     color: "red"
                 }
                 Text{
