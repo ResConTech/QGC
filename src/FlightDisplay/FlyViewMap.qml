@@ -1466,91 +1466,91 @@ FlightMap {
                     }
             }
 
-                Rectangle{
-                    id: valueDisplay
-                    width: drone.width * 2
-                    height: drone.height * 1.75
-                    anchors.right: drone.left
-                    anchors.bottom: drone.bottom
-                    anchors.rightMargin: drone.width
-                    anchors.bottomMargin: drone.width / -4
-                    color: "white"
-                    //opacity: .5
-                    Text{
-                        id: actRoll
-                        text: _activeVehicle ? "Roll: " + _activeVehicle.roll.value.toFixed(5) : null
-                    }
-                    Text{
-                        id: actPitch
-                        anchors.top: actRoll.bottom
-                        text: _activeVehicle ? "Pitch: " + _activeVehicle.pitch.value.toFixed(5) : null
-                    }
-                    Text{
-                        id: actYaw
-                        anchors.top: actPitch.bottom
-                        text: _activeVehicle ? "Yaw: " + _activeVehicle.heading.value.toFixed(5) : null
-                    }
-                    Text{
-                        id: estRoll
-                        anchors.top: actYaw.bottom
-                        text: _activeVehicle ? "Setpoint Roll: " + setpoint_roll.toFixed(5) : null
-                        color: "orange"
-                    }
-                    Text{
-                        id: estPitch
-                        anchors.top: estRoll.bottom
-                        text: _activeVehicle ? "Setpoint Pitch: " + setpoint_pitch.toFixed(5) : null
-                        color: "orange"
-                    }
-                    Text{
-                        id: estYaw
-                        anchors.top: estPitch.bottom
-                        text: _activeVehicle ? "Setpoint Yaw: " + setpoint_yaw.toFixed(5) : null
-                        color: "orange"
-                    }
-                    Text{
-                        id: nRollPercent
-                        anchors.top: estYaw.bottom
-                        text: _root ? _root.rc_or_pid : null
-                        color: "green"
-                    }
-                    Text{
-                        id: nPitchPercent
-                        anchors.top: nRollPercent.bottom
-                        text: _activeVehicle ? _activeVehicle.armed : false
-                        color: "green"
-                    }
-                    Text{
-                        id: nYawPercent
-                        anchors.top: nPitchPercent.bottom
-                        //text: _activeVehicle ? "Accurate Yaw %: " + _activeVehicle.yawRate.value.toFixed(2) : null
-                        color: "green"
-                    }
-                    Text{
-                        id: oRollPercent
-                        anchors.top: nYawPercent.bottom
-                        text: _activeVehicle ? "Inaccurate Roll %: " + (((Math.abs(_activeVehicle.attitudeRoll.value - _activeVehicle.rollRate.value)) / Math.abs(_activeVehicle.rollRate.value)) * 100).toFixed(2) : 0
-                        color: "red"
-                    }
-                    Text{
-                        id: oPitchPercent
-                        anchors.top: oRollPercent.bottom
-                        text: _activeVehicle ? "inaccurate Pitch %: " + (((Math.abs(_activeVehicle.attitudePitch.value - _activeVehicle.pitchRate.value)) / Math.abs(_activeVehicle.pitchRate.value)) * 100).toFixed(2) : 0
-                        color: "red"
-                    }
-                    Text{
-                        id: oYawPercent
-                        anchors.top: oPitchPercent.bottom
-                        text: _activeVehicle ? "Inaccurate Yaw %: " +  (((Math.abs(_activeVehicle.attitudeYaw.value - _activeVehicle.yawRate.value)) / Math.abs(_activeVehicle.yawRate.value)) * 100).toFixed(2) : 0
-                        color: "red"
-                    }
-                    Text{
-                        id: rateController
-                        anchors.top: oYawPercent.bottom
-                        //text: instrumentValueData.fact.enumOrValueString
-                        color: "blue"
-                    }
+            Rectangle{
+                id: valueDisplay
+                width: drone.width * 2
+                height: drone.height * 1.75
+                anchors.right: drone.left
+                anchors.bottom: drone.bottom
+                anchors.rightMargin: drone.width
+                anchors.bottomMargin: drone.width / -4
+                color: "white"
+                //opacity: .5
+                Text{
+                    id: actRoll
+                    text: _activeVehicle ? "Roll: " + actualNormalize(_activeVehicle.roll.value).toFixed(5) : null
                 }
+                Text{
+                    id: actPitch
+                    anchors.top: actRoll.bottom
+                    text: _activeVehicle ? "Pitch: " + actualNormalize(_activeVehicle.pitch.value).toFixed(5) : null
+                }
+                Text{
+                    id: actYaw
+                    anchors.top: actPitch.bottom
+                    text: _activeVehicle ? "Yaw: " + actualNormalize(_activeVehicle.heading.value).toFixed(5) : null
+                }
+                Text{
+                    id: estRoll
+                    anchors.top: actYaw.bottom
+                    text: _activeVehicle ? "Setpoint Roll: " + setpoint_roll.toFixed(5) : null
+                    color: "orange"
+                }
+                Text{
+                    id: estPitch
+                    anchors.top: estRoll.bottom
+                    text: _activeVehicle ? "Setpoint Pitch: " + setpoint_pitch.toFixed(5) : null
+                    color: "orange"
+                }
+                Text{
+                    id: estYaw
+                    anchors.top: estPitch.bottom
+                    text: _activeVehicle ? "Setpoint Yaw: " + Math.abs(setpoint_yaw).toFixed(5) : null
+                    color: "orange"
+                }
+                Text{
+                    id: nRollPercent
+                    anchors.top: estYaw.bottom
+                    text: _root ? _root.rc_or_pid : null
+                    color: "green"
+                }
+                Text{
+                    id: nPitchPercent
+                    anchors.top: nRollPercent.bottom
+                    text: _activeVehicle ? _activeVehicle.armed : false
+                    color: "green"
+                }
+                Text{
+                    id: nYawPercent
+                    anchors.top: nPitchPercent.bottom
+                    text: _activeVehicle ? "Weighted Yaw Error %: " + errorHeight(yaw_graph.yawError, y_dis.height, 2) / 20 : null
+                    color: "green"
+                }
+                Text{
+                    id: oRollPercent
+                    anchors.top: nYawPercent.bottom
+                    text: _activeVehicle ? "Yaw Error %: " + yaw_graph.yawError * 100 : 0
+                    color: "red"
+                }
+                Text{
+                    id: oPitchPercent
+                    anchors.top: oRollPercent.bottom
+                    text: _activeVehicle ? "Roll Error %: " + roll_graph.rollError * 100 : 0
+                    color: "red"
+                }
+                Text{
+                    id: oYawPercent
+                    anchors.top: oPitchPercent.bottom
+                    text: _activeVehicle ? "Pitch Error %: " + pitch_graph.pitchError * 100 : 0
+                    color: "red"
+                }
+                Text{
+                    id: rateController
+                    anchors.top: oYawPercent.bottom
+                    //text: instrumentValueData.fact.enumOrValueString
+                    color: "blue"
+                }
+            }
 
     /////////////////////////////////////////////////////////////
 
