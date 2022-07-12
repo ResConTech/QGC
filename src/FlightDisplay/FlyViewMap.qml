@@ -38,16 +38,16 @@ FlightMap {
     //variable to keep track of rc/pid state
     property int rc_or_pid:1
     property int train:0
-    property int setpoint_pitch: _activeVehicle.getSetpointPitch()
-    property int setpoint_roll: _activeVehicle.getSetpointRoll()
-    property int setpoint_yaw: _activeVehicle.getSetpointYaw()
+    property int setpoint_pitch: _activeVehicle ? _activeVehicle.getSetpointPitch() : 0
+    property int setpoint_roll: _activeVehicle ? _activeVehicle.getSetpointRoll() : 0
+    property int setpoint_yaw: _activeVehicle ? _activeVehicle.getSetpointYaw() : 0
     property string roll_graph_color: "green"
     property string pitch_graph_color: "green"
     property string yaw_graph_color: "green"
     function updateSetpoints(){
-        setpoint_pitch = _activeVehicle.getSetpointPitch()
-        setpoint_roll = _activeVehicle.getSetpointRoll()
-        setpoint_yaw = _activeVehicle.getSetpointYaw()
+        setpoint_pitch = _activeVehicle ? _activeVehicle.getSetpointPitch() : 0
+        setpoint_roll = _activeVehicle ? _activeVehicle.getSetpointRoll() : 0
+        setpoint_yaw = _activeVehicle ? _activeVehicle.getSetpointYaw() : 0
     }
     function updateGraph(){
         if(roll_graph.height<33){
@@ -1128,8 +1128,8 @@ FlightMap {
 
                 Rectangle{
                     id: rc_button
-                    height: 15
-                    width: 60
+                    height: buttons.width / 8
+                    width: buttons.width / 2.75
                     anchors.right: buttons.horizontalCenter
                     anchors.top: buttons.top
                     anchors.leftMargin: p_dis.width
@@ -1143,6 +1143,7 @@ FlightMap {
                             PropertyChanges {target: rc_button; rc_border_color: "lime"}
                             PropertyChanges {target: rc_button_control; palette.button : "steelblue"}
                             PropertyChanges {target: rc_button_control; text : "RC"}
+                            PropertyChanges {target: train_button; enabled: true }
                             //switch to rc
                             onCompleted: _root.rc_or_pid=1
                         },
@@ -1153,6 +1154,7 @@ FlightMap {
                             PropertyChanges {target: rc_button_control; palette.buttonText: "black"}
                             PropertyChanges {target: rc_button; rc_border_color: "black"}
                             PropertyChanges {target: rc_button_control; palette.button : "white"}
+                            PropertyChanges {target: train_button; enabled: false }
                             //switch to pid
                             onCompleted: _root.rc_or_pid=0
                         }
@@ -1164,14 +1166,14 @@ FlightMap {
                     ]
                     Button{
                         id: rc_button_control
-                        height: 15
-                        width: 60
+                        width: rc_button.width
+                        height: rc_button.height
                         text: "RC"
                         palette.buttonText: "white"
                         palette.button: "steelblue"
                         Rectangle{
-                            height: 15
-                            width: 60
+                            width: rc_button.width
+                            height: rc_button.height
                             border.color: rc_button.rc_border_color
                             border.width: 1.25
                             color: "transparent"
@@ -1179,98 +1181,125 @@ FlightMap {
 
                         onClicked: {
                             rc_button.state = (rc_button.state === 'off_rc' ? 'on_rc' : "off_rc");
-                            if(_root.rc_or_pid===0){
-                                train_button.state = "train_off"
-                            }
-                            else{
-                                train_button.state = "train_on"
-                            }
                             //switch rc pid
                             paramController.changeValue("RC_OR_PID", _root.rc_or_pid);
                         }
                     }
                 }
 
-
                 Rectangle{
                     id: train_button
-                    height: 15
-                    width: 60
-                    anchors.left: buttons.horizontalCenter
+                    height: buttons.width / 8
+                    width: buttons.width / 2.75
+                    anchors.right: buttons.right
                     anchors.top: buttons.top
                     anchors.rightMargin: p_dis.width
-                    property string train_border_color: "black"
+                    color: "black"
                     states: [
                         State {
                             name: "train_on"
-                            PropertyChanges {target: train_button_control; palette.button : "white"}
-                            PropertyChanges {target: train_button_control; palette.buttonText: "black"}
-                            PropertyChanges {target: train_button; train_border_color: "black"}
+                            PropertyChanges {target: train_button_control; palette.button : "green"}
                             PropertyChanges {target: train_button; opacity : 1}
-                            onCompleted: _root.train =  0
+                            PropertyChanges {target: train_button; enabled: false }
+                            PropertyChanges {target: rc_button; enabled: false }
+                            PropertyChanges {target: slider; enabled: false }
                         },
                         State {
                             name: "train_off"
-                            PropertyChanges {target: train_button_control; palette.button : "grey"}
-                            PropertyChanges {target: train_button_control; palette.buttonText: "white"}
-                            PropertyChanges {target: train_button; train_border_color: "grey"}
-                            PropertyChanges {target: train_button; opacity : .5}
-                        },
-                        State {
-                            name: "training"
+                            PropertyChanges {target: train_button_control; palette.button : "black"}
                             PropertyChanges {target: train_button; opacity : 1}
-                            PropertyChanges {target: train_button_control; palette.buttonText: "white"}
-                            PropertyChanges {target: train_button_control; palette.button : "steelblue"}
-                            PropertyChanges {target: train_button; train_border_color: "lime"}
-                            onCompleted: _root.train = 1
+                            PropertyChanges {target: train_button; enabled: false }
+                            PropertyChanges {target: slider; enabled: true }
                         }
                     ]
                     transitions: [
-                        Transition {
-                            from: "train_on"; to: "training"; reversible: true
-                        },
-                        Transition {
-                            from: "training"; to: "train_off"; reversible: true
-                        },
                         Transition {
                             from: "train_off"; to: "train_on"; reversible: true
                         }
                     ]
                     Button{
                         id: train_button_control
-                        height: 15
-                        width: 60
-                        text: "TRAIN"
+                        width: rc_button.width
+                        height: rc_button.height
+                        text: "Train"
+                        palette.text: "white"
                         anchors.horizontalCenter: train_button.horizontalCenter
                         anchors.verticalCenter: train_button.verticalCenter
-                        Rectangle{
-                            height: 15
-                            width: 60
-                            border.color: train_button.train_border_color
-                            border.width: 1.25
-                            color: "transparent"
-                        }
+                        palette.buttonText: "white"
+                        palette.button: "black"
                         onClicked: {
-                            paramController.changeValue("TRAIN", _root.train);
-                            if(_root.rc_or_pid===1){
-                                if(_root.train===0){
-                                    train_button.state = "training"
-                                }
+                            train_button.state = (train_button.state === 'train_on' ? 'train_off' : "train_on");
+
+                            if (slider.value <= 15 ) {
+                                timer_value.interval = slider.value * 1000
+                                timer_value.start()
+                            } else {
+                                timer_value.interval = 10000
+                                timer_value.start()
                             }
                         }
+                    }
 
+                    Timer{
+                        id: timer_value
+                        running: false; repeat: false
+                        onTriggered: train_button.state = 'on_rc'
                     }
                 }
+                Slider {
+                    id: slider
+                    anchors.bottom: rc_button.top
+                    anchors.right: rc_button.left
+                    anchors.horizontalCenterOffset: rc_button.width
+                    from: 0; to: 15; stepSize: 5
+                    value: 0
+                    ToolTip {
+                            parent: slider.handle
+                            visible: slider.pressed
+                            text: slider.valueAt(slider.position).toFixed(1)
+                        }
+                }
 
-                QGCButton {
+                Button {
+                    id: armed_button
+                    background: Rectangle{
+                        color: "green"
+                        id: button_comp
+
+                    states: [
+                        State {
+                            name: "armed"
+                            PropertyChanges { target: button_comp; color: "red" }
+                        },
+                        State {
+                            name: "disarmed"
+                            PropertyChanges { target: button_comp; color: "green" }
+                        }
+                    ]
+
+                    transitions: [
+                        Transition {
+                            from: "disarmed"; to: "armed"; reversible: true
+                        }
+                    ]
+                    }
+
                     anchors.bottom: buttons.top
                     anchors.horizontalCenter: buttons.horizontalCenter
                     anchors.bottomMargin: train_button.height / 3
                     property bool   _armed:         _activeVehicle ? _activeVehicle.armed : false
                     Layout.alignment:   Qt.AlignHCenter
-                    text:               _armed ?  qsTr("Disarm") : (forceArm ? qsTr("Force Arm") : qsTr("Arm"))
+                    text:               _armed ?  qsTr("Armed") : (forceArm ? qsTr("Force Arm") : qsTr("Disarmed"))
 
                     property bool forceArm: false
+
+                    onTextChanged: {
+                        if (_armed == true) {
+                        button_comp.state = 'armed'
+                        } else {
+                            button_comp.state = 'disarmed'
+                        }
+                    }
 
                     onPressAndHold: forceArm = true
 
