@@ -30,7 +30,6 @@ import QGroundControl.Vehicle       1.0
 import QtQuick.Controls.Styles 1.4
 FlightMap {
     id:                         _root
-
     property var    curSystem:          controller ? controller.activeSystem : null
     property var    curMessage:         curSystem && curSystem.messages.count ? curSystem.messages.get(curSystem.selected) : null
     property int    curCompID:          0
@@ -38,7 +37,7 @@ FlightMap {
     //variable to keep track of rc/pid state
     property int rc_or_pid:1
     property int train:0
-<<<<<<< HEAD
+
     property int setpoint_pitch: _activeVehicle ? _activeVehicle.getSetpointPitch() : 0
     property int setpoint_roll: _activeVehicle ? _activeVehicle.getSetpointRoll() : 0
     property int setpoint_yaw: _activeVehicle ? _activeVehicle.getSetpointYaw() : 0
@@ -56,17 +55,6 @@ FlightMap {
         }
         else if(roll_graph.height<66){
             roll_graph_color = "yellow"
-=======
-    property var setpoint_pitch: _activeVehicle ? _activeVehicle.getSetpointPitch() : 0
-    property var setpoint_roll: _activeVehicle ? _activeVehicle.getSetpointRoll() : 0
-    property var setpoint_yaw: _activeVehicle ? _activeVehicle.getSetpointYaw() : 0
-    property bool maximum_error: [false, false, false]
-    function errorHeight(error, height, index){
-        updateWeightedAvg(index,error)
-        if(weighted_moving_average[index] * height * 20 > height){
-            maximum_error[index] = true
-            return height
->>>>>>> 8a18a731e6b12ccd94c74f9322ef8c676bbb0aff
         }
         else{
             maximum_error[index] = false
@@ -81,11 +69,6 @@ FlightMap {
         return actual
     }
 
-    function updateSetpoints(){
-        setpoint_pitch = _activeVehicle ? _activeVehicle.getSetpointPitch() : 0
-        setpoint_roll = _activeVehicle ? _activeVehicle.getSetpointRoll() : 0
-        setpoint_yaw = _activeVehicle ? _activeVehicle.getSetpointYaw() : 0
-    }
     property real weight: 100000
     property variant n:[0,0,0]
     property variant numerator: [0,0,0]
