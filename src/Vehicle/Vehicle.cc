@@ -356,10 +356,6 @@ QVariant Vehicle:: getSetpointYaw()
 {
     return _setpointFactGroup.yaw()->rawValue();
 }
-QVariant Vehicle:: getServo1()
-{
-    return _servoRawFact.rawValue();
-}
 //
 void Vehicle::trackFirmwareVehicleTypeChanges(void)
 {
