@@ -1027,7 +1027,7 @@ void Vehicle::_handleAttitudeWorker(double rollRadians, double pitchRadians, dou
         yaw += 360.0;
     }
     // truncate to integer so widget never displays 360
-    yaw = trunc(yaw);
+    //yaw = trunc(yaw);
 
     _rollFact.setRawValue(roll);
     _pitchFact.setRawValue(pitch);
