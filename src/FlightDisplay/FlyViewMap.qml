@@ -42,6 +42,7 @@ FlightMap {
     property var setpoint_roll: _activeVehicle ? _activeVehicle.getSetpointRoll() : 0
     property var setpoint_yaw: _activeVehicle ? _activeVehicle.getSetpointYaw() : 0
     property bool maximum_error: [false, false, false]
+    property int smoothingFactor: 10
     function errorHeight(error, height, index){
         if(error * height / 2 * 20 > height / 2){
             maximum_error[index] = true
@@ -59,19 +60,16 @@ FlightMap {
         }
         return actual
     }
-    function smoothData(error, height, index){
-
-    }
-    function pos(actual, setpoint){
-        if(actual - setpoint >= 0){
+    function pos(actual, setpoint, negHeight){
+        if(actual - setpoint >= 0){ //|| negHeight > 0){
             return 1
         }
         else{
             return 0
         }
     }
-    function neg(actual, setpoint){
-        if(actual - setpoint >= 0){
+    function neg(actual, setpoint, posHeight){
+        if(actual - setpoint >= 0){ //|| posHeight > 0){
             return 0
         }
         else{
@@ -83,15 +81,14 @@ FlightMap {
         setpoint_roll = _activeVehicle ? _activeVehicle.getSetpointRoll() : 0
         setpoint_yaw = _activeVehicle ? _activeVehicle.getSetpointYaw() : 0
     }
-
-    Timer {
-        interval:       1
-        running:        true
-        repeat:         true
-        onTriggered:    {
-            updateSetpoints()
-        }
-    }
+//    Timer {
+//        interval:       1
+//        running:        true
+//        repeat:         true
+//        onTriggered:    {
+//            updateSetpoints()
+//        }
+//    }
     //use parameter editor controller
     ParameterEditorController{
         id: paramController
@@ -725,7 +722,7 @@ FlightMap {
                             anchors.horizontalCenter: parent.horizontalCenter
                             anchors.verticalCenter: parent.verticalCenter
                             visible:                true
-                            text:                   _activeVehicle ? _activeVehicle.servoRaw.value +"%" : null
+                            text:                   _activeVehicle ? _activeVehicle.servoRaw.value +"%" : 0
                     }
                 }
 
@@ -790,7 +787,7 @@ FlightMap {
                             anchors.verticalCenter: parent.verticalCenter
                             //color: "black"
                             visible:                true
-                            text:                   _activeVehicle ? _activeVehicle.servoRaw3.value +"%" : null
+                            text:                   _activeVehicle ? _activeVehicle.servoRaw3.value +"%" : 0
                     }
                 }
 
@@ -854,7 +851,7 @@ FlightMap {
                             anchors.horizontalCenter: parent.horizontalCenter
                             anchors.verticalCenter: parent.verticalCenter
                             visible:                true
-                            text:                   _activeVehicle ? _activeVehicle.servoRaw4.value +"%" : null
+                            text:                   _activeVehicle ? _activeVehicle.servoRaw4.value +"%" : 0
                     }
                 }
 
@@ -918,7 +915,7 @@ FlightMap {
                             anchors.horizontalCenter: parent.horizontalCenter
                             anchors.verticalCenter: parent.verticalCenter
                             visible:                true
-                            text:                   _activeVehicle ? _activeVehicle.servoRaw2.value +"%" : null
+                            text:                   _activeVehicle ? _activeVehicle.servoRaw2.value +"%" : 0
                     }
                 }
             }
@@ -990,7 +987,7 @@ FlightMap {
                         border.color: "black"
                         border.width: 2
                         property real _pitch: _activeVehicle ? actualNormalize(_activeVehicle.pitch.value) : 0
-                        property real pitchError: _activeVehicle ? ((Math.abs(_pitch - setpoint_pitch)) / 180) : 0
+                        property real pitchError: _activeVehicle ? ((Math.abs(_pitch - _activeVehicle.getSetpointPitch())) / 180) : 0
 
                         Text{
                             text: "P"
@@ -1004,7 +1001,8 @@ FlightMap {
                             anchors.horizontalCenter: p_dis.horizontalCenter
                             anchors.bottomMargin: 2
                             color: "green"
-                            height: pos(Math.abs(p_dis._pitch), Math.abs(setpoint_pitch)) * errorHeight(p_dis.pitchError, p_dis.height, 1)
+                            height: _activeVehicle ? pos(Math.abs(p_dis._pitch), Math.abs(_activeVehicle.getSetpointPitch()), pitch_neg.height) * errorHeight(p_dis.pitchError, p_dis.height, 1) : 0
+                            //Behavior on height { SmoothedAnimation { velocity: smoothingFactor } }
                             states:[
                                 State {
                                     name: "green"; when: pitch_pos.height / (p_dis.height / 2) < .333
@@ -1051,7 +1049,8 @@ FlightMap {
                             anchors.horizontalCenter: p_dis.horizontalCenter
                             anchors.bottomMargin: 2
                             color: "green"
-                            height: neg(Math.abs(p_dis._pitch), Math.abs(setpoint_pitch)) * errorHeight(p_dis.pitchError, p_dis.height, 1)
+                            height: _activeVehicle ? neg(Math.abs(p_dis._pitch), Math.abs(_activeVehicle.getSetpointPitch()), pitch_pos.height) * errorHeight(p_dis.pitchError, p_dis.height, 1) : 0
+                            //Behavior on height { SmoothedAnimation { velocity: smoothingFactor } }
                             states:[
                                 State {
                                     name: "green"; when: pitch_neg.height / (p_dis.height / 2) < .333
@@ -1105,7 +1104,7 @@ FlightMap {
                         border.color: "black"
                         border.width: 2
                         property real _roll: _activeVehicle ? actualNormalize(_activeVehicle.roll.value) : 0
-                        property real rollError: _activeVehicle ? ((Math.abs(_roll - setpoint_roll)) / 180) : 0
+                        property real rollError: _activeVehicle ? ((Math.abs(_roll - _activeVehicle.getSetpointRoll())) / 180) : 0
 
                         Text{
                             text: "R"
@@ -1119,7 +1118,8 @@ FlightMap {
                             anchors.horizontalCenter: r_dis.horizontalCenter
                             anchors.bottomMargin: 2
                             color: "green"
-                            height: pos(Math.abs(r_dis._roll), Math.abs(setpoint_roll)) * errorHeight(r_dis.rollError, r_dis.height, 0)
+                            height: _activeVehicle ? pos(Math.abs(r_dis._roll), Math.abs(_activeVehicle.getSetpointRoll()), roll_neg.height) * errorHeight(r_dis.rollError, r_dis.height, 0) : 0
+                            //Behavior on height { SmoothedAnimation { velocity: smoothingFactor } }
                             states:[
                                 State {
                                     name: "green"; when: roll_pos.height / (r_dis.height / 2) < .333
@@ -1166,7 +1166,8 @@ FlightMap {
                             anchors.horizontalCenter: r_dis.horizontalCenter
                             anchors.bottomMargin: 2
                             color: "green"
-                            height: neg(Math.abs(r_dis._roll), Math.abs(setpoint_roll)) * errorHeight(r_dis.rollError, r_dis.height, 0)
+                            height: _activeVehicle ? neg(Math.abs(r_dis._roll), Math.abs(_activeVehicle.getSetpointRoll()), roll_pos.height) * errorHeight(r_dis.rollError, r_dis.height, 0) : 0
+                            //Behavior on height { SmoothedAnimation { velocity: smoothingFactor } }
                             states:[
                                 State {
                                     name: "green"; when: roll_neg.height / (r_dis.height / 2) < .333
@@ -1220,7 +1221,7 @@ FlightMap {
                         border.color: "black"
                         border.width: 2
                         property real heading: _activeVehicle ? Math.abs(actualNormalize(_activeVehicle.heading.value)) : 0
-                        property real yawError: _activeVehicle ? (Math.abs(heading - Math.abs(setpoint_yaw))) / 180 : 0
+                        property real yawError: _activeVehicle ? (Math.abs(heading - Math.abs(_activeVehicle.getSetpointYaw()))) / 180 : 0
 
                         Text{
                             text: "Y"
@@ -1234,7 +1235,8 @@ FlightMap {
                             anchors.horizontalCenter: y_dis.horizontalCenter
                             anchors.bottomMargin: 2
                             color: "green"
-                            height: pos(Math.abs(y_dis.heading), Math.abs(setpoint_yaw)) * errorHeight(y_dis.yawError, y_dis.height, 2)
+                            height: _activeVehicle ? pos(Math.abs(y_dis.heading), Math.abs(_activeVehicle.getSetpointYaw()), yaw_neg.height) * errorHeight(y_dis.yawError, y_dis.height, 2) : 0
+                            //Behavior on height { SmoothedAnimation { velocity: smoothingFactor } }
                             states:[
                                 State {
                                     name: "green"; when: yaw_pos.height / (y_dis.height / 2) < .333
@@ -1281,7 +1283,8 @@ FlightMap {
                             anchors.horizontalCenter: y_dis.horizontalCenter
                             anchors.bottomMargin: 2
                             color: "green"
-                            height: neg(Math.abs(y_dis.heading), Math.abs(setpoint_yaw)) * errorHeight(y_dis.yawError, y_dis.height, 2)
+                            height: _activeVehicle ? neg(Math.abs(y_dis.heading), Math.abs(_activeVehicle.getSetpointYaw()), yaw_pos.height) * errorHeight(y_dis.yawError, y_dis.height, 2) : 0
+                            //Behavior on height { SmoothedAnimation { velocity: smoothingFactor } }
                             states:[
                                 State {
                                     name: "green"; when: yaw_neg.height / (y_dis.height / 2) < .333
