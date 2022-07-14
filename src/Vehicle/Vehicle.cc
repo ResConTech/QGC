@@ -343,7 +343,24 @@ Vehicle::Vehicle(MAV_AUTOPILOT              firmwareType,
     _offlineFirmwareTypeSettingChanged(_firmwareType);  // This adds correct terrain capability bit
     _firmwarePlugin->initializeVehicle(this);
 }
-
+//Retrive setpoint values for roll pitch yaw
+QVariant Vehicle:: getSetpointRoll()
+{
+    return _setpointFactGroup.roll()->rawValue();
+}
+QVariant Vehicle:: getSetpointPitch()
+{
+    return _setpointFactGroup.pitch()->rawValue();
+}
+QVariant Vehicle:: getSetpointYaw()
+{
+    return _setpointFactGroup.yaw()->rawValue();
+}
+QVariant Vehicle:: getServo1()
+{
+    return _servoRawFact.rawValue();
+}
+//
 void Vehicle::trackFirmwareVehicleTypeChanges(void)
 {
     connect(_settingsManager->appSettings()->offlineEditingFirmwareClass(), &Fact::rawValueChanged, this, &Vehicle::_offlineFirmwareTypeSettingChanged);
