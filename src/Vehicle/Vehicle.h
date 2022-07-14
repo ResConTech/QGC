@@ -796,7 +796,6 @@ public slots:
     QVariant getSetpointRoll                    ();
     QVariant getSetpointPitch                   ();
     QVariant getSetpointYaw                     ();
-    QVariant getServo1                          ();
     //
 signals:
     void coordinateChanged              (QGeoCoordinate coordinate);
