@@ -42,7 +42,8 @@ FlightMap {
     property var setpoint_roll: _activeVehicle ? _activeVehicle.getSetpointRoll() : 0
     property var setpoint_yaw: _activeVehicle ? _activeVehicle.getSetpointYaw() : 0
     property bool maximum_error: [false, false, false]
-    property int smoothingFactor: 10
+    property int smoothingFactor: 10  //lower = smoother
+
     function errorHeight(error, height, index){
         if(error * height / 2 * 20 > height / 2){
             maximum_error[index] = true
@@ -82,7 +83,7 @@ FlightMap {
         setpoint_yaw = _activeVehicle ? _activeVehicle.getSetpointYaw() : 0
     }
 //    Timer {
-//        interval:       1
+//        interval:       100
 //        running:        true
 //        repeat:         true
 //        onTriggered:    {
@@ -669,19 +670,23 @@ FlightMap {
                     color: "white"
                     states:[
                         State {
-                            name: "green"; when: _activeVehicle.servoRaw.value < 75
-                            PropertyChanges {target: top_left_prop; color: "green"}
-                        },
-                        State {
-                            name: "yellow"; when: _activeVehicle.servoRaw.value >= 75 && _activeVehicle.servoRaw.value <90
+                            name: "yellow_low"; when: _activeVehicle.servoRaw.value <= 40 && _activeVehicle.servoRaw.value > 35
                             PropertyChanges {target: top_left_prop; color: "yellow"}
                         },
                         State {
-                            name: "orange"; when: _activeVehicle.servoRaw.value >= 90 && _activeVehicle.servoRaw.value <95
-                            PropertyChanges {target: top_left_prop; color: "orange"}
+                            name: "red_low"; when: _activeVehicle.servoRaw.value <= 35
+                            PropertyChanges {target: top_left_prop; color: "red"}
                         },
                         State {
-                            name: "red"; when: _activeVehicle.servoRaw.value >= 95
+                            name: "green"; when: _activeVehicle.servoRaw.value > 40 && _activeVehicle.servoRaw.value < 95
+                            PropertyChanges {target: top_left_prop; color: "green"}
+                        },
+                        State {
+                            name: "yellow"; when: _activeVehicle.servoRaw.value >= 95 && _activeVehicle.servoRaw.value < 98
+                            PropertyChanges {target: top_left_prop; color: "yellow"}
+                        },
+                        State {
+                            name: "red"; when: _activeVehicle.servoRaw.value >= 98
                             PropertyChanges {target: top_left_prop; color: "red"}
                         }
                     ]
@@ -693,24 +698,25 @@ FlightMap {
                             }
                         },
                         Transition{
-                            from: "green"; to: "yellow"; reversible: true
+                            from: "yellow"; to: "red"; reversible: true
                             ParallelAnimation{
                                 ColorAnimation { duration: 500 }
                             }
                         },
                         Transition{
-                            from: "yellow"; to: "orange"; reversible: true
+                            from: "green"; to: "yellow_low"; reversible: true
                             ParallelAnimation{
                                 ColorAnimation { duration: 500 }
                             }
                         },
                         Transition{
-                            from: "orange"; to: "red"; reversible: true
+                            from: "yellow_low"; to: "red_low"; reversible: true
                             ParallelAnimation{
                                 ColorAnimation { duration: 500 }
                             }
                         }
                     ]
+
                     border.color: "black"
                     border.width: 1
                     radius: width*0.5
@@ -733,19 +739,23 @@ FlightMap {
                     color: "white"
                     states:[
                         State {
-                            name: "green"; when: _activeVehicle.servoRaw3.value < 75
-                            PropertyChanges {target: bottom_left_prop; color: "green"}
-                        },
-                        State {
-                            name: "yellow"; when: _activeVehicle.servoRaw3.value >= 75 && _activeVehicle.servoRaw3.value <90
+                            name: "yellow_low"; when: _activeVehicle.servoRaw3.value <= 40 && _activeVehicle.servoRaw3.value > 35
                             PropertyChanges {target: bottom_left_prop; color: "yellow"}
                         },
                         State {
-                            name: "orange"; when: _activeVehicle.servoRaw3.value >= 90 && _activeVehicle.servoRaw3.value <95
-                            PropertyChanges {target: bottom_left_prop; color: "orange"}
+                            name: "red_low"; when: _activeVehicle.servoRaw3.value <= 35
+                            PropertyChanges {target: bottom_left_prop; color: "red"}
                         },
                         State {
-                            name: "red"; when: _activeVehicle.servoRaw3.value >= 95
+                            name: "green"; when: _activeVehicle.servoRaw3.value > 40 && _activeVehicle.servoRaw3.value < 95
+                            PropertyChanges {target: bottom_left_prop; color: "green"}
+                        },
+                        State {
+                            name: "yellow"; when: _activeVehicle.servoRaw3.value >= 95 && _activeVehicle.servoRaw3.value < 98
+                            PropertyChanges {target: bottom_left_prop; color: "yellow"}
+                        },
+                        State {
+                            name: "red"; when: _activeVehicle.servoRaw3.value >= 98
                             PropertyChanges {target: bottom_left_prop; color: "red"}
                         }
                     ]
@@ -757,24 +767,25 @@ FlightMap {
                             }
                         },
                         Transition{
-                            from: "green"; to: "yellow"; reversible: true
+                            from: "yellow"; to: "red"; reversible: true
                             ParallelAnimation{
                                 ColorAnimation { duration: 500 }
                             }
                         },
                         Transition{
-                            from: "yellow"; to: "orange"; reversible: true
+                            from: "green"; to: "yellow_low"; reversible: true
                             ParallelAnimation{
                                 ColorAnimation { duration: 500 }
                             }
                         },
                         Transition{
-                            from: "orange"; to: "red"; reversible: true
+                            from: "yellow_low"; to: "red_low"; reversible: true
                             ParallelAnimation{
                                 ColorAnimation { duration: 500 }
                             }
                         }
                     ]
+
                     border.color: "black"
                     border.width: 1
                     radius: width*0.5
@@ -787,7 +798,7 @@ FlightMap {
                             anchors.verticalCenter: parent.verticalCenter
                             //color: "black"
                             visible:                true
-                            text:                   _activeVehicle ? _activeVehicle.servoRaw3.value +"%" : 0
+                            text:                   _activeVehicle ? _activeVehicle.servoRaw3.value + "%" : 0
                     }
                 }
 
@@ -798,19 +809,23 @@ FlightMap {
                     color: "white"
                     states:[
                         State {
-                            name: "green"; when: _activeVehicle.servoRaw4.value < 75
-                            PropertyChanges {target: bottom_right_prop; color: "green"}
-                        },
-                        State {
-                            name: "yellow"; when: _activeVehicle.servoRaw4.value >= 75 && _activeVehicle.servoRaw4.value <90
+                            name: "yellow_low"; when: _activeVehicle.servoRaw4.value <= 40 && _activeVehicle.servoRaw4.value > 35
                             PropertyChanges {target: bottom_right_prop; color: "yellow"}
                         },
                         State {
-                            name: "orange"; when: _activeVehicle.servoRaw4.value >= 90 && _activeVehicle.servoRaw4.value <95
-                            PropertyChanges {target: bottom_right_prop; color: "orange"}
+                            name: "red_low"; when: _activeVehicle.servoRaw4.value <= 35
+                            PropertyChanges {target: bottom_right_prop; color: "red"}
                         },
                         State {
-                            name: "red"; when: _activeVehicle.servoRaw4.value >= 95
+                            name: "green"; when: _activeVehicle.servoRaw4.value > 40 && _activeVehicle.servoRaw4.value < 95
+                            PropertyChanges {target: bottom_right_prop; color: "green"}
+                        },
+                        State {
+                            name: "yellow"; when: _activeVehicle.servoRaw4.value >= 95 && _activeVehicle.servoRaw4.value < 98
+                            PropertyChanges {target: bottom_right_prop; color: "yellow"}
+                        },
+                        State {
+                            name: "red"; when: _activeVehicle.servoRaw4.value >= 98
                             PropertyChanges {target: bottom_right_prop; color: "red"}
                         }
                     ]
@@ -822,19 +837,19 @@ FlightMap {
                             }
                         },
                         Transition{
-                            from: "green"; to: "yellow"; reversible: true
+                            from: "yellow"; to: "red"; reversible: true
                             ParallelAnimation{
                                 ColorAnimation { duration: 500 }
                             }
                         },
                         Transition{
-                            from: "yellow"; to: "orange"; reversible: true
+                            from: "green"; to: "yellow_low"; reversible: true
                             ParallelAnimation{
                                 ColorAnimation { duration: 500 }
                             }
                         },
                         Transition{
-                            from: "orange"; to: "red"; reversible: true
+                            from: "yellow_low"; to: "red_low"; reversible: true
                             ParallelAnimation{
                                 ColorAnimation { duration: 500 }
                             }
@@ -862,19 +877,23 @@ FlightMap {
                     color: "white"
                     states:[
                         State {
-                            name: "green"; when: _activeVehicle.servoRaw2.value < 75
-                            PropertyChanges {target: top_right_prop; color: "green"}
-                        },
-                        State {
-                            name: "yellow"; when: _activeVehicle.servoRaw2.value >= 75 && _activeVehicle.servoRaw2.value <90
+                            name: "yellow_low"; when: _activeVehicle.servoRaw2.value <= 40 && _activeVehicle.servoRaw2.value > 35
                             PropertyChanges {target: top_right_prop; color: "yellow"}
                         },
                         State {
-                            name: "orange"; when: _activeVehicle.servoRaw2.value >= 90 && _activeVehicle.servoRaw2.value <95
-                            PropertyChanges {target: top_right_prop; color: "orange"}
+                            name: "red_low"; when: _activeVehicle.servoRaw2.value <= 35
+                            PropertyChanges {target: top_right_prop; color: "red"}
                         },
                         State {
-                            name: "red"; when: _activeVehicle.servoRaw2.value >= 95
+                            name: "green"; when: _activeVehicle.servoRaw2.value > 40 && _activeVehicle.servoRaw2.value < 95
+                            PropertyChanges {target: top_right_prop; color: "green"}
+                        },
+                        State {
+                            name: "yellow"; when: _activeVehicle.servoRaw2.value >= 95 && _activeVehicle.servoRaw2.value < 98
+                            PropertyChanges {target: top_right_prop; color: "yellow"}
+                        },
+                        State {
+                            name: "red"; when: _activeVehicle.servoRaw2.value >= 98
                             PropertyChanges {target: top_right_prop; color: "red"}
                         }
                     ]
@@ -886,24 +905,25 @@ FlightMap {
                             }
                         },
                         Transition{
-                            from: "green"; to: "yellow"; reversible: true
+                            from: "yellow"; to: "red"; reversible: true
                             ParallelAnimation{
                                 ColorAnimation { duration: 500 }
                             }
                         },
                         Transition{
-                            from: "yellow"; to: "orange"; reversible: true
+                            from: "green"; to: "yellow_low"; reversible: true
                             ParallelAnimation{
                                 ColorAnimation { duration: 500 }
                             }
                         },
                         Transition{
-                            from: "orange"; to: "red"; reversible: true
+                            from: "yellow_low"; to: "red_low"; reversible: true
                             ParallelAnimation{
                                 ColorAnimation { duration: 500 }
                             }
                         }
                     ]
+
                     border.color: "black"
                     border.width: 1
                     radius: width*0.5
@@ -915,7 +935,7 @@ FlightMap {
                             anchors.horizontalCenter: parent.horizontalCenter
                             anchors.verticalCenter: parent.verticalCenter
                             visible:                true
-                            text:                   _activeVehicle ? _activeVehicle.servoRaw2.value +"%" : 0
+                            text:                   _activeVehicle ? _activeVehicle.servoRaw2.value + "%" : 0
                     }
                 }
             }
@@ -988,7 +1008,46 @@ FlightMap {
                         border.width: 2
                         property real _pitch: _activeVehicle ? actualNormalize(_activeVehicle.pitch.value) : 0
                         property real pitchError: _activeVehicle ? ((Math.abs(_pitch - _activeVehicle.getSetpointPitch())) / 180) : 0
-
+                        states: [
+                            State {
+                                name: "pos"
+                                when: pitch_pos.height > 0
+                                PropertyChanges {
+                                    target: pitch_neg
+                                    height: 0
+                                }
+                            },
+                            State {
+                                name: "neg"
+                                when: pitch_neg.height > 0
+                                PropertyChanges {
+                                    target: pitch_pos
+                                    height: 0
+                                }
+                            }
+                        ]
+                        transitions: [
+                            Transition {
+                                from: "pos"; to: "neg"; reversible: false
+                                NumberAnimation {
+                                    target: pitch_pos
+                                    property: height
+                                    duration: 20
+                                    easing.type: Easing.OutExpo
+                                    to: 0
+                                }
+                            },
+                            Transition {
+                                from: "neg"; to: "pos"; reversible: false
+                                NumberAnimation {
+                                    target: pitch_neg
+                                    property: height
+                                    duration: 20
+                                    easing.type: Easing.OutExpo
+                                    to: 0
+                                }
+                            }
+                        ]
                         Text{
                             text: "P"
                             anchors.top: p_dis.bottom
@@ -1002,7 +1061,7 @@ FlightMap {
                             anchors.bottomMargin: 2
                             color: "green"
                             height: _activeVehicle ? pos(Math.abs(p_dis._pitch), Math.abs(_activeVehicle.getSetpointPitch()), pitch_neg.height) * errorHeight(p_dis.pitchError, p_dis.height, 1) : 0
-                            //Behavior on height { SmoothedAnimation { velocity: smoothingFactor } }
+                            Behavior on height { SmoothedAnimation { velocity: smoothingFactor } }
                             states:[
                                 State {
                                     name: "green"; when: pitch_pos.height / (p_dis.height / 2) < .333
@@ -1050,7 +1109,7 @@ FlightMap {
                             anchors.bottomMargin: 2
                             color: "green"
                             height: _activeVehicle ? neg(Math.abs(p_dis._pitch), Math.abs(_activeVehicle.getSetpointPitch()), pitch_pos.height) * errorHeight(p_dis.pitchError, p_dis.height, 1) : 0
-                            //Behavior on height { SmoothedAnimation { velocity: smoothingFactor } }
+                            Behavior on height { SmoothedAnimation { velocity: smoothingFactor } }
                             states:[
                                 State {
                                     name: "green"; when: pitch_neg.height / (p_dis.height / 2) < .333
@@ -1105,6 +1164,46 @@ FlightMap {
                         border.width: 2
                         property real _roll: _activeVehicle ? actualNormalize(_activeVehicle.roll.value) : 0
                         property real rollError: _activeVehicle ? ((Math.abs(_roll - _activeVehicle.getSetpointRoll())) / 180) : 0
+                        states: [
+                            State {
+                                name: "pos"
+                                when: roll_pos.height > 0
+                                PropertyChanges {
+                                    target: roll_neg
+                                    height: 0
+                                }
+                            },
+                            State {
+                                name: "neg"
+                                when: roll_neg.height > 0
+                                PropertyChanges {
+                                    target: roll_pos
+                                    height: 0
+                                }
+                            }
+                        ]
+                        transitions: [
+                            Transition {
+                                from: "pos"; to: "neg"; reversible: false
+                                NumberAnimation {
+                                    target: roll_pos
+                                    property: height
+                                    duration: 20
+                                    easing.type: Easing.OutExpo
+                                    to: 0
+                                }
+                            },
+                            Transition {
+                                from: "neg"; to: "pos"; reversible: false
+                                NumberAnimation {
+                                    target: roll_neg
+                                    property: height
+                                    duration: 20
+                                    easing.type: Easing.OutExpo
+                                    to: 0
+                                }
+                            }
+                        ]
 
                         Text{
                             text: "R"
@@ -1119,7 +1218,7 @@ FlightMap {
                             anchors.bottomMargin: 2
                             color: "green"
                             height: _activeVehicle ? pos(Math.abs(r_dis._roll), Math.abs(_activeVehicle.getSetpointRoll()), roll_neg.height) * errorHeight(r_dis.rollError, r_dis.height, 0) : 0
-                            //Behavior on height { SmoothedAnimation { velocity: smoothingFactor } }
+                            Behavior on height { SmoothedAnimation { velocity: smoothingFactor } }
                             states:[
                                 State {
                                     name: "green"; when: roll_pos.height / (r_dis.height / 2) < .333
@@ -1167,7 +1266,7 @@ FlightMap {
                             anchors.bottomMargin: 2
                             color: "green"
                             height: _activeVehicle ? neg(Math.abs(r_dis._roll), Math.abs(_activeVehicle.getSetpointRoll()), roll_pos.height) * errorHeight(r_dis.rollError, r_dis.height, 0) : 0
-                            //Behavior on height { SmoothedAnimation { velocity: smoothingFactor } }
+                            Behavior on height { SmoothedAnimation { velocity: smoothingFactor } }
                             states:[
                                 State {
                                     name: "green"; when: roll_neg.height / (r_dis.height / 2) < .333
@@ -1222,6 +1321,46 @@ FlightMap {
                         border.width: 2
                         property real heading: _activeVehicle ? Math.abs(actualNormalize(_activeVehicle.heading.value)) : 0
                         property real yawError: _activeVehicle ? (Math.abs(heading - Math.abs(_activeVehicle.getSetpointYaw()))) / 180 : 0
+                        states: [
+                            State {
+                                name: "pos"
+                                when: yaw_pos.height > 0
+                                PropertyChanges {
+                                    target: yaw_neg
+                                    height: 0
+                                }
+                            },
+                            State {
+                                name: "neg"
+                                when: yaw_neg.height > 0
+                                PropertyChanges {
+                                    target: yaw_pos
+                                    height: 0
+                                }
+                            }
+                        ]
+                        transitions: [
+                            Transition {
+                                from: "pos"; to: "neg"; reversible: false
+                                NumberAnimation {
+                                    target: yaw_pos
+                                    property: height
+                                    duration: 20
+                                    easing.type: Easing.OutExpo
+                                    to: 0
+                                }
+                            },
+                            Transition {
+                                from: "neg"; to: "pos"; reversible: false
+                                NumberAnimation {
+                                    target: yaw_neg
+                                    property: height
+                                    duration: 20
+                                    easing.type: Easing.OutExpo
+                                    to: 0
+                                }
+                            }
+                        ]
 
                         Text{
                             text: "Y"
@@ -1236,7 +1375,7 @@ FlightMap {
                             anchors.bottomMargin: 2
                             color: "green"
                             height: _activeVehicle ? pos(Math.abs(y_dis.heading), Math.abs(_activeVehicle.getSetpointYaw()), yaw_neg.height) * errorHeight(y_dis.yawError, y_dis.height, 2) : 0
-                            //Behavior on height { SmoothedAnimation { velocity: smoothingFactor } }
+                            Behavior on height { SmoothedAnimation { velocity: smoothingFactor } }
                             states:[
                                 State {
                                     name: "green"; when: yaw_pos.height / (y_dis.height / 2) < .333
@@ -1284,7 +1423,7 @@ FlightMap {
                             anchors.bottomMargin: 2
                             color: "green"
                             height: _activeVehicle ? neg(Math.abs(y_dis.heading), Math.abs(_activeVehicle.getSetpointYaw()), yaw_pos.height) * errorHeight(y_dis.yawError, y_dis.height, 2) : 0
-                            //Behavior on height { SmoothedAnimation { velocity: smoothingFactor } }
+                            Behavior on height { SmoothedAnimation { velocity: smoothingFactor } }
                             states:[
                                 State {
                                     name: "green"; when: yaw_neg.height / (y_dis.height / 2) < .333
