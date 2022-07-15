@@ -658,7 +658,7 @@ FlightMap {
                     id: drone_center
                     width: drone.width
                     height: width
-                    //source: "/qml/droneBody.png"
+                    source: "/qmlimages/newDroneBody.png"
                     anchors.verticalCenter: drone.verticalCenter
                     anchors.horizontalCenter: drone.horizontalCenter
                 }
