@@ -38,20 +38,17 @@ FlightMap {
     //variable to keep track of rc/pid state
     property int rc_or_pid:1
     property int train:0
-    property var setpoint_pitch: _activeVehicle ? _activeVehicle.getSetpointPitch() : 0
-    property var setpoint_roll: _activeVehicle ? _activeVehicle.getSetpointRoll() : 0
-    property var setpoint_yaw: _activeVehicle ? _activeVehicle.getSetpointYaw() : 0
     property bool maximum_error: [false, false, false]
-    property int smoothingFactor: 10  //lower = smoother
-
+    property int smoothingFactor: 100  //lower = smoother
+    property real error_bar_height: 2.5
     function errorHeight(error, height, index){
-        if(error * height / 2 * 20 > height / 2){
+        if(error * height / 2 * (100 / error_bar_height) > height / 2){
             maximum_error[index] = true
             return height / 2
         }
         else{
             maximum_error[index] = false
-            return error * height / 2 * 20
+            return error * height / 2 * (100 / error_bar_height)
         }
     }
 
@@ -77,19 +74,6 @@ FlightMap {
             return 1
         }
     }
-    function updateSetpoints(){
-        setpoint_pitch = _activeVehicle ? _activeVehicle.getSetpointPitch() : 0
-        setpoint_roll = _activeVehicle ? _activeVehicle.getSetpointRoll() : 0
-        setpoint_yaw = _activeVehicle ? _activeVehicle.getSetpointYaw() : 0
-    }
-//    Timer {
-//        interval:       100
-//        running:        true
-//        repeat:         true
-//        onTriggered:    {
-//            updateSetpoints()
-//        }
-//    }
     //use parameter editor controller
     ParameterEditorController{
         id: paramController
@@ -656,16 +640,17 @@ FlightMap {
 
                 Image {
                     id: drone_center
-                    width: drone.width
-                    height: width
+                    width: drone.width / 1.25
+                    height: width * 1.5
                     source: "/qmlimages/newDroneBody.png"
+                    //anchors.top: drone.top
                     anchors.verticalCenter: drone.verticalCenter
                     anchors.horizontalCenter: drone.horizontalCenter
                 }
 
                 Rectangle {
                     id: top_left_prop
-                    width: drone.width / 1.5
+                    width: drone.width / 1.35
                     height: width
                     color: "white"
                     states:[
@@ -720,14 +705,15 @@ FlightMap {
                     border.color: "black"
                     border.width: 1
                     radius: width*0.5
-                    anchors.top: drone_center.top
-                    anchors.left: drone_center.left
+                    anchors.top: drone.top
+                    anchors.left: drone.left
                     anchors.topMargin: -top_left_prop.height / 1.65
                     anchors.leftMargin: -top_left_prop.width / 1.65
                     Text {
                             anchors.horizontalCenter: parent.horizontalCenter
                             anchors.verticalCenter: parent.verticalCenter
                             visible:                true
+                            font.pointSize: 20
                             text:                   _activeVehicle ? _activeVehicle.servoRaw.value +"%" : 0
                     }
                 }
@@ -789,15 +775,15 @@ FlightMap {
                     border.color: "black"
                     border.width: 1
                     radius: width*0.5
-                    anchors.bottom: drone_center.bottom
-                    anchors.left: drone_center.left
+                    anchors.bottom: drone.bottom
+                    anchors.left: drone.left
                     anchors.bottomMargin: -bottom_left_prop.height / 1.65
                     anchors.leftMargin: -bottom_left_prop.width / 1.65
                     Text {
                             anchors.horizontalCenter: parent.horizontalCenter
                             anchors.verticalCenter: parent.verticalCenter
-                            //color: "black"
                             visible:                true
+                            font.pointSize: 20
                             text:                   _activeVehicle ? _activeVehicle.servoRaw3.value + "%" : 0
                     }
                 }
@@ -858,14 +844,15 @@ FlightMap {
                     border.color: "black"
                     border.width: 1
                     radius: width*0.5
-                    anchors.bottom: drone_center.bottom
-                    anchors.right: drone_center.right
+                    anchors.bottom: drone.bottom
+                    anchors.right: drone.right
                     anchors.bottomMargin: -bottom_right_prop.height / 1.65
                     anchors.rightMargin: -bottom_right_prop.width / 1.65
                     Text {
                             anchors.horizontalCenter: parent.horizontalCenter
                             anchors.verticalCenter: parent.verticalCenter
                             visible:                true
+                            font.pointSize: 20
                             text:                   _activeVehicle ? _activeVehicle.servoRaw4.value +"%" : 0
                     }
                 }
@@ -927,14 +914,15 @@ FlightMap {
                     border.color: "black"
                     border.width: 1
                     radius: width*0.5
-                    anchors.top: drone_center.top
-                    anchors.right: drone_center.right
+                    anchors.top: drone.top
+                    anchors.right: drone.right
                     anchors.topMargin: -top_right_prop.height / 1.65
                     anchors.rightMargin: -top_right_prop.width / 1.65
                     Text {
                             anchors.horizontalCenter: parent.horizontalCenter
                             anchors.verticalCenter: parent.verticalCenter
                             visible:                true
+                            font.pointSize: 20
                             text:                   _activeVehicle ? _activeVehicle.servoRaw2.value + "%" : 0
                     }
                 }
@@ -979,7 +967,7 @@ FlightMap {
             }
                 Item{
                     id: buttons
-                    width: 1.75*(drone.width)
+                    width: 2.05*(drone.width)
                     height: 2.5*(drone.height)
                     anchors.verticalCenter: drone.verticalCenter
                     anchors.horizontalCenter: drone.horizontalCenter
@@ -988,7 +976,7 @@ FlightMap {
                         id: white_background
                         color: "white"
                         opacity: 0.5
-                        width: p_dis.width * 6
+                        width: p_dis.width * 6.5
                         height: p_dis.height * 1.2
                         anchors.left: buttons.right
                         anchors.top: p_dis.top
@@ -1084,19 +1072,19 @@ FlightMap {
                                 Transition{
                                     from: "green"; to: "yellow"; reversible: true
                                     ParallelAnimation{
-                                        ColorAnimation { duration: 20 }
+                                        ColorAnimation { duration: 500 }
                                     }
                                 },
                                 Transition{
                                     from: "yellow"; to: "red"; reversible: true
                                     ParallelAnimation{
-                                        ColorAnimation { duration: 20 }
+                                        ColorAnimation { duration: 500 }
                                     }
                                 },
                                 Transition{
                                     from: "red"; to: "max"; reversible: true
                                     ParallelAnimation{
-                                        ColorAnimation { duration: 20 }
+                                        ColorAnimation { duration: 500 }
                                     }
                                 }
                             ]
@@ -1132,19 +1120,19 @@ FlightMap {
                                 Transition{
                                     from: "green"; to: "yellow"; reversible: true
                                     ParallelAnimation{
-                                        ColorAnimation { duration: 20 }
+                                        ColorAnimation { duration: 500 }
                                     }
                                 },
                                 Transition{
                                     from: "yellow"; to: "red"; reversible: true
                                     ParallelAnimation{
-                                        ColorAnimation { duration: 20 }
+                                        ColorAnimation { duration: 500 }
                                     }
                                 },
                                 Transition{
                                     from: "red"; to: "max"; reversible: true
                                     ParallelAnimation{
-                                        ColorAnimation { duration: 20 }
+                                        ColorAnimation { duration: 500 }
                                     }
                                 }
                             ]
@@ -1241,19 +1229,19 @@ FlightMap {
                                 Transition{
                                     from: "green"; to: "yellow"; reversible: true
                                     ParallelAnimation{
-                                        ColorAnimation { duration: 20 }
+                                        ColorAnimation { duration: 500 }
                                     }
                                 },
                                 Transition{
                                     from: "yellow"; to: "red"; reversible: true
                                     ParallelAnimation{
-                                        ColorAnimation { duration: 20 }
+                                        ColorAnimation { duration: 500 }
                                     }
                                 },
                                 Transition{
                                     from: "red"; to: "max"; reversible: true
                                     ParallelAnimation{
-                                        ColorAnimation { duration: 20 }
+                                        ColorAnimation { duration: 500 }
                                     }
                                 }
                             ]
@@ -1289,19 +1277,19 @@ FlightMap {
                                 Transition{
                                     from: "green"; to: "yellow"; reversible: true
                                     ParallelAnimation{
-                                        ColorAnimation { duration: 20 }
+                                        ColorAnimation { duration: 500 }
                                     }
                                 },
                                 Transition{
                                     from: "yellow"; to: "red"; reversible: true
                                     ParallelAnimation{
-                                        ColorAnimation { duration: 20 }
+                                        ColorAnimation { duration: 500 }
                                     }
                                 },
                                 Transition{
                                     from: "red"; to: "max"; reversible: true
                                     ParallelAnimation{
-                                        ColorAnimation { duration: 20 }
+                                        ColorAnimation { duration: 500 }
                                     }
                                 }
                             ]
@@ -1398,19 +1386,19 @@ FlightMap {
                                 Transition{
                                     from: "green"; to: "yellow"; reversible: true
                                     ParallelAnimation{
-                                        ColorAnimation { duration: 20 }
+                                        ColorAnimation { duration: 500 }
                                     }
                                 },
                                 Transition{
                                     from: "yellow"; to: "red"; reversible: true
                                     ParallelAnimation{
-                                        ColorAnimation { duration: 20 }
+                                        ColorAnimation { duration: 500 }
                                     }
                                 },
                                 Transition{
                                     from: "red"; to: "max"; reversible: true
                                     ParallelAnimation{
-                                        ColorAnimation { duration: 20 }
+                                        ColorAnimation { duration: 500 }
                                     }
                                 }
                             ]
@@ -1446,19 +1434,19 @@ FlightMap {
                                 Transition{
                                     from: "green"; to: "yellow"; reversible: true
                                     ParallelAnimation{
-                                        ColorAnimation { duration: 20 }
+                                        ColorAnimation { duration: 500 }
                                     }
                                 },
                                 Transition{
                                     from: "yellow"; to: "red"; reversible: true
                                     ParallelAnimation{
-                                        ColorAnimation { duration: 20 }
+                                        ColorAnimation { duration: 500 }
                                     }
                                 },
                                 Transition{
                                     from: "red"; to: "max"; reversible: true
                                     ParallelAnimation{
-                                        ColorAnimation { duration: 20 }
+                                        ColorAnimation { duration: 500 }
                                     }
                                 }
                             ]
@@ -1474,7 +1462,7 @@ FlightMap {
                         anchors.top: p_dis.top
                         anchors.leftMargin: topRef.width / 3
                         Text{
-                            text: "5"
+                            text: error_bar_height
                             anchors.left: topRef.right
                             anchors.horizontalCenter: topRef.horizontalCenter
                         }
@@ -1499,7 +1487,7 @@ FlightMap {
                         anchors.bottom: p_dis.bottom
                         anchors.leftMargin: topRef.width / 3
                         Text{
-                            text: "-5"
+                            text: "-" + error_bar_height
                             anchors.left: bottomRef.right
                             anchors.horizontalCenter: bottomRef.horizontalCenter
                         }
@@ -1720,91 +1708,6 @@ FlightMap {
                     }
             }
 
-                Rectangle{
-                    id: valueDisplay
-                    width: drone.width * 2
-                    height: drone.height * 1.75
-                    anchors.right: drone.left
-                    anchors.bottom: drone.bottom
-                    anchors.rightMargin: drone.width
-                    anchors.bottomMargin: drone.width / -4
-                    color: "white"
-                    //opacity: .5
-                    Text{
-                        id: actRoll
-                        text: _activeVehicle ? "Roll: " + r_dis._roll.toFixed(5) : null
-                    }
-                    Text{
-                        id: actPitch
-                        anchors.top: actRoll.bottom
-                        text: _activeVehicle ? "Pitch: " + p_dis._pitch.toFixed(5) : null
-                    }
-                    Text{
-                        id: actYaw
-                        anchors.top: actPitch.bottom
-                        text: _activeVehicle ? "Yaw: " + y_dis.heading.toFixed(5) : null
-                    }
-                    Text{
-                        id: estRoll
-                        anchors.top: actYaw.bottom
-                        text: _activeVehicle ? "Setpoint Roll: " + setpoint_roll.toFixed(5) : null
-                        color: "orange"
-                    }
-                    Text{
-                        id: estPitch
-                        anchors.top: estRoll.bottom
-                        text: _activeVehicle ? "Setpoint Pitch: " + setpoint_pitch.toFixed(5) : null
-                        color: "orange"
-                    }
-                    Text{
-                        id: estYaw
-                        anchors.top: estPitch.bottom
-                        text: _activeVehicle ? "Setpoint Yaw: " + Math.abs(setpoint_yaw).toFixed(5) : null
-                        color: "orange"
-                    }
-                    Text{
-                        id: nRollPercent
-                        anchors.top: estYaw.bottom
-                        text: _root ? _root.rc_or_pid : null
-                        color: "green"
-                    }
-                    Text{
-                        id: nPitchPercent
-                        anchors.top: nRollPercent.bottom
-                        text: _activeVehicle ? _activeVehicle.armed : false
-                        color: "green"
-                    }
-                    Text{
-                        id: nYawPercent
-                        anchors.top: nPitchPercent.bottom
-                        //text: _activeVehicle ? "Weighted Yaw Error %: " + errorHeight(yaw_graph.yawError, y_dis.height, 2) / 20 : null
-                        color: "green"
-                    }
-                    Text{
-                        id: oRollPercent
-                        anchors.top: nYawPercent.bottom
-                        text: _activeVehicle ? "Yaw Error %: " + y_dis.yawError * 100 : 0
-                        color: "red"
-                    }
-                    Text{
-                        id: oPitchPercent
-                        anchors.top: oRollPercent.bottom
-                        text: _activeVehicle ? "Roll Error %: " + r_dis.rollError * 100 : 0
-                        color: "red"
-                    }
-                    Text{
-                        id: oYawPercent
-                        anchors.top: oPitchPercent.bottom
-                        text: _activeVehicle ? "Pitch Error %: " + p_dis.pitchError * 100 : 0
-                        color: "red"
-                    }
-                    Text{
-                        id: rateController
-                        anchors.top: oYawPercent.bottom
-                        //text: instrumentValueData.fact.enumOrValueString
-                        color: "blue"
-                    }
-                }
 
     /////////////////////////////////////////////////////////////
 
