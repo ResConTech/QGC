@@ -627,12 +627,12 @@ FlightMap {
     }
 
     ///////////////////////////////////////////////////////////////////////////
-    Timer {
-        interval:       100
-        running:        rc_or_pid == 0 & batt > 0
-        repeat:         true
-        onTriggered:    batt = batt - 1
-    }
+//    Timer {
+//        interval:       100
+//        running:        rc_or_pid == 0 & batt > 0
+//        repeat:         true
+//        onTriggered:    batt = batt - 1
+//    }
             Item{
                 id: battery_bar
                 width: parent.width/15
@@ -646,40 +646,54 @@ FlightMap {
                 Rectangle{
                     id: battery_outline_faux
                     height: buttons.width / 8
-                    width: buttons.width / 2.825
+                    width: buttons.width / 2.725 // 3         //2.825
                     anchors.verticalCenter: battery_bar.verticalCenter
                     anchors.horizontalCenter: battery_bar.horizontalCenter
                     color: "transparent"
+                    radius: 8
                 }
                 Rectangle{
                     id: battery_outline
-                    height: buttons.width / 8
-                    width: buttons.width / 2.75
+                    height: buttons.width / 7.75 //8
+                    width: buttons.width / 2.5     //2.75
                     anchors.verticalCenter: battery_bar.verticalCenter
                     anchors.horizontalCenter: battery_bar.horizontalCenter
                     color: "black"
                     radius: 8
-                    border.color: "black"
+                    border.color: "white"
                     border.width: 3
+                }
+                Rectangle{
+                    id: battery_outline_2
+                    height: buttons.width / 7.5
+                    width: buttons.width / 2.4125
+                    anchors.verticalCenter: battery_bar.verticalCenter
+                    anchors.horizontalCenter: battery_bar.horizontalCenter
+                    color: "transparent"
+                    radius: 8
+                    border.color: "black"
+                    border.width: 2
 
                 }
                 Rectangle{
                     id: battery_ornate
                     height: battery_outline.height / 3.25
                     width: height / 2
-                    anchors.right: battery_outline.left
+                    anchors.right: battery_outline_2.left
                     anchors.verticalCenter: battery_outline.verticalCenter
-                    color: "black"
-                    radius: 1
+                    color: "white"
+                    radius: 8
+                    border.color: "black"
+                    border.width: 1
                 }
 
                 Rectangle{
                     id: battery
-                    height: battery_outline.height / 1.2
-                    width: (battery_outline.width / 1.05) * batt / 100
+                    height: battery_outline.height / 1.425   //1.2 //1.325
+                    width: (battery_outline.width / 1.0925) * (batt / 100)  //1.0725
                     anchors.right: battery_outline_faux.right
                     anchors.verticalCenter: battery_bar.verticalCenter
-                    radius: 8
+                    radius: 2
                     Text {
                         color: "white"
                         //anchors.left: parent.right
