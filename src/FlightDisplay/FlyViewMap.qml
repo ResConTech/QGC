@@ -26,11 +26,12 @@ import QGroundControl.FlightMap     1.0
 import QGroundControl.Palette       1.0
 import QGroundControl.ScreenTools   1.0
 import QGroundControl.Vehicle       1.0
+import QtQuick.Shapes 1.3
 
 import QtQuick.Controls.Styles 1.4
 FlightMap {
     id:                         _root
-
+    property int batt: _activeVehicle ? _activeVehicle.batteries.get(0).percentRemaining.rawValue : 0
     property var    curSystem:          controller ? controller.activeSystem : null
     property var    curMessage:         curSystem && curSystem.messages.count ? curSystem.messages.get(curSystem.selected) : null
     property int    curCompID:          0
@@ -628,8 +629,122 @@ FlightMap {
     ///////////////////////////////////////////////////////////////////////////
 
             Item{
+                id: battery_bar
+                width: parent.width/15
+                x: parent.width<parent.height?parent.width:parent.height
+                height: width
+                anchors.right: parent.right
+                anchors.top: drone.bottom
+                anchors.rightMargin: 2.5 * (top_left_prop.width)
+                anchors.bottomMargin: 1 * top_left_prop.width
+
+                Rectangle{
+                    id: battery_outline_faux
+                    height: buttons.width / 8
+                    width: buttons.width / 2.725 // 3         //2.825
+                    anchors.verticalCenter: battery_bar.verticalCenter
+                    anchors.horizontalCenter: battery_bar.horizontalCenter
+                    color: "transparent"
+                    radius: 8
+                }
+                Rectangle{
+                    id: battery_outline
+                    height: buttons.width / 7.75 //8
+                    width: buttons.width / 2.5     //2.75
+                    anchors.verticalCenter: battery_bar.verticalCenter
+                    anchors.horizontalCenter: battery_bar.horizontalCenter
+                    color: "black"
+                    radius: 8
+                    border.color: "white"
+                    border.width: 3
+                }
+                Rectangle{
+                    id: battery_outline_2
+                    height: buttons.width / 7.5
+                    width: buttons.width / 2.4125
+                    anchors.verticalCenter: battery_bar.verticalCenter
+                    anchors.horizontalCenter: battery_bar.horizontalCenter
+                    color: "transparent"
+                    radius: 8
+                    border.color: "black"
+                    border.width: 2
+
+                }
+                Rectangle{
+                    id: battery_ornate
+                    height: battery_outline.height / 3.25
+                    width: height / 2
+                    anchors.right: battery_outline_2.left
+                    anchors.verticalCenter: battery_outline.verticalCenter
+                    color: "white"
+                    radius: 8
+                    border.color: "black"
+                    border.width: 1
+                }
+
+                Rectangle{
+                    id: battery
+                    height: battery_outline.height / 1.425   //1.2 //1.325
+                    width: (battery_outline.width / 1.0925) * (batt / 100)  //1.0725
+                    anchors.right: battery_outline_faux.right
+                    anchors.verticalCenter: battery_bar.verticalCenter
+                    radius: 2
+                    Text {
+                        color: "white"
+                        //anchors.left: parent.right
+                        anchors.horizontalCenter: parent.horizontalCenter
+                        anchors.verticalCenter: parent.verticalCenter
+                        visible:  batt > 40
+                        font.pointSize: 12
+                        style: Text.Outline
+                        styleColor: "black"
+                        text: batt + "%"
+                    }
+                    Text {
+                        color: "white"
+                        anchors.right: parent.left
+                        anchors.verticalCenter: parent.verticalCenter
+                        visible:  batt <= 40
+                        font.pointSize: 12
+                        style: Text.Outline
+                        styleColor: "black"
+                        text: batt + "%"
+                    }
+                    states:[
+                        State {
+                            name: "green"; when: batt > 70
+                            PropertyChanges {target: battery; color: "green"}
+                        },
+                        State {
+                            name: "yellow"; when:batt > 20 && batt <= 70
+                            PropertyChanges {target: battery; color: "yellow"}
+                        },
+                        State {
+                            name: "red"; when: batt <= 20
+                            PropertyChanges {target: battery; color: "red"}
+                        }
+                    ]
+                    transitions:[
+                        Transition{
+                            from: "green"; to: "yellow"; reversible: true
+                            ParallelAnimation{
+                                ColorAnimation { duration: 1000 }
+                            }
+                        },
+                        Transition{
+                            from: "yellow"; to: "red"; reversible: true
+                            ParallelAnimation{
+                                ColorAnimation { duration: 1000 }
+                            }
+                        }
+                    ]
+
+                }
+
+
+            }
+            Item{
                 id: drone
-                //width: parent.width<parent.height?parent.width:parent.height/4
                 width: parent.width/15
                 x: parent.width<parent.height?parent.width:parent.height
                 height: width
@@ -643,7 +758,6 @@ FlightMap {
                     width: drone.width / 1.25
                     height: width * 1.5
                     source: "/qmlimages/newDroneBody.png"
-                    //anchors.top: drone.top
                     anchors.verticalCenter: drone.verticalCenter
                     anchors.horizontalCenter: drone.horizontalCenter
                 }
@@ -1620,7 +1734,7 @@ FlightMap {
                                 train_button.state = (train_button.state === 'train_on' ? 'train_off' : "train_on");
 
                                 if (slider.value <= 15 ) {
-                                    timer_value.interval = slider.value * 1000
+                                    _value.interval = slider.value * 1000
                                     timer_value.start()
                                 } else {
                                     timer_value.interval = 10000
