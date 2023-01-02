@@ -27,11 +27,15 @@ import QGroundControl.Palette       1.0
 import QGroundControl.ScreenTools   1.0
 import QGroundControl.Vehicle       1.0
 import QtQuick.Shapes 1.3
-
 import QtQuick.Controls.Styles 1.4
+
+import QGroundControl.Airmap        1.0
+import QGroundControl.FactControls  1.0
+
+
 FlightMap {
     id:                         _root
-    property int batt: 100
+    property int batt: PreFlightBatteryCheck ? _activeVehicle.batteries.get(0).percentRemaining.rawValue : 0
     property var    curSystem:          controller ? controller.activeSystem : null
     property var    curMessage:         curSystem && curSystem.messages.count ? curSystem.messages.get(curSystem.selected) : null
     property int    curCompID:          0
@@ -41,7 +45,51 @@ FlightMap {
     property int train:0
     property bool maximum_error: [false, false, false]
     property int smoothingFactor: 100  //lower = smoother
-    property real error_bar_height: 2.5
+    property real error_bar_height:     paramController.getValue('error_range')
+    property real rpm_color_low_min:    paramController.getValue('RPM_color_low_min')
+    property real rpm_color_low_max:    paramController.getValue('RPM_color_low_max')
+    property real rpm_color_mid_max:    paramController.getValue('RPM_color_mid_max')
+    property real rpm_color_high_max:   paramController.getValue('RPM_color_high_max')
+
+    property real error_color_min:   paramController.getValue('error_color_minimum')
+    property real error_color_med:   paramController.getValue('error_color_medium')
+    property real error_color_max:   paramController.getValue('error_color_maximum')
+
+    property color color_rpm_min: paramController.getColor('color_rpm_min')
+    property color color_rpm_med: paramController.getColor('color_rpm_med')
+    property color color_rpm_max: paramController.getColor('color_rpm_max')
+
+    property color color_error_min: paramController.getColor('color_error_min')
+    property color color_error_med: paramController.getColor('color_error_med')
+    property color color_error_max: paramController.getColor('color_error_max')
+
+    property FactGroup weatherFactGroup: paramController.vehicle.getFactGroup("wind")
+    property Fact windDirection: weatherFactGroup.getFact("direction")
+    property Fact windSpeed: weatherFactGroup.getFact("speed")
+
+    Timer {
+        id:         update_custo
+        interval:   100
+        running:    true
+        repeat: true
+        onTriggered: {
+            error_bar_height   =    paramController.getValue('error_range')
+            rpm_color_low_min  =    paramController.getValue('RPM_color_low_min')
+            rpm_color_low_max  =    paramController.getValue('RPM_color_low_max')
+            rpm_color_mid_max  =    paramController.getValue('RPM_color_mid_max')
+            rpm_color_high_max =    paramController.getValue('RPM_color_high_max')
+            error_color_min    =    paramController.getValue('error_color_minimum')
+            error_color_med    =    paramController.getValue('error_color_medium')
+            error_color_max    =    paramController.getValue('error_color_maximum')
+
+            color_rpm_min      =    paramController.getColor('color_rpm_min')
+            color_rpm_med      =    paramController.getColor('color_rpm_med')
+            color_rpm_max      =    paramController.getColor('color_rpm_max')
+            color_error_min    =    paramController.getColor('color_error_min')
+            color_error_med    =    paramController.getColor('color_error_med')
+            color_error_max    =    paramController.getColor('color_error_max')
+        }
+    }
     function errorHeight(error, height, index){
         if(error * height / 2 * (100 / error_bar_height) > height / 2){
             maximum_error[index] = true
@@ -627,12 +675,6 @@ FlightMap {
     }
 
     ///////////////////////////////////////////////////////////////////////////
-//    Timer {
-//        interval:       100
-//        running:        rc_or_pid == 0 & batt > 0
-//        repeat:         true
-//        onTriggered:    batt = batt - 1
-//    }
             Item{
                 id: battery_bar
                 width: parent.width/15
@@ -748,15 +790,75 @@ FlightMap {
 
 
             }
+            Rectangle{
+                id: borders
+                width: parent.width/15
+                x: parent.width<parent.height?parent.width:parent.height
+                height: width / 4
+                anchors.right: parent.right
+                anchors.bottom: parent.bottom
+                anchors.rightMargin: 2.5*(top_left_prop.width)
+                anchors.bottomMargin: top_left_prop.width
+                color: 'transparent'
+            }
+
             Item{
                 id: drone
                 width: parent.width/15
                 x: parent.width<parent.height?parent.width:parent.height
                 height: width
                 anchors.right: parent.right
-                anchors.bottom: parent.bottom
+                anchors.bottom: borders.top
                 anchors.rightMargin: 2.5*(top_left_prop.width)
                 anchors.bottomMargin: top_left_prop.width
+
+                property real heading: _activeVehicle ? _activeVehicle.heading.rawValue : 0
+                property real headingToWP: _activeVehicle ? calculateTravelDirection() : 0
+                property real groundSpeed: _activeVehicle ? _activeVehicle.groundSpeed.value : 0
+                function calculateTravelDirection(){
+                    //How to find??
+                    return 0;
+                }
+
+                function getHeadingDisplay(){
+                    if(heading.toFixed(0) > 9 && heading.toFixed(0) < 100){
+                        return '0' + heading.toFixed(0);
+                    }
+
+                    else if(heading.toFixed(0) < 10){
+                        return '00' + heading.toFixed(0);
+                    }
+                    else{
+                        return heading.toFixed(0) + '';
+                    }
+                }
+                function getTravelHeadingDisplay(){
+
+                    return getHeadingDisplay();
+
+//                    if(headingToWP.toFixed(0) > 9 && headingToWP.toFixed(0) < 100){
+//                        return '0' + headingToWP.toFixed(0);
+//                    }
+
+//                    else if(headingToWP.toFixed(0) < 10){
+//                        return '00' + headingToWP.toFixed(0);
+//                    }
+//                    else{
+//                        return headingToWP.toFixed(0) + '';
+//                    }
+                }
+                function getWindHeadingDisplay(){
+                    if(windDirection.rawValue.toFixed(0) > 9 && windDirection.rawValue.toFixed(0) < 100){
+                        return '0' + windDirection.rawValue.toFixed(0);
+                    }
+
+                    else if(windDirection.rawValue.toFixed(0) < 10){
+                        return '00' + windDirection.rawValue.toFixed(0);
+                    }
+                    else{
+                        return windDirection.rawValue.toFixed(0) + '';
+                    }
+                }
 
                 Image {
                     id: drone_center
@@ -766,7 +868,472 @@ FlightMap {
                     anchors.verticalCenter: drone.verticalCenter
                     anchors.horizontalCenter: drone.horizontalCenter
                 }
+                Rectangle{
+                    id: vehicleHeadingDisplay
+                    width: drone.width / 3
+                    height: width / 2
+                    anchors.horizontalCenter: drone_center.horizontalCenter
+                    anchors.top: vehicleDisplayAnchors.top
+                    color: 'white'
+                    Text {
+                        anchors.horizontalCenter: parent.horizontalCenter
+                        anchors.verticalCenter: parent.verticalCenter
+                        visible:                true
+                        text: _activeVehicle ? drone.getHeadingDisplay() + '°' : '--.--'
+                    }
+                    border.color: 'black'
+                    border.width: 1.5
+                }
+                Rectangle{
+                    id: vehicleHeadingDisplay_tic_main
+                    width: vehicleHeadingDisplay.width / 16
+                    height: vehicleHeadingDisplay.width / 4
+                    anchors.horizontalCenter: drone_center.horizontalCenter
+                    anchors.top: vehicleHeadingDisplay.bottom
+                    color: 'black'
+                    border.color: 'black'
+                    border.width: 1.5
+                    visible: true
+                }
+                Rectangle{
+                    id: vehicleHeadingDisplay_tic_main_skele
+                    width: vehicleHeadingDisplay_tic_main.width * 6
+                    height: vehicleHeadingDisplay_tic_main.height * 1.5
+                    anchors.horizontalCenter: vehicleHeadingDisplay_tic_main.horizontalCenter
+                    anchors.verticalCenter: vehicleHeadingDisplay_tic_main.verticalCenter
+                    color: 'black'
+                    border.color: 'black'
+                    border.width: 1
+                    visible: false
+                }
+                Rectangle{
+                    id: vehicleHeadingDisplay_tic_1L
+                    width: vehicleHeadingDisplay_tic_main.width / 2
+                    height: vehicleHeadingDisplay_tic_main.height / 1.5
+                    anchors.bottom: vehicleHeadingDisplay_tic_main.bottom
+                    anchors.right: vehicleHeadingDisplay_tic_main_skele.left
+                    color: 'black'
+                    rotation: 170
+                }
+                Rectangle{
+                    id: vehicleHeadingDisplay_tic_1L_skele
+                    width: vehicleHeadingDisplay_tic_1L.width * 8
+                    height: vehicleHeadingDisplay_tic_1L.height * 2
+                    anchors.horizontalCenter: vehicleHeadingDisplay_tic_1L.horizontalCenter
+                    anchors.verticalCenter: vehicleHeadingDisplay_tic_1L.verticalCenter
+                    visible: false
+                    color: 'black'
+                    border.color: 'black'
+                    border.width: 1
+                }
+                Rectangle{
+                    id: vehicleHeadingDisplay_tic_2L
+                    width: vehicleHeadingDisplay_tic_main.width / 2
+                    height: vehicleHeadingDisplay_tic_main.height / 1.5
+                    anchors.bottom: vehicleHeadingDisplay_tic_1L_skele.bottom
+                    anchors.right: vehicleHeadingDisplay_tic_1L_skele.left
+                    color: 'black'
+                    rotation: 160
+                }
+                Rectangle{
+                    id: vehicleHeadingDisplay_tic_1R
+                    width: vehicleHeadingDisplay_tic_main.width / 2
+                    height: vehicleHeadingDisplay_tic_main.height / 1.5
+                    anchors.bottom: vehicleHeadingDisplay_tic_main.bottom
+                    anchors.left: vehicleHeadingDisplay_tic_main_skele.right
+                    color: 'black'
+                    rotation: 190
+                }
+                Rectangle{
+                    id: vehicleHeadingDisplay_tic_1R_skele
+                    width: vehicleHeadingDisplay_tic_1R.width * 8
+                    height: vehicleHeadingDisplay_tic_1R.height * 2
+                    anchors.horizontalCenter: vehicleHeadingDisplay_tic_1R.horizontalCenter
+                    anchors.verticalCenter: vehicleHeadingDisplay_tic_1R.verticalCenter
+                    visible: false
+                    color: 'black'
+                    border.color: 'black'
+                    border.width: 1
+                }
+                Rectangle{
+                    id: vehicleHeadingDisplay_tic_RL
+                    width: vehicleHeadingDisplay_tic_main.width / 2
+                    height: vehicleHeadingDisplay_tic_main.height / 1.5
+                    anchors.bottom: vehicleHeadingDisplay_tic_1R_skele.bottom
+                    anchors.left: vehicleHeadingDisplay_tic_1R_skele.right
+                    color: 'black'
+                    rotation: 200
+                }
+                Rectangle{
+                    id: headingAnchors
+                    anchors.verticalCenter: drone.verticalCenter
+                    anchors.horizontalCenter: drone.horizontalCenter
+                    width: drone_center.width * 2.5
+                    height: drone_center.height * 2.75
+                    color: "transparent"
+                    //border.color: "black"
+                    //border.width: 1
+                    radius: width * .5
+                }
+                Rectangle{
+                    id: vehicleDisplayAnchors
+                    anchors.verticalCenter: headingAnchors.verticalCenter
+                    anchors.horizontalCenter: headingAnchors.horizontalCenter
+                    width: drone_center.width
+                    height: drone_center.height * 1.625
+                    color: "transparent"
+                    //border.color: "black"
+                    //border.width: 1
+                    radius: width * .5
+                }
+//                Rectangle{
+//                    id: windIndicator
+//                    Text {
+//                        anchors.top: parent.top
+//                        anchors.horizontalCenter: parent.horizontalCenter
+//                        visible:                true
+//                        text: _activeVehicle ? windSpeed.rawValue + 'm/s' : '-- m/s'
+//                        font.pointSize: 8
+//                    }
+//                    Text {
+//                        anchors.top: parent.bottom
+//                        anchors.horizontalCenter: parent.horizontalCenter
+//                        visible:                true
+//                        text: _activeVehicle ? drone.getWindHeadingDisplay() + '°' : '--.--'
+//                        font.pointSize: 8
+//                    }
+//                    width: drone.width / 2.5
+//                    height: width * 1.5
+//                    x: windArrowPath_top.x
+//                    y: windArrowPath_top.y
+//                    rotation: windArrowPath_top.angle
+//                }
+                function getGroundSpeed(){
+                    if(drone.groundSpeed >= 10){
+                        return drone.groundSpeed.toFixed(0);
+                    }
+                    else{
+                        return drone.groundSpeed.toFixed(1);
+                    }
+                }
+                function getWindIndicatorWidth(){
+                        return 2 * (5 - drone.groundSpeed.toFixed(0));
+                }
+                function getTravelIndicatorWidth(){
+                        return 2 * (5 - drone.groundSpeed.toFixed(0));
+                }
+                Image{
+                    id: travelDirectionIndicator
+                    visible: _activeVehicle
+                    source: "/qmlimages/blue_arrow.png"
+                    z: 10000
+                    Text {
+                        anchors.bottom: travelDirectionIndicator_anchors2.bottom
+                        anchors.horizontalCenter: parent.horizontalCenter
+                        visible:                true
+                        text: _activeVehicle ? drone.getHeadingDisplay() + '°' : '--.--'
+                        font.pointSize: 8
+                    }
+                    Text {
+                        anchors.top: travelDirectionIndicator_anchors.bottom
+                        anchors.horizontalCenter: parent.horizontalCenter
+                        visible:                true
+                        text: _activeVehicle ? drone.getGroundSpeed() : ''
+                        color: 'white'
+                        font.pointSize: 10
+                        font.bold: true
+                    }
+                    width: drone.width / 1.125
+                    height: width - drone.getWindIndicatorWidth()
+                    x: drone.get_travel_x()
+                    y: drone.get_travel_y()
+                    rotation:  drone.get_travel_angle()
+                    Rectangle{
+                        id: travelDirectionIndicator_anchors
+                        width: travelDirectionIndicator.width
+                        height: travelDirectionIndicator.height / 6
+                        visible: false
+                        color: 'red'
+                    }
+                    Rectangle{
+                        id: travelDirectionIndicator_anchors2
+                        width: travelDirectionIndicator.width / 6
+                        height: travelDirectionIndicator.height * 1.05
+                        visible: false
+                        color: 'red'
+                    }
+                }
+                Image{
+                    id: _travelDirectionIndicator
+                    visible: _activeVehicle
+                    source: "/qmlimages/white_arrow.png"
+                    z: 10000
+                    Text {
+                        anchors.bottom: _travelDirectionIndicator_anchors.bottom
+                        anchors.horizontalCenter: parent.horizontalCenter
+                        visible:                true
+                        text: _activeVehicle ? drone.getTravelHeadingDisplay() + '°' : '--.--'
+                        font.pointSize: 8
+                    }
+                    Text {
+                        anchors.bottom: _travelDirectionIndicator_anchors2.bottom
+                        anchors.horizontalCenter: parent.horizontalCenter
+                        visible:                true
+                        text: _activeVehicle ? drone.getGroundSpeed() : ''
+                        color: 'black'
+                        font.pointSize: 10
+                        font.bold: true
+                    }
+                    width: drone.width / 1.125
+                    height: width - drone.getTravelIndicatorWidth()
+                    x: drone.get_tdir_x()
+                    y: drone.get_tdir_y()
+                    rotation: drone.get_tdir_angle()
+                    Rectangle{
+                        id: _travelDirectionIndicator_anchors
+                        width: _travelDirectionIndicator.width
+                        height: _travelDirectionIndicator.height / 30
+                        visible: false
+                        color: 'red'
+                    }
+                    Rectangle{
+                        id: _travelDirectionIndicator_anchors2
+                        width: _travelDirectionIndicator.width / 6
+                        height: _travelDirectionIndicator.height * .85
+                        visible: false
+                        color: 'blue'
+                    }
+                }
 
+
+                property real firstBreak: 33
+                property real secondBreak: 147
+                property real thirdBreak: 213
+                property real fourthBreak: 303
+                property real fifthBreak: 0
+                property real fifthBreak_360: 360
+
+                function get_travel_x(){
+                    return travelArrow_circ.x;
+//                    if(drone.getHeadingDisplay() >= firstBreak && drone.getHeadingDisplay() < secondBreak){
+//                        return travelArrowPath_top.x;
+//                    }
+//                    else if(drone.getHeadingDisplay() >= secondBreak && drone.getHeadingDisplay() < thirdBreak){
+//                        return travelArrowPath_right.x;
+//                    }
+//                    else if(drone.getHeadingDisplay() >= thirdBreak && drone.getHeadingDisplay() < fourthBreak){
+//                        return travelArrowPath_bottom.x;
+//                    }
+//                    else if(drone.getHeadingDisplay() >= fourthBreak && drone.getHeadingDisplay() <= fifthBreak_360){
+//                        return travelArrowPath_left.x;
+//                    }
+//                    else if(drone.getHeadingDisplay() >= fifthBreak && drone.getHeadingDisplay() < firstBreak){
+//                        return travelArrowPath_left_0_plus.x;
+//                    }
+                }
+                function get_travel_y(){
+                    return travelArrow_circ.y;
+//                    if(drone.getHeadingDisplay() >= firstBreak && drone.getHeadingDisplay() < secondBreak){
+//                        return travelArrowPath_top.y;
+//                    }
+//                    else if(drone.getHeadingDisplay() >= secondBreak && drone.getHeadingDisplay() < thirdBreak){
+//                        return travelArrowPath_right.y;
+//                    }
+//                    else if(drone.getHeadingDisplay() >= thirdBreak && drone.getHeadingDisplay() < fourthBreak){
+//                        return travelArrowPath_bottom.y;
+//                    }
+//                    else if(drone.getHeadingDisplay() >= fourthBreak && drone.getHeadingDisplay() <= fifthBreak_360){
+//                        return travelArrowPath_left.y;
+//                    }
+//                    else if(drone.getHeadingDisplay() >= fifthBreak && drone.getHeadingDisplay() < firstBreak){
+//                        return travelArrowPath_left_0_plus.y;
+//                    }
+                }
+                function get_travel_angle(){
+                    return travelArrow_circ.angle;
+//                    if(drone.getHeadingDisplay() >= firstBreak && drone.getHeadingDisplay() < secondBreak){
+//                        return travelArrowPath_top.angle;
+//                    }
+//                    else if(drone.getHeadingDisplay() >= secondBreak && drone.getHeadingDisplay() < thirdBreak){
+//                        return 90;
+//                        //travelArrowPath_right.angle;
+//                    }
+//                    else if(drone.getHeadingDisplay() >= thirdBreak && drone.getHeadingDisplay() < fourthBreak){
+//                        return travelArrowPath_bottom.angle;
+//                    }
+//                    else if(drone.getHeadingDisplay() >= fourthBreak && drone.getHeadingDisplay() <= fifthBreak_360){
+//                        return 270;
+//                        //travelArrowPath_left.angle;
+//                    }
+//                    else if(drone.getHeadingDisplay() >= fifthBreak && drone.getHeadingDisplay() < firstBreak){
+//                        return 270;
+//                    }
+                }
+                function get_tdir_x(){
+                    return travelDirection_circ.x;
+                }
+                function get_tdir_y(){
+                    return travelDirection_circ.y;
+                }
+                function get_tdir_angle(){
+                    return travelDirection_circ.angle;
+                }
+
+                PathInterpolator {
+                    id: travelArrow_circ
+                    path: Path {
+                        startX: headingAnchors.x + headingAnchors.radius / 1.75; startY: headingAnchors.y - headingAnchors.radius / 4
+                        PathArc {
+                            x: headingAnchors.x + headingAnchors.radius / 1.75; y: headingAnchors.y + 2.5 * headingAnchors.radius
+                            radiusX: headingAnchors.radius / 1.5; radiusY: headingAnchors.radius / 1.5
+                            direction: PathArc.Clockwise
+                        }
+                        PathArc {
+                            x: headingAnchors.x + headingAnchors.radius / 1.75; y: headingAnchors.y - headingAnchors.radius / 4
+                            radiusX: headingAnchors.radius / 1.5; radiusY: headingAnchors.radius / 1.5
+                            direction: PathArc.Clockwise
+                        }
+                    }
+                    //NumberAnimation on progress { from: 0; to: 1; duration: 90000 }
+
+                    progress: (drone.getHeadingDisplay() / drone.fifthBreak_360 )
+                }
+                PathInterpolator {
+                    id: travelDirection_circ
+                    path: Path {
+                        startX: headingAnchors.x + headingAnchors.radius / 1.75; startY: headingAnchors.y - headingAnchors.radius / 4
+                        PathArc {
+                            x: headingAnchors.x + headingAnchors.radius / 1.75; y: headingAnchors.y + 2.5 * headingAnchors.radius
+                            radiusX: headingAnchors.radius / 1.5; radiusY: headingAnchors.radius / 1.5
+                            direction: PathArc.Clockwise
+                        }
+                        PathArc {
+                            x: headingAnchors.x + headingAnchors.radius / 1.75; y: headingAnchors.y - headingAnchors.radius / 4
+                            radiusX: headingAnchors.radius / 1.5; radiusY: headingAnchors.radius / 1.5
+                            direction: PathArc.Clockwise
+                        }
+                    }
+                    //NumberAnimation on progress { from: 1; to: 0; duration: 90000 }
+
+                    progress: ((360 - drone.getHeadingDisplay()) / drone.fifthBreak_360 )
+                }
+                PathInterpolator {
+                    id: travelArrowPath_top
+                    path: Path {
+                        startX: headingAnchors.x - 100; startY: headingAnchors.y
+                        PathArc {
+                            x: headingAnchors.x - 25 + 2 * radiusX; y: headingAnchors.y
+                            radiusX: headingAnchors.radius * 1.25; radiusY: headingAnchors.radius / 1.25
+                            direction: PathArc.Clockwise
+                        }
+                    }
+                    //NumberAnimation on progress { from: 0; to: 1; duration: 20000 }
+
+                    progress: (drone.getHeadingDisplay() - drone.firstBreak)/ (drone.secondBreak - drone.firstBreak)
+                }
+                PathInterpolator {
+                    id: travelArrowPath_right
+                    path: Path {
+                        startX: headingAnchors.x - 25 + 2 * headingAnchors.radius * 1.25; startY: headingAnchors.y
+                        PathLine{
+                            x: headingAnchors.x - 25 + 2 * headingAnchors.radius * 1.25
+                            y: - headingAnchors.y
+                        }
+                    }
+                    //NumberAnimation on progress { from: 0; to: 1; duration: 20000 }
+
+                    progress: (drone.getHeadingDisplay() - drone.secondBreak)/ (drone.thirdBreak - drone.secondBreak)
+                }
+//                Timer {
+//                    interval:       1
+//                    running:        true
+//                    repeat:         true
+//                    onTriggered:    travelArrowPath_left.updateLeftSideProgress()
+//                }
+//                PathInterpolator {
+//                    id: travelArrowPath_left
+
+//                    property real left_side_progress: 0
+
+//                    function updateLeftSideProgress(){
+//                        if(drone.getHeadingDisplay() >= 0 && drone.getHeadingDisplay() <= drone.firstBreak){
+//                            left_side_progress = drone.getHeadingDisplay() + (360 - drone.fourthBreak);
+//                        }
+//                        else{
+//                            left_side_progress = drone.getHeadingDisplay() - drone.fourthBreak;
+//                        }
+//                    }
+
+//                    path: Path {
+//                        startX: headingAnchors.x - 100; startY: -headingAnchors.y
+//                        PathLine{
+//                            x: headingAnchors.x - 100
+//                            y: headingAnchors.y
+//                        }
+//                    }
+
+//                    //NumberAnimation on progress { from: 0; to: 1; duration: 20000 }
+
+//                    progress: left_side_progress / (drone.firstBreak + (360 - drone.fourthBreak))
+//                }
+                PathInterpolator {
+                    id: travelArrowPath_left
+                    path: Path {
+                        startX: headingAnchors.x - 100; startY: -headingAnchors.y
+                        PathLine{
+                            x: headingAnchors.x - 100
+                            y: headingAnchors.y * (57 / 90) //ratio
+                        }
+                    }
+
+                    //NumberAnimation on progress { from: 0; to: 1; duration: 20000 }
+
+                    progress: (drone.getHeadingDisplay() - drone.fourthBreak)/ (drone.fifthBreak_360 - drone.fourthBreak)
+                }
+                PathInterpolator {
+                    id: travelArrowPath_left_0_plus
+
+                    path: Path {
+                        startX: headingAnchors.x - 100; startY: headingAnchors.y * (57 / 90)
+                        PathLine{
+                            x: headingAnchors.x - 100
+                            y: headingAnchors.y
+                        }
+                    }
+
+                    //NumberAnimation on progress { from: 0; to: 1; duration: 20000 }
+
+                    progress: (drone.getHeadingDisplay())/ (drone.firstBreak)
+                }
+
+                PathInterpolator {
+                    id: travelArrowPath_bottom
+                    path: Path {
+                        startX: headingAnchors.x - 25 + 2 * headingAnchors.radius * 1.25; startY: -headingAnchors.y
+                        PathArc {
+                            x: headingAnchors.x - 100; y: -headingAnchors.y
+                            radiusX: headingAnchors.radius * 1.25; radiusY: headingAnchors.radius / 1.5
+                            direction: PathArc.Clockwise
+                        }
+                    }
+                    //NumberAnimation on progress { from: 0; to: 1; duration: 20000 }
+
+                    progress: (drone.getHeadingDisplay() - drone.thirdBreak)/ (drone.fourthBreak - drone.thirdBreak)
+                }
+                PathInterpolator {
+                    id: windArrowPath_top
+                    path: Path {
+                        startX: headingAnchors.x - 25; startY: headingAnchors.y
+
+                        PathArc {
+                            x: headingAnchors.x - 100 + 2 * radiusX; y: headingAnchors.y
+                            radiusX: headingAnchors.radius * 1.25; radiusY: headingAnchors.radius / 2
+                            direction: PathArc.Clockwise
+                        }
+                    }
+
+                    NumberAnimation on progress { loops: 20; from: 0; to: 1;  duration: 20000 }
+                }
                 Rectangle {
                     id: top_left_prop
                     width: drone.width / 1.35
@@ -774,24 +1341,24 @@ FlightMap {
                     color: "white"
                     states:[
                         State {
-                            name: "yellow_low"; when: _activeVehicle.servoRaw.value <= 40 && _activeVehicle.servoRaw.value > 35
-                            PropertyChanges {target: top_left_prop; color: "yellow"}
+                            name: "yellow_low"; when: _activeVehicle.servoRaw.value <= rpm_color_low_max && _activeVehicle.servoRaw.value > rpm_color_low_min
+                            PropertyChanges {target: top_left_prop; color: color_rpm_med}
                         },
                         State {
-                            name: "red_low"; when: _activeVehicle.servoRaw.value <= 35
-                            PropertyChanges {target: top_left_prop; color: "red"}
+                            name: "red_low"; when: _activeVehicle.servoRaw.value <= rpm_color_low_min
+                            PropertyChanges {target: top_left_prop; color: color_rpm_max}
                         },
                         State {
-                            name: "green"; when: _activeVehicle.servoRaw.value > 40 && _activeVehicle.servoRaw.value < 95
-                            PropertyChanges {target: top_left_prop; color: "green"}
+                            name: "green"; when: _activeVehicle.servoRaw.value > rpm_color_low_max && _activeVehicle.servoRaw.value < rpm_color_mid_max
+                            PropertyChanges {target: top_left_prop; color: color_rpm_min}
                         },
                         State {
-                            name: "yellow"; when: _activeVehicle.servoRaw.value >= 95 && _activeVehicle.servoRaw.value < 98
-                            PropertyChanges {target: top_left_prop; color: "yellow"}
+                            name: "yellow"; when: _activeVehicle.servoRaw.value >= rpm_color_mid_max && _activeVehicle.servoRaw.value < rpm_color_high_max
+                            PropertyChanges {target: top_left_prop; color: color_rpm_med}
                         },
                         State {
-                            name: "red"; when: _activeVehicle.servoRaw.value >= 98
-                            PropertyChanges {target: top_left_prop; color: "red"}
+                            name: "red"; when: _activeVehicle.servoRaw.value >= rpm_color_high_max
+                            PropertyChanges {target: top_left_prop; color: color_rpm_max}
                         }
                     ]
                     transitions:[
@@ -833,7 +1400,7 @@ FlightMap {
                             anchors.verticalCenter: parent.verticalCenter
                             visible:                true
                             font.pointSize: 20
-                            text:                   _activeVehicle ? _activeVehicle.servoRaw.value +"%" : 0
+                            text:                   _activeVehicle ? _activeVehicle.servoRaw.value : 0
                     }
                 }
 
@@ -844,24 +1411,24 @@ FlightMap {
                     color: "white"
                     states:[
                         State {
-                            name: "yellow_low"; when: _activeVehicle.servoRaw3.value <= 40 && _activeVehicle.servoRaw3.value > 35
-                            PropertyChanges {target: bottom_left_prop; color: "yellow"}
+                            name: "yellow_low"; when: _activeVehicle.servoRaw3.value <= rpm_color_low_max && _activeVehicle.servoRaw3.value > rpm_color_low_min
+                            PropertyChanges {target: bottom_left_prop; color: color_rpm_med}
                         },
                         State {
-                            name: "red_low"; when: _activeVehicle.servoRaw3.value <= 35
-                            PropertyChanges {target: bottom_left_prop; color: "red"}
+                            name: "red_low"; when: _activeVehicle.servoRaw3.value <= rpm_color_low_min
+                            PropertyChanges {target: bottom_left_prop; color: color_rpm_max}
                         },
                         State {
-                            name: "green"; when: _activeVehicle.servoRaw3.value > 40 && _activeVehicle.servoRaw3.value < 95
-                            PropertyChanges {target: bottom_left_prop; color: "green"}
+                            name: "green"; when: _activeVehicle.servoRaw3.value > rpm_color_low_max && _activeVehicle.servoRaw3.value < rpm_color_mid_max
+                            PropertyChanges {target: bottom_left_prop; color: color_rpm_min}
                         },
                         State {
-                            name: "yellow"; when: _activeVehicle.servoRaw3.value >= 95 && _activeVehicle.servoRaw3.value < 98
-                            PropertyChanges {target: bottom_left_prop; color: "yellow"}
+                            name: "yellow"; when: _activeVehicle.servoRaw3.value >= rpm_color_mid_max && _activeVehicle.servoRaw3.value < rpm_color_high_max
+                            PropertyChanges {target: bottom_left_prop; color: color_rpm_med}
                         },
                         State {
-                            name: "red"; when: _activeVehicle.servoRaw3.value >= 98
-                            PropertyChanges {target: bottom_left_prop; color: "red"}
+                            name: "red"; when: _activeVehicle.servoRaw3.value >= rpm_color_high_max
+                            PropertyChanges {target: bottom_left_prop; color: color_rpm_max}
                         }
                     ]
                     transitions:[
@@ -903,7 +1470,7 @@ FlightMap {
                             anchors.verticalCenter: parent.verticalCenter
                             visible:                true
                             font.pointSize: 20
-                            text:                   _activeVehicle ? _activeVehicle.servoRaw3.value + "%" : 0
+                            text:                   _activeVehicle ? _activeVehicle.servoRaw3.value : 0
                     }
                 }
 
@@ -914,24 +1481,24 @@ FlightMap {
                     color: "white"
                     states:[
                         State {
-                            name: "yellow_low"; when: _activeVehicle.servoRaw4.value <= 40 && _activeVehicle.servoRaw4.value > 35
-                            PropertyChanges {target: bottom_right_prop; color: "yellow"}
+                            name: "yellow_low"; when: _activeVehicle.servoRaw4.value <= rpm_color_low_max && _activeVehicle.servoRaw4.value > rpm_color_low_min
+                            PropertyChanges {target: bottom_right_prop; color: color_rpm_med}
                         },
                         State {
-                            name: "red_low"; when: _activeVehicle.servoRaw4.value <= 35
-                            PropertyChanges {target: bottom_right_prop; color: "red"}
+                            name: "red_low"; when: _activeVehicle.servoRaw4.value <= rpm_color_low_min
+                            PropertyChanges {target: bottom_right_prop; color: color_rpm_max}
                         },
                         State {
-                            name: "green"; when: _activeVehicle.servoRaw4.value > 40 && _activeVehicle.servoRaw4.value < 95
-                            PropertyChanges {target: bottom_right_prop; color: "green"}
+                            name: "green"; when: _activeVehicle.servoRaw4.value > rpm_color_low_max && _activeVehicle.servoRaw4.value < rpm_color_mid_max
+                            PropertyChanges {target: bottom_right_prop; color: color_rpm_min}
                         },
                         State {
-                            name: "yellow"; when: _activeVehicle.servoRaw4.value >= 95 && _activeVehicle.servoRaw4.value < 98
-                            PropertyChanges {target: bottom_right_prop; color: "yellow"}
+                            name: "yellow"; when: _activeVehicle.servoRaw4.value >= rpm_color_mid_max && _activeVehicle.servoRaw4.value < rpm_color_high_max
+                            PropertyChanges {target: bottom_right_prop; color: color_rpm_med}
                         },
                         State {
-                            name: "red"; when: _activeVehicle.servoRaw4.value >= 98
-                            PropertyChanges {target: bottom_right_prop; color: "red"}
+                            name: "red"; when: _activeVehicle.servoRaw4.value >= rpm_color_high_max
+                            PropertyChanges {target: bottom_right_prop; color: color_rpm_max}
                         }
                     ]
                     transitions:[
@@ -972,7 +1539,7 @@ FlightMap {
                             anchors.verticalCenter: parent.verticalCenter
                             visible:                true
                             font.pointSize: 20
-                            text:                   _activeVehicle ? _activeVehicle.servoRaw4.value +"%" : 0
+                            text:                   _activeVehicle ? _activeVehicle.servoRaw4.value : 0
                     }
                 }
 
@@ -983,24 +1550,24 @@ FlightMap {
                     color: "white"
                     states:[
                         State {
-                            name: "yellow_low"; when: _activeVehicle.servoRaw2.value <= 40 && _activeVehicle.servoRaw2.value > 35
-                            PropertyChanges {target: top_right_prop; color: "yellow"}
+                            name: "yellow_low"; when: _activeVehicle.servoRaw2.value <= rpm_color_low_max && _activeVehicle.servoRaw2.value > rpm_color_low_min
+                            PropertyChanges {target: top_right_prop; color: color_rpm_med}
                         },
                         State {
-                            name: "red_low"; when: _activeVehicle.servoRaw2.value <= 35
-                            PropertyChanges {target: top_right_prop; color: "red"}
+                            name: "red_low"; when: _activeVehicle.servoRaw2.value <= rpm_color_low_min
+                            PropertyChanges {target: top_right_prop; color: color_rpm_max}
                         },
                         State {
-                            name: "green"; when: _activeVehicle.servoRaw2.value > 40 && _activeVehicle.servoRaw2.value < 95
-                            PropertyChanges {target: top_right_prop; color: "green"}
+                            name: "green"; when: _activeVehicle.servoRaw2.value > rpm_color_low_max && _activeVehicle.servoRaw2.value < rpm_color_mid_max
+                            PropertyChanges {target: top_right_prop; color: color_rpm_min}
                         },
                         State {
-                            name: "yellow"; when: _activeVehicle.servoRaw2.value >= 95 && _activeVehicle.servoRaw2.value < 98
-                            PropertyChanges {target: top_right_prop; color: "yellow"}
+                            name: "yellow"; when: _activeVehicle.servoRaw2.value >= rpm_color_mid_max && _activeVehicle.servoRaw2.value < rpm_color_high_max
+                            PropertyChanges {target: top_right_prop; color: color_rpm_med}
                         },
                         State {
-                            name: "red"; when: _activeVehicle.servoRaw2.value >= 98
-                            PropertyChanges {target: top_right_prop; color: "red"}
+                            name: "red"; when: _activeVehicle.servoRaw2.value >= rpm_color_high_max
+                            PropertyChanges {target: top_right_prop; color: color_rpm_max}
                         }
                     ]
                     transitions:[
@@ -1042,791 +1609,792 @@ FlightMap {
                             anchors.verticalCenter: parent.verticalCenter
                             visible:                true
                             font.pointSize: 20
-                            text:                   _activeVehicle ? _activeVehicle.servoRaw2.value + "%" : 0
+                            text:                   _activeVehicle ? _activeVehicle.servoRaw2.value : 0
                     }
                 }
-            }
 
-                Rectangle{
-                    id: button
-                    width: drone.width/3
-                    height: width/3
-                    anchors.top: parent.top
-                    anchors.left: parent.left
-                    anchors.leftMargin: parent.width/24.25
-                    anchors.topMargin: parent.height/15
-                    color: "transparent"
-                    states: [
-                        State {
-                            name: "on"
-                            PropertyChanges {target: drone_center; visible : true}
-                            PropertyChanges {target: top_left_prop; visible : true}
-                            PropertyChanges {target: top_right_prop; visible : true}
-                            PropertyChanges {target: bottom_right_prop; visible : true}
-                            PropertyChanges {target: bottom_left_prop; visible : true}
-                        },
-                        State {
-                            name: "off"
-                            PropertyChanges {target: drone_center; visible : false}
-                            PropertyChanges {target: top_left_prop; visible : false}
-                            PropertyChanges {target: top_right_prop; visible : false}
-                            PropertyChanges {target: bottom_right_prop; visible : false}
-                            PropertyChanges {target: bottom_left_prop; visible : false}
-                        }
-                    ]
-                        transitions: [
-                            Transition {
-                                from: "on"; to: "off"; reversible: true
-                            }
-                        ]
-                    Button{
-                        text: "On/Off"
-                        onClicked: button.state = (button.state === 'off' ? 'on' : "off");
-                    }
-            }
-                Item{
-                    id: buttons
-                    width: 2.05*(drone.width)
-                    height: 2.5*(drone.height)
-                    anchors.verticalCenter: drone.verticalCenter
-                    anchors.horizontalCenter: drone.horizontalCenter
 
                     Rectangle{
-                        id: white_background
-                        color: "white"
-                        opacity: 0.5
-                        width: p_dis.width * 6.5
-                        height: p_dis.height * 1.2
-                        anchors.left: buttons.right
-                        anchors.top: p_dis.top
-                        anchors.topMargin: -p_dis.width / 2
-                        anchors.leftMargin: -p_dis.width / 4
-                    }
-
-                    Rectangle{
-                        id: p_dis
-                        anchors.left: buttons.right
-                        anchors.top: buttons.top
-                        anchors.topMargin: buttons.width / 3.5
-                        height: buttons.height / 2
-                        width: buttons.width / 10
+                        id: button
+                        width: drone.width/3
+                        height: width/3
+                        anchors.top: parent.top
+                        anchors.left: parent.left
+                        anchors.leftMargin: parent.width/24.25
+                        anchors.topMargin: parent.height/15
                         color: "transparent"
-                        border.color: "black"
-                        border.width: 2
-                        property real _pitch: _activeVehicle ? actualNormalize(_activeVehicle.pitch.value) : 0
-                        property real pitchError: _activeVehicle ? ((Math.abs(_pitch - _activeVehicle.getSetpointPitch())) / 180) : 0
                         states: [
                             State {
-                                name: "pos"
-                                when: pitch_pos.height > 0
-                                PropertyChanges {
-                                    target: pitch_neg
-                                    height: 0
-                                }
+                                name: "on"
+                                PropertyChanges {target: drone_center; visible : true}
+                                PropertyChanges {target: top_left_prop; visible : true}
+                                PropertyChanges {target: top_right_prop; visible : true}
+                                PropertyChanges {target: bottom_right_prop; visible : true}
+                                PropertyChanges {target: bottom_left_prop; visible : true}
                             },
                             State {
-                                name: "neg"
-                                when: pitch_neg.height > 0
-                                PropertyChanges {
-                                    target: pitch_pos
-                                    height: 0
-                                }
+                                name: "off"
+                                PropertyChanges {target: drone_center; visible : false}
+                                PropertyChanges {target: top_left_prop; visible : false}
+                                PropertyChanges {target: top_right_prop; visible : false}
+                                PropertyChanges {target: bottom_right_prop; visible : false}
+                                PropertyChanges {target: bottom_left_prop; visible : false}
                             }
                         ]
-                        transitions: [
-                            Transition {
-                                from: "pos"; to: "neg"; reversible: false
-                                NumberAnimation {
-                                    target: pitch_pos
-                                    property: height
-                                    duration: 20
-                                    easing.type: Easing.OutExpo
-                                    to: 0
-                                }
-                            },
-                            Transition {
-                                from: "neg"; to: "pos"; reversible: false
-                                NumberAnimation {
-                                    target: pitch_neg
-                                    property: height
-                                    duration: 20
-                                    easing.type: Easing.OutExpo
-                                    to: 0
-                                }
-                            }
-                        ]
-                        Text{
-                            text: "P"
-                            anchors.top: p_dis.bottom
-                            anchors.horizontalCenter: p_dis.horizontalCenter
-                        }
-                        Rectangle{
-                            id: pitch_pos
-                            width: p_dis.width / 1.25
-                            anchors.bottom: p_dis.verticalCenter
-                            anchors.horizontalCenter: p_dis.horizontalCenter
-                            anchors.bottomMargin: 2
-                            color: "green"
-                            height: _activeVehicle ? pos(Math.abs(p_dis._pitch), Math.abs(_activeVehicle.getSetpointPitch()), pitch_neg.height) * errorHeight(p_dis.pitchError, p_dis.height, 1) : 0
-                            Behavior on height { SmoothedAnimation { velocity: smoothingFactor } }
-                            states:[
-                                State {
-                                    name: "green"; when: pitch_pos.height / (p_dis.height / 2) < .333
-                                    PropertyChanges {target: pitch_pos; color: "green"}
-                                },
-                                State {
-                                    name: "yellow"; when: pitch_pos.height / (p_dis.height / 2) >= .333 && pitch_pos.height / (p_dis.height / 2) < .667
-                                    PropertyChanges {target: pitch_pos; color: "yellow"}
-                                },
-                                State {
-                                    name: "red"; when: pitch_pos.height / (p_dis.height / 2) <= 1 && pitch_pos.height / (p_dis.height / 2) >= .667
-                                    PropertyChanges {target: pitch_pos; color: "red"}
-                                },
-                                State {
-                                    name: "max"; when: maximum_error[1]
-                                    PropertyChanges {target: pitch_pos; color: "darkred"}
+                            transitions: [
+                                Transition {
+                                    from: "on"; to: "off"; reversible: true
                                 }
                             ]
-                            transitions:[
-                                Transition{
-                                    from: "green"; to: "yellow"; reversible: true
-                                    ParallelAnimation{
-                                        ColorAnimation { duration: 500 }
-                                    }
-                                },
-                                Transition{
-                                    from: "yellow"; to: "red"; reversible: true
-                                    ParallelAnimation{
-                                        ColorAnimation { duration: 500 }
-                                    }
-                                },
-                                Transition{
-                                    from: "red"; to: "max"; reversible: true
-                                    ParallelAnimation{
-                                        ColorAnimation { duration: 500 }
-                                    }
-                                }
-                            ]
-                        }
-                        Rectangle{
-                            id: pitch_neg
-                            width: p_dis.width / 1.25
-                            anchors.top: p_dis.verticalCenter
-                            anchors.horizontalCenter: p_dis.horizontalCenter
-                            anchors.bottomMargin: 2
-                            color: "green"
-                            height: _activeVehicle ? neg(Math.abs(p_dis._pitch), Math.abs(_activeVehicle.getSetpointPitch()), pitch_pos.height) * errorHeight(p_dis.pitchError, p_dis.height, 1) : 0
-                            Behavior on height { SmoothedAnimation { velocity: smoothingFactor } }
-                            states:[
-                                State {
-                                    name: "green"; when: pitch_neg.height / (p_dis.height / 2) < .333
-                                    PropertyChanges {target: pitch_neg; color: "green"}
-                                },
-                                State {
-                                    name: "yellow"; when: pitch_neg.height / (p_dis.height / 2) >= .333 && pitch_neg.height / (p_dis.height / 2) < .667
-                                    PropertyChanges {target: pitch_neg; color: "yellow"}
-                                },
-                                State {
-                                    name: "red"; when: pitch_neg.height / (p_dis.height / 2) <= 1 && pitch_neg.height / (p_dis.height / 2) >= .667
-                                    PropertyChanges {target: pitch_neg; color: "red"}
-                                },
-                                State {
-                                    name: "max"; when: maximum_error[1]
-                                    PropertyChanges {target: pitch_neg; color: "darkred"}
-                                }
-                            ]
-                            transitions:[
-                                Transition{
-                                    from: "green"; to: "yellow"; reversible: true
-                                    ParallelAnimation{
-                                        ColorAnimation { duration: 500 }
-                                    }
-                                },
-                                Transition{
-                                    from: "yellow"; to: "red"; reversible: true
-                                    ParallelAnimation{
-                                        ColorAnimation { duration: 500 }
-                                    }
-                                },
-                                Transition{
-                                    from: "red"; to: "max"; reversible: true
-                                    ParallelAnimation{
-                                        ColorAnimation { duration: 500 }
-                                    }
-                                }
-                            ]
-                        }
-
-                    }
-
-                    Rectangle{
-                        id: r_dis
-                        anchors.left: p_dis.right
-                        anchors.top: p_dis.top
-                        anchors.leftMargin: r_dis.width / 3
-                        height: p_dis.height
-                        width: p_dis.width
-                        color: "transparent"
-                        border.color: "black"
-                        border.width: 2
-                        property real _roll: _activeVehicle ? actualNormalize(_activeVehicle.roll.value) : 0
-                        property real rollError: _activeVehicle ? ((Math.abs(_roll - _activeVehicle.getSetpointRoll())) / 180) : 0
-                        states: [
-                            State {
-                                name: "pos"
-                                when: roll_pos.height > 0
-                                PropertyChanges {
-                                    target: roll_neg
-                                    height: 0
-                                }
-                            },
-                            State {
-                                name: "neg"
-                                when: roll_neg.height > 0
-                                PropertyChanges {
-                                    target: roll_pos
-                                    height: 0
-                                }
-                            }
-                        ]
-                        transitions: [
-                            Transition {
-                                from: "pos"; to: "neg"; reversible: false
-                                NumberAnimation {
-                                    target: roll_pos
-                                    property: height
-                                    duration: 20
-                                    easing.type: Easing.OutExpo
-                                    to: 0
-                                }
-                            },
-                            Transition {
-                                from: "neg"; to: "pos"; reversible: false
-                                NumberAnimation {
-                                    target: roll_neg
-                                    property: height
-                                    duration: 20
-                                    easing.type: Easing.OutExpo
-                                    to: 0
-                                }
-                            }
-                        ]
-
-                        Text{
-                            text: "R"
-                            anchors.top: r_dis.bottom
-                            anchors.horizontalCenter: r_dis.horizontalCenter
-                        }
-                        Rectangle{
-                            id: roll_pos
-                            width: r_dis.width / 1.25
-                            anchors.bottom: r_dis.verticalCenter
-                            anchors.horizontalCenter: r_dis.horizontalCenter
-                            anchors.bottomMargin: 2
-                            color: "green"
-                            height: _activeVehicle ? pos(Math.abs(r_dis._roll), Math.abs(_activeVehicle.getSetpointRoll()), roll_neg.height) * errorHeight(r_dis.rollError, r_dis.height, 0) : 0
-                            Behavior on height { SmoothedAnimation { velocity: smoothingFactor } }
-                            states:[
-                                State {
-                                    name: "green"; when: roll_pos.height / (r_dis.height / 2) < .333
-                                    PropertyChanges {target: roll_pos; color: "green"}
-                                },
-                                State {
-                                    name: "yellow"; when: roll_pos.height / (r_dis.height / 2) >= .333 && roll_pos.height / (r_dis.height / 2) < .667
-                                    PropertyChanges {target: roll_pos; color: "yellow"}
-                                },
-                                State {
-                                    name: "red"; when: roll_pos.height / (r_dis.height / 2) <= 1 && roll_pos.height / (r_dis.height / 2) >= .667
-                                    PropertyChanges {target: roll_pos; color: "red"}
-                                },
-                                State {
-                                    name: "max"; when: maximum_error[0]
-                                    PropertyChanges {target: roll_pos; color: "darkred"}
-                                }
-                            ]
-                            transitions:[
-                                Transition{
-                                    from: "green"; to: "yellow"; reversible: true
-                                    ParallelAnimation{
-                                        ColorAnimation { duration: 500 }
-                                    }
-                                },
-                                Transition{
-                                    from: "yellow"; to: "red"; reversible: true
-                                    ParallelAnimation{
-                                        ColorAnimation { duration: 500 }
-                                    }
-                                },
-                                Transition{
-                                    from: "red"; to: "max"; reversible: true
-                                    ParallelAnimation{
-                                        ColorAnimation { duration: 500 }
-                                    }
-                                }
-                            ]
-                        }
-                        Rectangle{
-                            id: roll_neg
-                            width: r_dis.width / 1.25
-                            anchors.top: r_dis.verticalCenter
-                            anchors.horizontalCenter: r_dis.horizontalCenter
-                            anchors.bottomMargin: 2
-                            color: "green"
-                            height: _activeVehicle ? neg(Math.abs(r_dis._roll), Math.abs(_activeVehicle.getSetpointRoll()), roll_pos.height) * errorHeight(r_dis.rollError, r_dis.height, 0) : 0
-                            Behavior on height { SmoothedAnimation { velocity: smoothingFactor } }
-                            states:[
-                                State {
-                                    name: "green"; when: roll_neg.height / (r_dis.height / 2) < .333
-                                    PropertyChanges {target: roll_neg; color: "green"}
-                                },
-                                State {
-                                    name: "yellow"; when: roll_neg.height / (r_dis.height / 2) >= .333 && roll_neg.height / (r_dis.height / 2) < .667
-                                    PropertyChanges {target: roll_neg; color: "yellow"}
-                                },
-                                State {
-                                    name: "red"; when: roll_neg.height / (r_dis.height / 2) <= 1 && roll_neg.height / (r_dis.height / 2) >= .667
-                                    PropertyChanges {target: roll_neg; color: "red"}
-                                },
-                                State {
-                                    name: "max"; when: maximum_error[0]
-                                    PropertyChanges {target: roll_neg; color: "darkred"}
-                                }
-                            ]
-                            transitions:[
-                                Transition{
-                                    from: "green"; to: "yellow"; reversible: true
-                                    ParallelAnimation{
-                                        ColorAnimation { duration: 500 }
-                                    }
-                                },
-                                Transition{
-                                    from: "yellow"; to: "red"; reversible: true
-                                    ParallelAnimation{
-                                        ColorAnimation { duration: 500 }
-                                    }
-                                },
-                                Transition{
-                                    from: "red"; to: "max"; reversible: true
-                                    ParallelAnimation{
-                                        ColorAnimation { duration: 500 }
-                                    }
-                                }
-                            ]
-                        }
-
-                    }
-
-                    Rectangle{
-                        id: y_dis
-                        anchors.left: r_dis.right
-                        anchors.top: r_dis.top
-                        anchors.leftMargin: y_dis.width / 3
-                        height: p_dis.height
-                        width: p_dis.width
-                        color: "transparent"
-                        border.color: "black"
-                        border.width: 2
-                        property real heading: _activeVehicle ? Math.abs(actualNormalize(_activeVehicle.heading.value)) : 0
-                        property real yawError: _activeVehicle ? (Math.abs(heading - Math.abs(_activeVehicle.getSetpointYaw()))) / 180 : 0
-                        states: [
-                            State {
-                                name: "pos"
-                                when: yaw_pos.height > 0
-                                PropertyChanges {
-                                    target: yaw_neg
-                                    height: 0
-                                }
-                            },
-                            State {
-                                name: "neg"
-                                when: yaw_neg.height > 0
-                                PropertyChanges {
-                                    target: yaw_pos
-                                    height: 0
-                                }
-                            }
-                        ]
-                        transitions: [
-                            Transition {
-                                from: "pos"; to: "neg"; reversible: false
-                                NumberAnimation {
-                                    target: yaw_pos
-                                    property: height
-                                    duration: 20
-                                    easing.type: Easing.OutExpo
-                                    to: 0
-                                }
-                            },
-                            Transition {
-                                from: "neg"; to: "pos"; reversible: false
-                                NumberAnimation {
-                                    target: yaw_neg
-                                    property: height
-                                    duration: 20
-                                    easing.type: Easing.OutExpo
-                                    to: 0
-                                }
-                            }
-                        ]
-
-                        Text{
-                            text: "Y"
-                            anchors.top: y_dis.bottom
-                            anchors.horizontalCenter: y_dis.horizontalCenter
-                        }
-                        Rectangle{
-                            id: yaw_pos
-                            width: y_dis.width / 1.25
-                            anchors.bottom: y_dis.verticalCenter
-                            anchors.horizontalCenter: y_dis.horizontalCenter
-                            anchors.bottomMargin: 2
-                            color: "green"
-                            height: _activeVehicle ? pos(Math.abs(y_dis.heading), Math.abs(_activeVehicle.getSetpointYaw()), yaw_neg.height) * errorHeight(y_dis.yawError, y_dis.height, 2) : 0
-                            Behavior on height { SmoothedAnimation { velocity: smoothingFactor } }
-                            states:[
-                                State {
-                                    name: "green"; when: yaw_pos.height / (y_dis.height / 2) < .333
-                                    PropertyChanges {target: yaw_pos; color: "green"}
-                                },
-                                State {
-                                    name: "yellow"; when: yaw_pos.height / (y_dis.height / 2) >= .333 && yaw_pos.height / (y_dis.height / 2) < .667
-                                    PropertyChanges {target: yaw_pos; color: "yellow"}
-                                },
-                                State {
-                                    name: "red"; when: yaw_pos.height / (y_dis.height / 2) <= 1 && yaw_pos.height / (y_dis.height / 2) >= .667
-                                    PropertyChanges {target: yaw_pos; color: "red"}
-                                },
-                                State {
-                                    name: "max"; when: maximum_error[2]
-                                    PropertyChanges {target: yaw_pos; color: "darkred"}
-                                }
-                            ]
-                            transitions:[
-                                Transition{
-                                    from: "green"; to: "yellow"; reversible: true
-                                    ParallelAnimation{
-                                        ColorAnimation { duration: 500 }
-                                    }
-                                },
-                                Transition{
-                                    from: "yellow"; to: "red"; reversible: true
-                                    ParallelAnimation{
-                                        ColorAnimation { duration: 500 }
-                                    }
-                                },
-                                Transition{
-                                    from: "red"; to: "max"; reversible: true
-                                    ParallelAnimation{
-                                        ColorAnimation { duration: 500 }
-                                    }
-                                }
-                            ]
-                        }
-                        Rectangle{
-                            id: yaw_neg
-                            width: y_dis.width / 1.25
-                            anchors.top: y_dis.verticalCenter
-                            anchors.horizontalCenter: y_dis.horizontalCenter
-                            anchors.bottomMargin: 2
-                            color: "green"
-                            height: _activeVehicle ? neg(Math.abs(y_dis.heading), Math.abs(_activeVehicle.getSetpointYaw()), yaw_pos.height) * errorHeight(y_dis.yawError, y_dis.height, 2) : 0
-                            Behavior on height { SmoothedAnimation { velocity: smoothingFactor } }
-                            states:[
-                                State {
-                                    name: "green"; when: yaw_neg.height / (y_dis.height / 2) < .333
-                                    PropertyChanges {target: yaw_neg; color: "green"}
-                                },
-                                State {
-                                    name: "yellow"; when: yaw_neg.height / (y_dis.height / 2) >= .333 && yaw_neg.height / (y_dis.height / 2) < .667
-                                    PropertyChanges {target: yaw_neg; color: "yellow"}
-                                },
-                                State {
-                                    name: "red"; when: yaw_neg.height / (y_dis.height / 2) <= 1 && yaw_neg.height / (y_dis.height / 2) >= .667
-                                    PropertyChanges {target: yaw_neg; color: "red"}
-                                },
-                                State {
-                                    name: "max"; when: maximum_error[2]
-                                    PropertyChanges {target: yaw_neg; color: "darkred"}
-                                }
-                            ]
-                            transitions:[
-                                Transition{
-                                    from: "green"; to: "yellow"; reversible: true
-                                    ParallelAnimation{
-                                        ColorAnimation { duration: 500 }
-                                    }
-                                },
-                                Transition{
-                                    from: "yellow"; to: "red"; reversible: true
-                                    ParallelAnimation{
-                                        ColorAnimation { duration: 500 }
-                                    }
-                                },
-                                Transition{
-                                    from: "red"; to: "max"; reversible: true
-                                    ParallelAnimation{
-                                        ColorAnimation { duration: 500 }
-                                    }
-                                }
-                            ]
-                        }
-                    }
-
-                    Rectangle{
-                        id: topRef
-                        width: p_dis.width
-                        height: 2
-                        color: "black"
-                        anchors.left: y_dis.right
-                        anchors.top: p_dis.top
-                        anchors.leftMargin: topRef.width / 3
-                        Text{
-                            text: error_bar_height
-                            anchors.left: topRef.right
-                            anchors.horizontalCenter: topRef.horizontalCenter
-                        }
-                    }
-
-                    Rectangle{
-                        id: sideRef
-                        width: 2
-                        height: p_dis.height
-                        color: "black"
-                        anchors.left: y_dis.right
-                        anchors.top: p_dis.top
-                        anchors.leftMargin: topRef.width / 3
-                    }
-
-                    Rectangle{
-                        id: bottomRef
-                        width: p_dis.width
-                        height: 2
-                        color: "black"
-                        anchors.left: y_dis.right
-                        anchors.bottom: p_dis.bottom
-                        anchors.leftMargin: topRef.width / 3
-                        Text{
-                            text: "-" + error_bar_height
-                            anchors.left: bottomRef.right
-                            anchors.horizontalCenter: bottomRef.horizontalCenter
-                        }
-                    }
-
-                    Rectangle{
-                        id: midRef
-                        width: p_dis.width
-                        height: 2
-                        color: "black"
-                        anchors.left: y_dis.right
-                        anchors.top: sideRef.top
-                        anchors.topMargin: sideRef.height / 2
-                        anchors.leftMargin: topRef.width / 3
-                        Text{
-                            text: "0"
-                            anchors.left: midRef.right
-                            anchors.horizontalCenter: midRef.horizontalCenter
-                        }
-                    }
-
-                    Rectangle{
-                        width: buttons.width
-                        height: buttons.height
-                        color: "transparent"
-                    }
-
-                    Rectangle{
-                        id: rc_button
-                        height: buttons.width / 8
-                        width: buttons.width / 2.75
-                        anchors.right: buttons.horizontalCenter
-                        anchors.top: buttons.top
-                        anchors.leftMargin: p_dis.width
-                        property string rc_border_color: "lime"
-                        states: [
-                            State {
-                                name: "on_rc"
-                                PropertyChanges {target: train_button; opacity : 1}
-                                PropertyChanges {target: rc_button_control; text : "RC"}
-                                PropertyChanges {target: rc_button_control; palette.buttonText: "white"}
-                                PropertyChanges {target: rc_button; rc_border_color: "lime"}
-                                PropertyChanges {target: rc_button_control; palette.button : "steelblue"}
-                                PropertyChanges {target: rc_button_control; text : "RC"}
-                                PropertyChanges {target: train_button; enabled: true }
-                                //switch to rc
-                                onCompleted: _root.rc_or_pid=1
-                            },
-                            State {
-                                name: "off_rc"
-                                PropertyChanges {target: train_button; opacity : 0.5}
-                                PropertyChanges {target: rc_button_control; text : "PID"}
-                                PropertyChanges {target: rc_button_control; palette.buttonText: "black"}
-                                PropertyChanges {target: rc_button; rc_border_color: "black"}
-                                PropertyChanges {target: rc_button_control; palette.button : "white"}
-                                PropertyChanges {target: train_button; enabled: false }
-                                //switch to pid
-                                onCompleted: _root.rc_or_pid=0
-                            }
-                        ]
-                        transitions: [
-                            Transition {
-                                from: "on_rc"; to: "off_rc"; reversible: true
-                            }
-                        ]
                         Button{
-                            id: rc_button_control
-                            width: rc_button.width
-                            height: rc_button.height
-                            text: "RC"
-                            palette.buttonText: "white"
-                            palette.button: "steelblue"
+                            visible: false
+                            text: "On/Off"
+                            onClicked: button.state = (button.state === 'off' ? 'on' : "off");
+                        }
+                }
+                    Item{
+                        id: buttons
+                        width: 2.05*(drone.width)
+                        height: 2.5*(drone.height)
+                        anchors.verticalCenter: drone.verticalCenter
+                        anchors.horizontalCenter: drone.horizontalCenter
+
+                        Rectangle{
+                            id: white_background
+                            color: "white"
+                            opacity: 0.5
+                            width: p_dis.width * 6.5
+                            height: p_dis.height * 1.2
+                            anchors.left: buttons.right
+                            anchors.top: p_dis.top
+                            anchors.topMargin: -p_dis.width / 2
+                            anchors.leftMargin: -p_dis.width / 4
+                        }
+
+                        Rectangle{
+                            id: p_dis
+                            anchors.left: buttons.right
+                            anchors.top: buttons.top
+                            anchors.topMargin: buttons.width / 3.5
+                            height: buttons.height / 2
+                            width: buttons.width / 10
+                            color: "transparent"
+                            border.color: "black"
+                            border.width: 2
+                            property real _pitch: _activeVehicle ? actualNormalize(_activeVehicle.pitch.value) : 0
+                            property real pitchError: _activeVehicle ? ((Math.abs(_pitch - _activeVehicle.getSetpointPitch())) / 180) : 0
+                            states: [
+                                State {
+                                    name: "pos"
+                                    when: pitch_pos.height > 0
+                                    PropertyChanges {
+                                        target: pitch_neg
+                                        height: 0
+                                    }
+                                },
+                                State {
+                                    name: "neg"
+                                    when: pitch_neg.height > 0
+                                    PropertyChanges {
+                                        target: pitch_pos
+                                        height: 0
+                                    }
+                                }
+                            ]
+                            transitions: [
+                                Transition {
+                                    from: "pos"; to: "neg"; reversible: false
+                                    NumberAnimation {
+                                        target: pitch_pos
+                                        property: height
+                                        duration: 20
+                                        easing.type: Easing.OutExpo
+                                        to: 0
+                                    }
+                                },
+                                Transition {
+                                    from: "neg"; to: "pos"; reversible: false
+                                    NumberAnimation {
+                                        target: pitch_neg
+                                        property: height
+                                        duration: 20
+                                        easing.type: Easing.OutExpo
+                                        to: 0
+                                    }
+                                }
+                            ]
+                            Text{
+                                text: "P"
+                                anchors.top: p_dis.bottom
+                                anchors.horizontalCenter: p_dis.horizontalCenter
+                            }
                             Rectangle{
+                                id: pitch_pos
+                                width: p_dis.width / 1.25
+                                anchors.bottom: p_dis.verticalCenter
+                                anchors.horizontalCenter: p_dis.horizontalCenter
+                                anchors.bottomMargin: 2
+                                color: "green"
+                                height: _activeVehicle ? pos(Math.abs(p_dis._pitch), Math.abs(_activeVehicle.getSetpointPitch()), pitch_neg.height) * errorHeight(p_dis.pitchError, p_dis.height, 1) : 0
+                                Behavior on height { SmoothedAnimation { velocity: smoothingFactor } }
+                                states:[
+                                    State {
+                                        name: "green"; when: pitch_pos.height / (p_dis.height / 2) < error_color_min
+                                        PropertyChanges {target: pitch_pos; color: color_error_min}
+                                    },
+                                    State {
+                                        name: "yellow"; when: pitch_pos.height / (p_dis.height / 2) >= error_color_min && pitch_pos.height / (p_dis.height / 2) < error_color_med
+                                        PropertyChanges {target: pitch_pos; color: color_error_med}
+                                    },
+                                    State {
+                                        name: "red"; when: pitch_pos.height / (p_dis.height / 2) <= error_color_max && pitch_pos.height / (p_dis.height / 2) >= error_color_med
+                                        PropertyChanges {target: pitch_pos; color: color_error_max}
+                                    },
+                                    State {
+                                        name: "max"; when: maximum_error[1]
+                                        PropertyChanges {target: pitch_pos; color: "darkred"}
+                                    }
+                                ]
+                                transitions:[
+                                    Transition{
+                                        from: "green"; to: "yellow"; reversible: true
+                                        ParallelAnimation{
+                                            ColorAnimation { duration: 500 }
+                                        }
+                                    },
+                                    Transition{
+                                        from: "yellow"; to: "red"; reversible: true
+                                        ParallelAnimation{
+                                            ColorAnimation { duration: 500 }
+                                        }
+                                    },
+                                    Transition{
+                                        from: "red"; to: "max"; reversible: true
+                                        ParallelAnimation{
+                                            ColorAnimation { duration: 500 }
+                                        }
+                                    }
+                                ]
+                            }
+                            Rectangle{
+                                id: pitch_neg
+                                width: p_dis.width / 1.25
+                                anchors.top: p_dis.verticalCenter
+                                anchors.horizontalCenter: p_dis.horizontalCenter
+                                anchors.bottomMargin: 2
+                                color: "green"
+                                height: _activeVehicle ? neg(Math.abs(p_dis._pitch), Math.abs(_activeVehicle.getSetpointPitch()), pitch_pos.height) * errorHeight(p_dis.pitchError, p_dis.height, 1) : 0
+                                Behavior on height { SmoothedAnimation { velocity: smoothingFactor } }
+                                states:[
+                                    State {
+                                        name: "green"; when: pitch_neg.height / (p_dis.height / 2) < error_color_min
+                                        PropertyChanges {target: pitch_neg; color: color_error_min}
+                                    },
+                                    State {
+                                        name: "yellow"; when: pitch_neg.height / (p_dis.height / 2) >= error_color_min && pitch_neg.height / (p_dis.height / 2) < error_color_med
+                                        PropertyChanges {target: pitch_neg; color: color_error_med}
+                                    },
+                                    State {
+                                        name: "red"; when: pitch_neg.height / (p_dis.height / 2) <= error_color_max && pitch_neg.height / (p_dis.height / 2) >= error_color_med
+                                        PropertyChanges {target: pitch_neg; color: color_error_max}
+                                    },
+                                    State {
+                                        name: "max"; when: maximum_error[1]
+                                        PropertyChanges {target: pitch_neg; color: "darkred"}
+                                    }
+                                ]
+                                transitions:[
+                                    Transition{
+                                        from: "green"; to: "yellow"; reversible: true
+                                        ParallelAnimation{
+                                            ColorAnimation { duration: 500 }
+                                        }
+                                    },
+                                    Transition{
+                                        from: "yellow"; to: "red"; reversible: true
+                                        ParallelAnimation{
+                                            ColorAnimation { duration: 500 }
+                                        }
+                                    },
+                                    Transition{
+                                        from: "red"; to: "max"; reversible: true
+                                        ParallelAnimation{
+                                            ColorAnimation { duration: 500 }
+                                        }
+                                    }
+                                ]
+                            }
+
+                        }
+
+                        Rectangle{
+                            id: r_dis
+                            anchors.left: p_dis.right
+                            anchors.top: p_dis.top
+                            anchors.leftMargin: r_dis.width / 3
+                            height: p_dis.height
+                            width: p_dis.width
+                            color: "transparent"
+                            border.color: "black"
+                            border.width: 2
+                            property real _roll: _activeVehicle ? actualNormalize(_activeVehicle.roll.value) : 0
+                            property real rollError: _activeVehicle ? ((Math.abs(_roll - _activeVehicle.getSetpointRoll())) / 180) : 0
+                            states: [
+                                State {
+                                    name: "pos"
+                                    when: roll_pos.height > 0
+                                    PropertyChanges {
+                                        target: roll_neg
+                                        height: 0
+                                    }
+                                },
+                                State {
+                                    name: "neg"
+                                    when: roll_neg.height > 0
+                                    PropertyChanges {
+                                        target: roll_pos
+                                        height: 0
+                                    }
+                                }
+                            ]
+                            transitions: [
+                                Transition {
+                                    from: "pos"; to: "neg"; reversible: false
+                                    NumberAnimation {
+                                        target: roll_pos
+                                        property: height
+                                        duration: 20
+                                        easing.type: Easing.OutExpo
+                                        to: 0
+                                    }
+                                },
+                                Transition {
+                                    from: "neg"; to: "pos"; reversible: false
+                                    NumberAnimation {
+                                        target: roll_neg
+                                        property: height
+                                        duration: 20
+                                        easing.type: Easing.OutExpo
+                                        to: 0
+                                    }
+                                }
+                            ]
+
+                            Text{
+                                text: "R"
+                                anchors.top: r_dis.bottom
+                                anchors.horizontalCenter: r_dis.horizontalCenter
+                            }
+                            Rectangle{
+                                id: roll_pos
+                                width: r_dis.width / 1.25
+                                anchors.bottom: r_dis.verticalCenter
+                                anchors.horizontalCenter: r_dis.horizontalCenter
+                                anchors.bottomMargin: 2
+                                color: "green"
+                                height: _activeVehicle ? pos(Math.abs(r_dis._roll), Math.abs(_activeVehicle.getSetpointRoll()), roll_neg.height) * errorHeight(r_dis.rollError, r_dis.height, 0) : 0
+                                Behavior on height { SmoothedAnimation { velocity: smoothingFactor } }
+                                states:[
+                                    State {
+                                        name: "green"; when: roll_pos.height / (r_dis.height / 2) < error_color_min
+                                        PropertyChanges {target: roll_pos; color: color_error_min}
+                                    },
+                                    State {
+                                        name: "yellow"; when: roll_pos.height / (r_dis.height / 2) >= error_color_min && roll_pos.height / (r_dis.height / 2) < error_color_med
+                                        PropertyChanges {target: roll_pos; color: color_error_med}
+                                    },
+                                    State {
+                                        name: "red"; when: roll_pos.height / (r_dis.height / 2) <= error_color_max && roll_pos.height / (r_dis.height / 2) >= error_color_med
+                                        PropertyChanges {target: roll_pos; color: color_error_max}
+                                    },
+                                    State {
+                                        name: "max"; when: maximum_error[0]
+                                        PropertyChanges {target: roll_pos; color: "darkred"}
+                                    }
+                                ]
+                                transitions:[
+                                    Transition{
+                                        from: "green"; to: "yellow"; reversible: true
+                                        ParallelAnimation{
+                                            ColorAnimation { duration: 500 }
+                                        }
+                                    },
+                                    Transition{
+                                        from: "yellow"; to: "red"; reversible: true
+                                        ParallelAnimation{
+                                            ColorAnimation { duration: 500 }
+                                        }
+                                    },
+                                    Transition{
+                                        from: "red"; to: "max"; reversible: true
+                                        ParallelAnimation{
+                                            ColorAnimation { duration: 500 }
+                                        }
+                                    }
+                                ]
+                            }
+                            Rectangle{
+                                id: roll_neg
+                                width: r_dis.width / 1.25
+                                anchors.top: r_dis.verticalCenter
+                                anchors.horizontalCenter: r_dis.horizontalCenter
+                                anchors.bottomMargin: 2
+                                color: "green"
+                                height: _activeVehicle ? neg(Math.abs(r_dis._roll), Math.abs(_activeVehicle.getSetpointRoll()), roll_pos.height) * errorHeight(r_dis.rollError, r_dis.height, 0) : 0
+                                Behavior on height { SmoothedAnimation { velocity: smoothingFactor } }
+                                states:[
+                                    State {
+                                        name: "green"; when: roll_neg.height / (r_dis.height / 2) < error_color_min
+                                        PropertyChanges {target: roll_neg; color: color_error_min}
+                                    },
+                                    State {
+                                        name: "yellow"; when: roll_neg.height / (r_dis.height / 2) >= error_color_min && roll_neg.height / (r_dis.height / 2) < error_color_med
+                                        PropertyChanges {target: roll_neg; color: color_error_med}
+                                    },
+                                    State {
+                                        name: "red"; when: roll_neg.height / (r_dis.height / 2) <= error_color_max && roll_neg.height / (r_dis.height / 2) >= error_color_med
+                                        PropertyChanges {target: roll_neg; color: color_error_max}
+                                    },
+                                    State {
+                                        name: "max"; when: maximum_error[0]
+                                        PropertyChanges {target: roll_neg; color: "darkred"}
+                                    }
+                                ]
+                                transitions:[
+                                    Transition{
+                                        from: "green"; to: "yellow"; reversible: true
+                                        ParallelAnimation{
+                                            ColorAnimation { duration: 500 }
+                                        }
+                                    },
+                                    Transition{
+                                        from: "yellow"; to: "red"; reversible: true
+                                        ParallelAnimation{
+                                            ColorAnimation { duration: 500 }
+                                        }
+                                    },
+                                    Transition{
+                                        from: "red"; to: "max"; reversible: true
+                                        ParallelAnimation{
+                                            ColorAnimation { duration: 500 }
+                                        }
+                                    }
+                                ]
+                            }
+
+                        }
+
+                        Rectangle{
+                            id: y_dis
+                            anchors.left: r_dis.right
+                            anchors.top: r_dis.top
+                            anchors.leftMargin: y_dis.width / 3
+                            height: p_dis.height
+                            width: p_dis.width
+                            color: "transparent"
+                            border.color: "black"
+                            border.width: 2
+                            property real heading: _activeVehicle ? Math.abs(actualNormalize(_activeVehicle.heading.value)) : 0
+                            property real yawError: _activeVehicle ? (Math.abs(heading - Math.abs(_activeVehicle.getSetpointYaw()))) / 180 : 0
+                            states: [
+                                State {
+                                    name: "pos"
+                                    when: yaw_pos.height > 0
+                                    PropertyChanges {
+                                        target: yaw_neg
+                                        height: 0
+                                    }
+                                },
+                                State {
+                                    name: "neg"
+                                    when: yaw_neg.height > 0
+                                    PropertyChanges {
+                                        target: yaw_pos
+                                        height: 0
+                                    }
+                                }
+                            ]
+                            transitions: [
+                                Transition {
+                                    from: "pos"; to: "neg"; reversible: false
+                                    NumberAnimation {
+                                        target: yaw_pos
+                                        property: height
+                                        duration: 20
+                                        easing.type: Easing.OutExpo
+                                        to: 0
+                                    }
+                                },
+                                Transition {
+                                    from: "neg"; to: "pos"; reversible: false
+                                    NumberAnimation {
+                                        target: yaw_neg
+                                        property: height
+                                        duration: 20
+                                        easing.type: Easing.OutExpo
+                                        to: 0
+                                    }
+                                }
+                            ]
+
+                            Text{
+                                text: "Y"
+                                anchors.top: y_dis.bottom
+                                anchors.horizontalCenter: y_dis.horizontalCenter
+                            }
+                            Rectangle{
+                                id: yaw_pos
+                                width: y_dis.width / 1.25
+                                anchors.bottom: y_dis.verticalCenter
+                                anchors.horizontalCenter: y_dis.horizontalCenter
+                                anchors.bottomMargin: 2
+                                color: "green"
+                                height: _activeVehicle ? pos(Math.abs(y_dis.heading), Math.abs(_activeVehicle.getSetpointYaw()), yaw_neg.height) * errorHeight(y_dis.yawError, y_dis.height, 2) : 0
+                                Behavior on height { SmoothedAnimation { velocity: smoothingFactor } }
+                                states:[
+                                    State {
+                                        name: "green"; when: yaw_pos.height / (y_dis.height / 2) < error_color_min
+                                        PropertyChanges {target: yaw_pos; color: color_error_min}
+                                    },
+                                    State {
+                                        name: "yellow"; when: yaw_pos.height / (y_dis.height / 2) >= error_color_min && yaw_pos.height / (y_dis.height / 2) < error_color_med
+                                        PropertyChanges {target: yaw_pos; color: color_error_med}
+                                    },
+                                    State {
+                                        name: "red"; when: yaw_pos.height / (y_dis.height / 2) <= error_color_max && yaw_pos.height / (y_dis.height / 2) >= error_color_med
+                                        PropertyChanges {target: yaw_pos; color: color_error_max}
+                                    },
+                                    State {
+                                        name: "max"; when: maximum_error[2]
+                                        PropertyChanges {target: yaw_pos; color: "darkred"}
+                                    }
+                                ]
+                                transitions:[
+                                    Transition{
+                                        from: "green"; to: "yellow"; reversible: true
+                                        ParallelAnimation{
+                                            ColorAnimation { duration: 500 }
+                                        }
+                                    },
+                                    Transition{
+                                        from: "yellow"; to: "red"; reversible: true
+                                        ParallelAnimation{
+                                            ColorAnimation { duration: 500 }
+                                        }
+                                    },
+                                    Transition{
+                                        from: "red"; to: "max"; reversible: true
+                                        ParallelAnimation{
+                                            ColorAnimation { duration: 500 }
+                                        }
+                                    }
+                                ]
+                            }
+                            Rectangle{
+                                id: yaw_neg
+                                width: y_dis.width / 1.25
+                                anchors.top: y_dis.verticalCenter
+                                anchors.horizontalCenter: y_dis.horizontalCenter
+                                anchors.bottomMargin: 2
+                                color: "green"
+                                height: _activeVehicle ? neg(Math.abs(y_dis.heading), Math.abs(_activeVehicle.getSetpointYaw()), yaw_pos.height) * errorHeight(y_dis.yawError, y_dis.height, 2) : 0
+                                Behavior on height { SmoothedAnimation { velocity: smoothingFactor } }
+                                states:[
+                                    State {
+                                        name: "green"; when: yaw_neg.height / (y_dis.height / 2) < error_color_min
+                                        PropertyChanges {target: yaw_neg; color: color_error_min}
+                                    },
+                                    State {
+                                        name: "yellow"; when: yaw_neg.height / (y_dis.height / 2) >= error_color_min && yaw_neg.height / (y_dis.height / 2) < error_color_med
+                                        PropertyChanges {target: yaw_neg; color: color_error_med}
+                                    },
+                                    State {
+                                        name: "red"; when: yaw_neg.height / (y_dis.height / 2) <= error_color_max && yaw_neg.height / (y_dis.height / 2) >= error_color_med
+                                        PropertyChanges {target: yaw_neg; color: color_error_max}
+                                    },
+                                    State {
+                                        name: "max"; when: maximum_error[2]
+                                        PropertyChanges {target: yaw_neg; color: "darkred"}
+                                    }
+                                ]
+                                transitions:[
+                                    Transition{
+                                        from: "green"; to: "yellow"; reversible: true
+                                        ParallelAnimation{
+                                            ColorAnimation { duration: 500 }
+                                        }
+                                    },
+                                    Transition{
+                                        from: "yellow"; to: "red"; reversible: true
+                                        ParallelAnimation{
+                                            ColorAnimation { duration: 500 }
+                                        }
+                                    },
+                                    Transition{
+                                        from: "red"; to: "max"; reversible: true
+                                        ParallelAnimation{
+                                            ColorAnimation { duration: 500 }
+                                        }
+                                    }
+                                ]
+                            }
+                        }
+
+                        Rectangle{
+                            id: topRef
+                            width: p_dis.width
+                            height: 2
+                            color: "black"
+                            anchors.left: y_dis.right
+                            anchors.top: p_dis.top
+                            anchors.leftMargin: topRef.width / 3
+                            Text{
+                                text: error_bar_height
+                                anchors.left: topRef.right
+                                anchors.horizontalCenter: topRef.horizontalCenter
+                            }
+                        }
+
+                        Rectangle{
+                            id: sideRef
+                            width: 2
+                            height: p_dis.height
+                            color: "black"
+                            anchors.left: y_dis.right
+                            anchors.top: p_dis.top
+                            anchors.leftMargin: topRef.width / 3
+                        }
+
+                        Rectangle{
+                            id: bottomRef
+                            width: p_dis.width
+                            height: 2
+                            color: "black"
+                            anchors.left: y_dis.right
+                            anchors.bottom: p_dis.bottom
+                            anchors.leftMargin: topRef.width / 3
+                            Text{
+                                text: "-" + error_bar_height
+                                anchors.left: bottomRef.right
+                                anchors.horizontalCenter: bottomRef.horizontalCenter
+                            }
+                        }
+
+                        Rectangle{
+                            id: midRef
+                            width: p_dis.width
+                            height: 2
+                            color: "black"
+                            anchors.left: y_dis.right
+                            anchors.top: sideRef.top
+                            anchors.topMargin: sideRef.height / 2
+                            anchors.leftMargin: topRef.width / 3
+                            Text{
+                                text: "0"
+                                anchors.left: midRef.right
+                                anchors.horizontalCenter: midRef.horizontalCenter
+                            }
+                        }
+
+                        Rectangle{
+                            width: buttons.width
+                            height: buttons.height
+                            color: "transparent"
+                        }
+
+                        Rectangle{
+                            id: rc_button
+                            height: buttons.width / 8
+                            width: buttons.width / 2.75
+                            anchors.right: buttons.horizontalCenter
+                            anchors.top: buttons.top
+                            anchors.leftMargin: p_dis.width
+                            property string rc_border_color: "lime"
+                            states: [
+                                State {
+                                    name: "on_rc"
+                                    PropertyChanges {target: train_button; opacity : 1}
+                                    PropertyChanges {target: rc_button_control; text : "RC"}
+                                    PropertyChanges {target: rc_button_control; palette.buttonText: "white"}
+                                    PropertyChanges {target: rc_button; rc_border_color: "lime"}
+                                    PropertyChanges {target: rc_button_control; palette.button : "steelblue"}
+                                    PropertyChanges {target: rc_button_control; text : "RC"}
+                                    PropertyChanges {target: train_button; enabled: true }
+                                    //switch to rc
+                                    onCompleted: _root.rc_or_pid=1
+                                },
+                                State {
+                                    name: "off_rc"
+                                    PropertyChanges {target: train_button; opacity : 0.5}
+                                    PropertyChanges {target: rc_button_control; text : "PID"}
+                                    PropertyChanges {target: rc_button_control; palette.buttonText: "black"}
+                                    PropertyChanges {target: rc_button; rc_border_color: "black"}
+                                    PropertyChanges {target: rc_button_control; palette.button : "white"}
+                                    PropertyChanges {target: train_button; enabled: false }
+                                    //switch to pid
+                                    onCompleted: _root.rc_or_pid=0
+                                }
+                            ]
+                            transitions: [
+                                Transition {
+                                    from: "on_rc"; to: "off_rc"; reversible: true
+                                }
+                            ]
+                            Button{
+                                id: rc_button_control
                                 width: rc_button.width
                                 height: rc_button.height
-                                border.color: rc_button.rc_border_color
-                                border.width: 1.25
-                                color: "transparent"
-                            }
+                                text: "RC"
+                                palette.buttonText: "white"
+                                palette.button: "steelblue"
+                                Rectangle{
+                                    width: rc_button.width
+                                    height: rc_button.height
+                                    border.color: rc_button.rc_border_color
+                                    border.width: 1.25
+                                    color: "transparent"
+                                }
 
-                            onClicked: {
-                                rc_button.state = (rc_button.state === 'off_rc' ? 'on_rc' : "off_rc");
-                                //switch rc pid
-                                paramController.changeValue("RC_OR_PID", _root.rc_or_pid);
-                            }
-                        }
-                    }
-
-                    Rectangle{
-                        id: train_button
-                        height: buttons.width / 8
-                        width: buttons.width / 2.75
-                        anchors.right: buttons.right
-                        anchors.top: buttons.top
-                        anchors.rightMargin: p_dis.width
-                        color: "black"
-                        states: [
-                            State {
-                                name: "train_on"
-                                PropertyChanges {target: train_button_control; palette.button : "green"}
-                                PropertyChanges {target: train_button; opacity : 1}
-                                PropertyChanges {target: train_button; enabled: false }
-                                PropertyChanges {target: rc_button; enabled: false }
-                                PropertyChanges {target: slider; enabled: false }
-                            },
-                            State {
-                                name: "train_off"
-                                PropertyChanges {target: train_button_control; palette.button : "black"}
-                                PropertyChanges {target: train_button; opacity : 1}
-                                PropertyChanges {target: train_button; enabled: false }
-                                PropertyChanges {target: slider; enabled: true }
-                            }
-                        ]
-                        transitions: [
-                            Transition {
-                                from: "train_off"; to: "train_on"; reversible: true
-                            }
-                        ]
-                        Button{
-                            id: train_button_control
-                            width: rc_button.width
-                            height: rc_button.height
-                            text: "Train"
-                            palette.text: "white"
-                            anchors.horizontalCenter: train_button.horizontalCenter
-                            anchors.verticalCenter: train_button.verticalCenter
-                            palette.buttonText: "white"
-                            palette.button: "black"
-                            onClicked: {
-                                train_button.state = (train_button.state === 'train_on' ? 'train_off' : "train_on");
-
-                                if (slider.value <= 15 ) {
-                                    _value.interval = slider.value * 1000
-                                    timer_value.start()
-                                } else {
-                                    timer_value.interval = 10000
-                                    timer_value.start()
+                                onClicked: {
+                                    rc_button.state = (rc_button.state === 'off_rc' ? 'on_rc' : "off_rc");
+                                    //switch rc pid
+                                    paramController.changeValue("RC_OR_PID", _root.rc_or_pid);
                                 }
                             }
                         }
 
-                        Timer{
-                            id: timer_value
-                            running: false; repeat: false
-                            onTriggered: train_button.state = 'on_rc'
-                        }
-                    }
-                    Slider {
-                        id: slider
-                        anchors.bottom: rc_button.top
-                        anchors.right: rc_button.left
-                        anchors.horizontalCenterOffset: rc_button.width
-                        from: 0; to: 15; stepSize: 5
-                        value: 0
-                        ToolTip {
-                                parent: slider.handle
-                                visible: slider.pressed
-                                text: slider.valueAt(slider.position).toFixed(1)
-                            }
-                    }
+                        Rectangle{
+                            id: train_button
+                            height: buttons.width / 8
+                            width: buttons.width / 2.75
+                            anchors.right: buttons.right
+                            anchors.top: buttons.top
+                            anchors.rightMargin: p_dis.width
+                            color: "black"
+                            states: [
+                                State {
+                                    name: "train_on"
+                                    PropertyChanges {target: train_button_control; palette.button : "green"}
+                                    PropertyChanges {target: train_button; opacity : 1}
+                                    PropertyChanges {target: train_button; enabled: false }
+                                    PropertyChanges {target: rc_button; enabled: false }
+                                    PropertyChanges {target: slider; enabled: false }
+                                },
+                                State {
+                                    name: "train_off"
+                                    PropertyChanges {target: train_button_control; palette.button : "black"}
+                                    PropertyChanges {target: train_button; opacity : 1}
+                                    PropertyChanges {target: train_button; enabled: false }
+                                    PropertyChanges {target: slider; enabled: true }
+                                }
+                            ]
+                            transitions: [
+                                Transition {
+                                    from: "train_off"; to: "train_on"; reversible: true
+                                }
+                            ]
+                            Button{
+                                id: train_button_control
+                                width: rc_button.width
+                                height: rc_button.height
+                                text: "Train"
+                                palette.text: "white"
+                                anchors.horizontalCenter: train_button.horizontalCenter
+                                anchors.verticalCenter: train_button.verticalCenter
+                                palette.buttonText: "white"
+                                palette.button: "black"
+                                onClicked: {
+                                    train_button.state = (train_button.state === 'train_on' ? 'train_off' : "train_on");
 
-                    Button {
-                        id: armed_button
-                        background: Rectangle{
-                            color: "green"
-                            id: button_comp
-
-                        states: [
-                            State {
-                                name: "armed"
-                                PropertyChanges { target: button_comp; color: "red" }
-                            },
-                            State {
-                                name: "disarmed"
-                                PropertyChanges { target: button_comp; color: "green" }
-                            }
-                        ]
-
-                        transitions: [
-                            Transition {
-                                from: "disarmed"; to: "armed"; reversible: true
-                            }
-                        ]
-                        }
-
-                        anchors.bottom: buttons.top
-                        anchors.horizontalCenter: buttons.horizontalCenter
-                        anchors.bottomMargin: train_button.height / 3
-                        property bool   _armed:         _activeVehicle ? _activeVehicle.armed : false
-                        Layout.alignment:   Qt.AlignHCenter
-                        text:               _armed ?  qsTr("Armed") : (forceArm ? qsTr("Force Arm") : qsTr("Disarmed"))
-
-                        property bool forceArm: false
-
-                        onTextChanged: {
-                            if (_armed == true) {
-                            button_comp.state = 'armed'
-                            } else {
-                                button_comp.state = 'disarmed'
-                            }
-                        }
-
-                        onPressAndHold: forceArm = true
-
-                        onClicked: {
-                            if (_armed) {
-                                mainWindow.disarmVehicleRequest()
-                            } else {
-                                if (forceArm) {
-                                    mainWindow.forceArmVehicleRequest()
-                                } else {
-                                    mainWindow.armVehicleRequest()
+                                    if (slider.value <= 15 ) {
+                                        _value.interval = slider.value * 1000
+                                        timer_value.start()
+                                    } else {
+                                        timer_value.interval = 10000
+                                        timer_value.start()
+                                    }
                                 }
                             }
-                            forceArm = false
-                            mainWindow.hideIndicatorPopup()
+
+                            Timer{
+                                id: timer_value
+                                running: false; repeat: false
+                                onTriggered: train_button.state = 'on_rc'
+                            }
                         }
-                    }
+                        Slider {
+                            id: slider
+                            anchors.bottom: rc_button.top
+                            anchors.right: rc_button.left
+                            anchors.horizontalCenterOffset: rc_button.width
+                            from: 0; to: 15; stepSize: 5
+                            value: 0
+                            ToolTip {
+                                    parent: slider.handle
+                                    visible: slider.pressed
+                                    text: slider.valueAt(slider.position).toFixed(1)
+                                }
+                        }
+
+                        Button {
+                            id: armed_button
+                            background: Rectangle{
+                                color: "green"
+                                id: button_comp
+
+                            states: [
+                                State {
+                                    name: "armed"
+                                    PropertyChanges { target: button_comp; color: "red" }
+                                },
+                                State {
+                                    name: "disarmed"
+                                    PropertyChanges { target: button_comp; color: "green" }
+                                }
+                            ]
+
+                            transitions: [
+                                Transition {
+                                    from: "disarmed"; to: "armed"; reversible: true
+                                }
+                            ]
+                            }
+
+                            anchors.bottom: buttons.top
+                            anchors.horizontalCenter: buttons.horizontalCenter
+                            anchors.bottomMargin: train_button.height / 3
+                            property bool   _armed:         _activeVehicle ? _activeVehicle.armed : false
+                            Layout.alignment:   Qt.AlignHCenter
+                            text:               _armed ?  qsTr("Armed") : (forceArm ? qsTr("Force Arm") : qsTr("Disarmed"))
+
+                            property bool forceArm: false
+
+                            onTextChanged: {
+                                if (_armed == true) {
+                                button_comp.state = 'armed'
+                                } else {
+                                    button_comp.state = 'disarmed'
+                                }
+                            }
+
+                            onPressAndHold: forceArm = true
+
+                            onClicked: {
+                                if (_armed) {
+                                    mainWindow.disarmVehicleRequest()
+                                } else {
+                                    if (forceArm) {
+                                        mainWindow.forceArmVehicleRequest()
+                                    } else {
+                                        mainWindow.armVehicleRequest()
+                                    }
+                                }
+                                forceArm = false
+                                mainWindow.hideIndicatorPopup()
+                            }
+                        }
+                }
             }
-
 
     /////////////////////////////////////////////////////////////
 
