@@ -12,10 +12,30 @@
 #include "ParameterManager.h"
 #include "SettingsManager.h"
 #include "AppSettings.h"
-
 #include <QStandardPaths>
 //variables for rc button
-int rc_or_pid=1;
+int rc_or_pid = 1;
+//
+//variables for customization
+double error_range = 2.5;
+
+double RPM_color_low_min = 35;
+double RPM_color_low_max = 40;
+double RPM_color_mid_max = 95;
+double RPM_color_high_max = 98;
+
+QColor color_rpm_min = "green";
+QColor color_rpm_med = "yellow";
+QColor color_rpm_max = "red";
+
+double error_color_minimum = .333;
+double error_color_medium = .667;
+double error_color_maximum = 1;
+
+QColor color_error_min = "green";
+QColor color_error_med = "yellow";
+QColor color_error_max = "red";
+
 //
 ParameterEditorController::ParameterEditorController(void)
     : _parameterMgr(_vehicle->parameterManager())
@@ -37,20 +57,120 @@ ParameterEditorController::~ParameterEditorController()
 {
 
 }
-//functions for rc button
+//functions for rc button and customization
 Fact* ParameterEditorController::getParam(const QString& paramName)
 {
     return _parameterMgr->getParameter(_vehicle->defaultComponentId(), paramName);
 }
 void ParameterEditorController::rcToPid()
 {
-    Fact* fact=getParam("MC_RC_CTRL_EN");
+    Fact* fact=getParam("MC_ML_CTRL_EN");
     fact->_containerRawValueChanged(rc_or_pid);
 }
-void ParameterEditorController::changeValue(int value){
-    rc_or_pid=value;
+void ParameterEditorController::changeValue(QString variable, int value){
+    if(variable.compare("RC_OR_PID") == 0){
+        rc_or_pid = value;
+    }
+    else if(variable.compare("error_range") == 0){
+        error_range = value;
+    }
+    else if(variable.compare("RPM_color_low_min") == 0){
+        RPM_color_low_min = value;
+    }
+    else if(variable.compare("RPM_color_low_max") == 0){
+        RPM_color_low_max = value;
+    }
+    else if(variable.compare("RPM_color_mid_max") == 0){
+        RPM_color_mid_max = value;
+    }
+    else if(variable.compare("RPM_color_high_max") == 0){
+        RPM_color_high_max = value;
+    }
+    else if(variable.compare("error_color_minimum") == 0){
+        error_color_minimum = value;
+    }
+    else if(variable.compare("error_color_medium") == 0){
+        error_color_medium = value;
+    }
+    else if(variable.compare("error_color_maximum") == 0){
+        error_color_maximum = value;
+    }
+}
+void ParameterEditorController::changeColor(QString variable, QColor value){
+    if(variable.compare("color_rpm_min") == 0){
+        color_rpm_min = value;
+    }
+    else if(variable.compare("color_rpm_med") == 0){
+        color_rpm_med = value;
+    }
+    else if(variable.compare("color_rpm_max") == 0){
+        color_rpm_max = value;
+    }
+    else if(variable.compare("color_error_min") == 0){
+        color_error_min = value;
+    }
+    else if(variable.compare("color_error_med") == 0){
+        color_error_med = value;
+    }
+    else if(variable.compare("color_error_max") == 0){
+        color_error_max = value;
+    }
+}
+
+//custo retrieval
+QColor ParameterEditorController::getColor(QString variable){
+    if(variable.compare("color_rpm_min") == 0){
+        return color_rpm_min;
+    }
+    else if(variable.compare("color_rpm_med") == 0){
+        return color_rpm_med;
+    }
+    else if(variable.compare("color_rpm_max") == 0){
+        return color_rpm_max;
+    }
+    else if(variable.compare("color_error_min") == 0){
+        return color_error_min;
+    }
+    else if(variable.compare("color_error_med") == 0){
+        return color_error_med;
+    }
+    else if(variable.compare("color_error_max") == 0){
+        return color_error_max;
+    }
+    //default
+    return "green";
+}
+
+double ParameterEditorController::getValue(QString variable){
+    if(variable.compare("error_range") == 0){
+        return error_range;
+    }
+    else if(variable.compare("RPM_color_low_min") == 0){
+        return RPM_color_low_min;
+    }
+    else if(variable.compare("RPM_color_low_max") == 0){
+        return RPM_color_low_max;
+    }
+    else if(variable.compare("RPM_color_mid_max") == 0){
+        return RPM_color_mid_max;
+    }
+    else if(variable.compare("RPM_color_high_max") == 0){
+        return RPM_color_high_max;
+    }
+    else if(variable.compare("error_color_minimum") == 0){
+        return error_color_minimum;
+    }
+    else if(variable.compare("error_color_medium") == 0){
+        return error_color_medium;
+    }
+    else if(variable.compare("error_color_maximum") == 0){
+        return error_color_maximum;
+    }
+    //default
+    return -1;
 }
 //
+
 void ParameterEditorController::_buildListsForComponent(int compId)
 {
     for (const QString& factName: _parameterMgr->parameterNames(compId)) {
