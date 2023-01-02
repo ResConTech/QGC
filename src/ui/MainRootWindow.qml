@@ -41,6 +41,7 @@ ApplicationWindow {
         firstRunPromptManager.nextPrompt()
     }
 
+
     QtObject {
         id: firstRunPromptManager
 
@@ -163,7 +164,9 @@ ApplicationWindow {
     function showSettingsTool() {
         showTool(qsTr("Application Settings"), "AppSettings.qml", "/res/QGCLogoWhite")
     }
-
+    function showCustomizationTool() {
+        showTool(qsTr("Customization Settings"), "CustomizationScreen.qml", "/res/QGCLogoWhite")
+    }
     //-------------------------------------------------------------------------
     //-- Global simple message dialog
 
@@ -343,7 +346,7 @@ ApplicationWindow {
             title:      qsTr("Select Tool")
             buttons:    StandardButton.Close
 
-            property real _toolButtonHeight:    ScreenTools.defaultFontPixelHeight * 3
+            property real _toolButtonHeight:    ScreenTools.defaultFontPixelHeight * 4
             property real _margins:             ScreenTools.defaultFontPixelWidth
 
             ColumnLayout {
@@ -401,7 +404,21 @@ ApplicationWindow {
                             }
                         }
                     }
-
+                    SubMenuButton {
+                        id:                 customizationButton
+                        height:             _toolButtonHeight
+                        Layout.fillWidth:   true
+                        text:               qsTr("Customization Settings")
+                        imageResource:      "/res/QGCLogoFull"
+                        imageColor:         "transparent"
+                        visible:            true
+                        onClicked: {
+                            if (!mainWindow.preventViewSwitch()) {
+                                toolSelectDialog.hideDialog()
+                                mainWindow.showCustomizationTool()
+                            }
+                        }
+                    }
                     ColumnLayout {
                         width:      innerLayout.width
                         spacing:    0
