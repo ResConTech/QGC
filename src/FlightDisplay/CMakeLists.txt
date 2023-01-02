@@ -1,6 +1,7 @@
 
 add_custom_target(FligthDisplayQml
 	SOURCES
+		CustomizationScreen.qml
 		DefaultChecklist.qml
 		FixedWingChecklist.qml
 		FlightDisplayViewDummy.qml
@@ -47,4 +48,3 @@ add_custom_target(FligthDisplayQml
 		VirtualJoystick.qml
 		VTOLChecklist.qml
 )
-
