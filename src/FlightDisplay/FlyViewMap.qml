@@ -35,7 +35,7 @@ import QGroundControl.FactControls  1.0
 
 FlightMap {
     id:                         _root
-    property int batt: PreFlightBatteryCheck ? _activeVehicle.batteries.get(0).percentRemaining.rawValue : 0
+    property double batt: PreFlightBatteryCheck ? _activeVehicle.batteries.get(0).percentRemaining.rawValue : 0
     property var    curSystem:          controller ? controller.activeSystem : null
     property var    curMessage:         curSystem && curSystem.messages.count ? curSystem.messages.get(curSystem.selected) : null
     property int    curCompID:          0
@@ -59,9 +59,19 @@ FlightMap {
     property color color_rpm_med: paramController.getColor('color_rpm_med')
     property color color_rpm_max: paramController.getColor('color_rpm_max')
 
+    property color color_batt_min: paramController.getColor('color_batt_min')
+    property color color_batt_med: paramController.getColor('color_batt_med')
+    property color color_batt_max: paramController.getColor('color_batt_max')
+
     property color color_error_min: paramController.getColor('color_error_min')
     property color color_error_med: paramController.getColor('color_error_med')
     property color color_error_max: paramController.getColor('color_error_max')
+
+    property bool _errorDisp: paramController.getValue('error')
+    property bool _droneDisp: paramController.getValue('drone')
+    property bool _batteryDisp: paramController.getValue('battery')
+    property bool _buttonsDisp: paramController.getValue('buttons')
+    property bool _windDisp: paramController.getValue('windDisplay')
 
     property FactGroup weatherFactGroup: paramController.vehicle.getFactGroup("wind")
     property Fact windDirection: weatherFactGroup.getFact("direction")
@@ -88,6 +98,20 @@ FlightMap {
             color_error_min    =    paramController.getColor('color_error_min')
             color_error_med    =    paramController.getColor('color_error_med')
             color_error_max    =    paramController.getColor('color_error_max')
+
+            _errorDisp         =    paramController.getValue('error')
+            _droneDisp         =    paramController.getValue('drone')
+            _batteryDisp       =    paramController.getValue('battery')
+            _buttonsDisp       =    paramController.getValue('buttons')
+            _windDisp          =    paramController.getValue('windDisplay')
+
+            color_batt_min     =    paramController.getColor('color_batt_min')
+            color_batt_med     =    paramController.getColor('color_batt_med')
+            color_batt_max     =    paramController.getColor('color_batt_max')
+            if(_activeVehicle)
+            {
+                batt           =   (_activeVehicle.batteries.get(0).percentRemaining.rawValue)
+            }
         }
     }
     function errorHeight(error, height, index){
@@ -675,121 +699,132 @@ FlightMap {
     }
 
     ///////////////////////////////////////////////////////////////////////////
-            Item{
-                id: battery_bar
-                width: parent.width/15
-                x: parent.width<parent.height?parent.width:parent.height
-                height: width
-                anchors.right: parent.right
-                anchors.top: drone.bottom
-                anchors.rightMargin: 2.5 * (top_left_prop.width)
-                anchors.bottomMargin: 1 * top_left_prop.width
+//            Item{
+//                id: battery_bar
 
-                Rectangle{
-                    id: battery_outline_faux
-                    height: buttons.width / 8
-                    width: buttons.width / 2.725 // 3         //2.825
-                    anchors.verticalCenter: battery_bar.verticalCenter
-                    anchors.horizontalCenter: battery_bar.horizontalCenter
-                    color: "transparent"
-                    radius: 8
-                }
-                Rectangle{
-                    id: battery_outline
-                    height: buttons.width / 7.75 //8
-                    width: buttons.width / 2.5     //2.75
-                    anchors.verticalCenter: battery_bar.verticalCenter
-                    anchors.horizontalCenter: battery_bar.horizontalCenter
-                    color: "black"
-                    radius: 8
-                    border.color: "white"
-                    border.width: 3
-                }
-                Rectangle{
-                    id: battery_outline_2
-                    height: buttons.width / 7.5
-                    width: buttons.width / 2.4125
-                    anchors.verticalCenter: battery_bar.verticalCenter
-                    anchors.horizontalCenter: battery_bar.horizontalCenter
-                    color: "transparent"
-                    radius: 8
-                    border.color: "black"
-                    border.width: 2
+//                width: parent.width/15
+//                x: parent.width<parent.height?parent.width:parent.height
+//                height: width
+//                anchors.right: parent.right
+//                anchors.top: drone.bottom
+//                anchors.rightMargin: 2.5 * (top_left_prop.width)
+//                anchors.bottomMargin: 1 * top_left_prop.width
+//                visible: _batteryDisp
+//                Rectangle{
+//                    z: 10
 
-                }
-                Rectangle{
-                    id: battery_ornate
-                    height: battery_outline.height / 3.25
-                    width: height / 2
-                    anchors.right: battery_outline_2.left
-                    anchors.verticalCenter: battery_outline.verticalCenter
-                    color: "white"
-                    radius: 8
-                    border.color: "black"
-                    border.width: 1
-                }
+//                    id: battery_outline_faux
+//                    height: buttons.width / 8
+//                    width: buttons.width / 2.725 // 3         //2.825
+//                    anchors.verticalCenter: battery_bar.verticalCenter
+//                    anchors.horizontalCenter: battery_bar.horizontalCenter
+//                    visible: false
+//                    radius: 8
+//                }
+//                Rectangle{
+//                    z: 10
 
-                Rectangle{
-                    id: battery
-                    height: battery_outline.height / 1.425   //1.2 //1.325
-                    width: (battery_outline.width / 1.0925) * (batt / 100)  //1.0725
-                    anchors.right: battery_outline_faux.right
-                    anchors.verticalCenter: battery_bar.verticalCenter
-                    radius: 2
-                    Text {
-                        color: "white"
-                        //anchors.left: parent.right
-                        anchors.horizontalCenter: parent.horizontalCenter
-                        anchors.verticalCenter: parent.verticalCenter
-                        visible:  batt > 40
-                        font.pointSize: 12
-                        style: Text.Outline
-                        styleColor: "black"
-                        text: batt + "%"
-                    }
-                    Text {
-                        color: "white"
-                        anchors.right: parent.left
-                        anchors.verticalCenter: parent.verticalCenter
-                        visible:  batt <= 40
-                        font.pointSize: 12
-                        style: Text.Outline
-                        styleColor: "black"
-                        text: batt + "%"
-                    }
-                    states:[
-                        State {
-                            name: "green"; when: batt > 70
-                            PropertyChanges {target: battery; color: "green"}
-                        },
-                        State {
-                            name: "yellow"; when:batt > 20 && batt <= 70
-                            PropertyChanges {target: battery; color: "yellow"}
-                        },
-                        State {
-                            name: "red"; when: batt <= 20
-                            PropertyChanges {target: battery; color: "red"}
-                        }
-                    ]
-                    transitions:[
-                        Transition{
-                            from: "green"; to: "yellow"; reversible: true
-                            ParallelAnimation{
-                                ColorAnimation { duration: 1000 }
-                            }
-                        },
-                        Transition{
-                            from: "yellow"; to: "red"; reversible: true
-                            ParallelAnimation{
-                                ColorAnimation { duration: 1000 }
-                            }
-                        }
-                    ]
+//                    id: battery_outline
+//                    height: buttons.width / 7.75 //8
+//                    width: buttons.width / 2.5     //2.75
+//                    anchors.verticalCenter: battery_bar.verticalCenter
+//                    anchors.horizontalCenter: battery_bar.horizontalCenter
+//                    color: "black"
+//                    radius: 8
+//                    border.color: "white"
+//                    border.width: 3
+//                }
+//                Rectangle{
+//                    z: 10
 
-                }
+//                    id: battery_outline_2
+//                    height: buttons.width / 7.5
+//                    width: buttons.width / 2.4125
+//                    anchors.verticalCenter: battery_bar.verticalCenter
+//                    anchors.horizontalCenter: battery_bar.horizontalCenter
+//                    color: "transparent"
+//                    radius: 8
+//                    border.color: "black"
+//                    border.width: 2
+
+//                }
+//                Rectangle{
+//                    z: 10
+
+//                    id: battery_ornate
+//                    height: battery_outline.height / 3.25
+//                    width: height / 2
+//                    anchors.right: battery_outline_2.left
+//                    anchors.verticalCenter: battery_outline.verticalCenter
+//                    color: "white"
+//                    radius: 8
+//                    border.color: "black"
+//                    border.width: 1
+//                }
+
+//                Rectangle{
+//                    z: 10
+
+//                    id: battery
+//                    height: battery_outline.height / 1.425   //1.2 //1.325
+//                    width: (battery_outline.width / 1.0925) * (batt / 100)  //1.0725
+//                    anchors.right: battery_outline_faux.right
+//                    anchors.verticalCenter: battery_bar.verticalCenter
+//                    radius: 2
+//                    Text {
+//                        color: "white"
+//                        //anchors.left: parent.right
+//                        anchors.horizontalCenter: parent.horizontalCenter
+//                        anchors.verticalCenter: parent.verticalCenter
+//                        visible:  batt > 40
+//                        font.pointSize: 12
+//                        style: Text.Outline
+//                        styleColor: "black"
+//                        text: batt + "%"
+//                    }
+//                    Text {
+//                        color: "white"
+//                        anchors.right: parent.left
+//                        anchors.verticalCenter: parent.verticalCenter
+//                        visible:  batt <= 40
+//                        font.pointSize: 12
+//                        style: Text.Outline
+//                        styleColor: "black"
+//                        text: batt + "%"
+//                    }
+//                    states:[
+//                        State {
+//                            name: "green"; when: batt > 70
+//                            PropertyChanges {target: battery; color: color_batt_max}
+//                        },
+//                        State {
+//                            name: "yellow"; when:batt > 20 && batt <= 70
+//                            PropertyChanges {target: battery; color: color_batt_med}
+//                        },
+//                        State {
+//                            name: "red"; when: batt <= 20
+//                            PropertyChanges {target: battery; color: color_batt_min}
+//                        }
+//                    ]
+//                    transitions:[
+//                        Transition{
+//                            from: "green"; to: "yellow"; reversible: true
+//                            ParallelAnimation{
+//                                ColorAnimation { duration: 1000 }
+//                            }
+//                        },
+//                        Transition{
+//                            from: "yellow"; to: "red"; reversible: true
+//                            ParallelAnimation{
+//                                ColorAnimation { duration: 1000 }
+//                            }
+//                        }
+//                    ]
+
+//                }
 
 
-            }
+//            }
             Rectangle{
                 id: borders
                 width: parent.width/15
@@ -799,19 +834,19 @@ FlightMap {
                 anchors.bottom: parent.bottom
                 anchors.rightMargin: 2.5*(top_left_prop.width)
                 anchors.bottomMargin: top_left_prop.width
-                color: 'transparent'
+                visible: false
             }
 
             Item{
                 id: drone
                 width: parent.width/15
                 x: parent.width<parent.height?parent.width:parent.height
+                z: 10
                 height: width
                 anchors.right: parent.right
                 anchors.bottom: borders.top
                 anchors.rightMargin: 2.5*(top_left_prop.width)
                 anchors.bottomMargin: top_left_prop.width
-
                 property real heading: _activeVehicle ? _activeVehicle.heading.rawValue : 0
                 property real headingToWP: _activeVehicle ? calculateTravelDirection() : 0
                 property real groundSpeed: _activeVehicle ? _activeVehicle.groundSpeed.value : 0
@@ -859,8 +894,136 @@ FlightMap {
                         return windDirection.rawValue.toFixed(0) + '';
                     }
                 }
+                Rectangle{
+                    id: battery_bar
+                    z: 10
 
+                    //width: parent.width/15
+                    //x: parent.width<parent.height?parent.width:parent.height
+                    //height: width
+                    anchors.horizontalCenter: drone.horizontalCenter
+                    anchors.top: bottom_left_prop.verticalCenter
+                    anchors.topMargin: .65 * top_left_prop.width
+                    visible: _batteryDisp
+                    Rectangle{
+                        z: 10
+
+                        id: battery_outline_faux
+                        height: buttons.width / 8
+                        width: buttons.width / 2.725 // 3         //2.825
+                        anchors.verticalCenter: battery_bar.verticalCenter
+                        anchors.horizontalCenter: battery_bar.horizontalCenter
+                        visible: false
+                        radius: 8
+                    }
+                    Rectangle{
+                        z: 10
+
+                        id: battery_outline
+                        height: buttons.width / 7.75 //8
+                        width: buttons.width / 2.5     //2.75
+                        anchors.verticalCenter: battery_bar.verticalCenter
+                        anchors.horizontalCenter: battery_bar.horizontalCenter
+                        color: "black"
+                        radius: 8
+                        border.color: "white"
+                        border.width: 3
+                    }
+                    Rectangle{
+                        z: 10
+
+                        id: battery_outline_2
+                        height: buttons.width / 7.5
+                        width: buttons.width / 2.4125
+                        anchors.verticalCenter: battery_bar.verticalCenter
+                        anchors.horizontalCenter: battery_bar.horizontalCenter
+                        color: "transparent"
+                        radius: 8
+                        border.color: "black"
+                        border.width: 2
+
+                    }
+                    Rectangle{
+                        z: 10
+
+                        id: battery_ornate
+                        height: battery_outline.height / 3.25
+                        width: height / 2
+                        anchors.right: battery_outline_2.left
+                        anchors.verticalCenter: battery_outline.verticalCenter
+                        color: "white"
+                        radius: 8
+                        border.color: "black"
+                        border.width: 1
+                    }
+
+                    Rectangle{
+                        z: 10
+
+                        id: battery
+                        height: battery_outline.height / 1.425   //1.2 //1.325
+                        width: (battery_outline.width / 1.0925) * (batt / 100)  //1.0725
+                        anchors.right: battery_outline_faux.right
+                        anchors.verticalCenter: battery_bar.verticalCenter
+                        radius: 2
+                        Text {
+                            color: "white"
+                            //anchors.left: parent.right
+                            anchors.horizontalCenter: parent.horizontalCenter
+                            anchors.verticalCenter: parent.verticalCenter
+                            visible:  batt > 40
+                            font.pointSize: 12
+                            style: Text.Outline
+                            styleColor: "black"
+                            text: batt + "%"
+                        }
+                        Text {
+                            color: "white"
+                            anchors.right: parent.left
+                            anchors.verticalCenter: parent.verticalCenter
+                            visible:  batt <= 40
+                            font.pointSize: 12
+                            style: Text.Outline
+                            styleColor: "black"
+                            text: batt + "%"
+                        }
+                        states:[
+                            State {
+                                name: "green"; when: batt > 70
+                                PropertyChanges {target: battery; color: color_batt_max}
+                            },
+                            State {
+                                name: "yellow"; when:batt > 20 && batt <= 70
+                                PropertyChanges {target: battery; color: color_batt_med}
+                            },
+                            State {
+                                name: "red"; when: batt <= 20
+                                PropertyChanges {target: battery; color: color_batt_min}
+                            }
+                        ]
+                        transitions:[
+                            Transition{
+                                from: "green"; to: "yellow"; reversible: true
+                                ParallelAnimation{
+                                    ColorAnimation { duration: 1000 }
+                                }
+                            },
+                            Transition{
+                                from: "yellow"; to: "red"; reversible: true
+                                ParallelAnimation{
+                                    ColorAnimation { duration: 1000 }
+                                }
+                            }
+                        ]
+
+                    }
+
+
+                }
                 Image {
+                    z: 10
+
+                    visible: _droneDisp
                     id: drone_center
                     width: drone.width / 1.25
                     height: width * 1.5
@@ -869,6 +1032,9 @@ FlightMap {
                     anchors.horizontalCenter: drone.horizontalCenter
                 }
                 Rectangle{
+                    z: 10
+
+                    visible: _windDisp
                     id: vehicleHeadingDisplay
                     width: drone.width / 3
                     height: width / 2
@@ -885,6 +1051,10 @@ FlightMap {
                     border.width: 1.5
                 }
                 Rectangle{
+                    z: 10
+
+                    visible: _windDisp
+
                     id: vehicleHeadingDisplay_tic_main
                     width: vehicleHeadingDisplay.width / 16
                     height: vehicleHeadingDisplay.width / 4
@@ -893,9 +1063,10 @@ FlightMap {
                     color: 'black'
                     border.color: 'black'
                     border.width: 1.5
-                    visible: true
                 }
                 Rectangle{
+                    z: 10
+
                     id: vehicleHeadingDisplay_tic_main_skele
                     width: vehicleHeadingDisplay_tic_main.width * 6
                     height: vehicleHeadingDisplay_tic_main.height * 1.5
@@ -907,6 +1078,10 @@ FlightMap {
                     visible: false
                 }
                 Rectangle{
+                    z: 10
+
+                    visible: _windDisp
+
                     id: vehicleHeadingDisplay_tic_1L
                     width: vehicleHeadingDisplay_tic_main.width / 2
                     height: vehicleHeadingDisplay_tic_main.height / 1.5
@@ -916,6 +1091,8 @@ FlightMap {
                     rotation: 170
                 }
                 Rectangle{
+                    z: 10
+
                     id: vehicleHeadingDisplay_tic_1L_skele
                     width: vehicleHeadingDisplay_tic_1L.width * 8
                     height: vehicleHeadingDisplay_tic_1L.height * 2
@@ -927,6 +1104,9 @@ FlightMap {
                     border.width: 1
                 }
                 Rectangle{
+                    visible: _windDisp
+                    z: 10
+
                     id: vehicleHeadingDisplay_tic_2L
                     width: vehicleHeadingDisplay_tic_main.width / 2
                     height: vehicleHeadingDisplay_tic_main.height / 1.5
@@ -936,6 +1116,9 @@ FlightMap {
                     rotation: 160
                 }
                 Rectangle{
+                    visible: _windDisp
+                    z: 10
+
                     id: vehicleHeadingDisplay_tic_1R
                     width: vehicleHeadingDisplay_tic_main.width / 2
                     height: vehicleHeadingDisplay_tic_main.height / 1.5
@@ -945,6 +1128,8 @@ FlightMap {
                     rotation: 190
                 }
                 Rectangle{
+                    z: 10
+
                     id: vehicleHeadingDisplay_tic_1R_skele
                     width: vehicleHeadingDisplay_tic_1R.width * 8
                     height: vehicleHeadingDisplay_tic_1R.height * 2
@@ -956,6 +1141,9 @@ FlightMap {
                     border.width: 1
                 }
                 Rectangle{
+                    visible: _windDisp
+                    z: 10
+
                     id: vehicleHeadingDisplay_tic_RL
                     width: vehicleHeadingDisplay_tic_main.width / 2
                     height: vehicleHeadingDisplay_tic_main.height / 1.5
@@ -965,6 +1153,9 @@ FlightMap {
                     rotation: 200
                 }
                 Rectangle{
+                    visible: _windDisp
+                    z: 10
+
                     id: headingAnchors
                     anchors.verticalCenter: drone.verticalCenter
                     anchors.horizontalCenter: drone.horizontalCenter
@@ -976,6 +1167,9 @@ FlightMap {
                     radius: width * .5
                 }
                 Rectangle{
+                    visible: _windDisp
+                    z: 10
+
                     id: vehicleDisplayAnchors
                     anchors.verticalCenter: headingAnchors.verticalCenter
                     anchors.horizontalCenter: headingAnchors.horizontalCenter
@@ -1023,8 +1217,9 @@ FlightMap {
                         return 2 * (5 - drone.groundSpeed.toFixed(0));
                 }
                 Image{
+
                     id: travelDirectionIndicator
-                    visible: _activeVehicle
+                    visible: _activeVehicle ? _windDisp:false
                     source: "/qmlimages/blue_arrow.png"
                     z: 10000
                     Text {
@@ -1049,6 +1244,8 @@ FlightMap {
                     y: drone.get_travel_y()
                     rotation:  drone.get_travel_angle()
                     Rectangle{
+                        z: 10
+
                         id: travelDirectionIndicator_anchors
                         width: travelDirectionIndicator.width
                         height: travelDirectionIndicator.height / 6
@@ -1056,6 +1253,8 @@ FlightMap {
                         color: 'red'
                     }
                     Rectangle{
+                        z: 10
+
                         id: travelDirectionIndicator_anchors2
                         width: travelDirectionIndicator.width / 6
                         height: travelDirectionIndicator.height * 1.05
@@ -1065,7 +1264,7 @@ FlightMap {
                 }
                 Image{
                     id: _travelDirectionIndicator
-                    visible: _activeVehicle
+                    visible: _activeVehicle ? _windDisp: false
                     source: "/qmlimages/white_arrow.png"
                     z: 10000
                     Text {
@@ -1095,6 +1294,8 @@ FlightMap {
                         height: _travelDirectionIndicator.height / 30
                         visible: false
                         color: 'red'
+                        z: 10
+
                     }
                     Rectangle{
                         id: _travelDirectionIndicator_anchors2
@@ -1102,6 +1303,8 @@ FlightMap {
                         height: _travelDirectionIndicator.height * .85
                         visible: false
                         color: 'blue'
+                        z: 10
+
                     }
                 }
 
@@ -1335,6 +1538,8 @@ FlightMap {
                     NumberAnimation on progress { loops: 20; from: 0; to: 1;  duration: 20000 }
                 }
                 Rectangle {
+                    visible: _droneDisp
+                    z: 10
                     id: top_left_prop
                     width: drone.width / 1.35
                     height: width
@@ -1405,6 +1610,9 @@ FlightMap {
                 }
 
                 Rectangle {
+                    visible: _droneDisp
+                    z: 10
+
                     id: bottom_left_prop
                     width: top_left_prop.width
                     height: width
@@ -1475,6 +1683,9 @@ FlightMap {
                 }
 
                 Rectangle {
+                    visible: _droneDisp
+                    z: 10
+
                     id: bottom_right_prop
                     width: top_left_prop.width
                     height: width
@@ -1544,6 +1755,9 @@ FlightMap {
                 }
 
                 Rectangle {
+                    visible: _droneDisp
+                    z: 10
+
                     id: top_right_prop
                     width: top_left_prop.width
                     height: width
@@ -1615,6 +1829,8 @@ FlightMap {
 
 
                     Rectangle{
+                        visible: _buttonsDisp
+
                         id: button
                         width: drone.width/3
                         height: width/3
@@ -1653,6 +1869,7 @@ FlightMap {
                         }
                 }
                     Item{
+
                         id: buttons
                         width: 2.05*(drone.width)
                         height: 2.5*(drone.height)
@@ -1661,18 +1878,23 @@ FlightMap {
 
                         Rectangle{
                             id: white_background
+                            visible: _errorDisp
+                            z: 0
                             color: "white"
                             opacity: 0.5
-                            width: p_dis.width * 6.5
-                            height: p_dis.height * 1.2
-                            anchors.left: buttons.right
-                            anchors.top: p_dis.top
+                            width: p_dis.width * 6.5 * 4.125
+                            height: p_dis.height * 1.2 * 2.7
+                            anchors.left: sliderGhost.left//buttons.right
+                            anchors.top: sliderGhost.top//p_dis.top
                             anchors.topMargin: -p_dis.width / 2
-                            anchors.leftMargin: -p_dis.width / 4
+                            //anchors.leftMargin: -p_dis.width / 4
+
                         }
 
                         Rectangle{
                             id: p_dis
+                            z: 10
+                            visible: _errorDisp
                             anchors.left: buttons.right
                             anchors.top: buttons.top
                             anchors.topMargin: buttons.width / 3.5
@@ -1730,6 +1952,8 @@ FlightMap {
                             }
                             Rectangle{
                                 id: pitch_pos
+                                z: 10
+
                                 width: p_dis.width / 1.25
                                 anchors.bottom: p_dis.verticalCenter
                                 anchors.horizontalCenter: p_dis.horizontalCenter
@@ -1778,6 +2002,8 @@ FlightMap {
                             }
                             Rectangle{
                                 id: pitch_neg
+                                z: 10
+
                                 width: p_dis.width / 1.25
                                 anchors.top: p_dis.verticalCenter
                                 anchors.horizontalCenter: p_dis.horizontalCenter
@@ -1829,6 +2055,9 @@ FlightMap {
 
                         Rectangle{
                             id: r_dis
+                            z: 10
+
+                            visible: _errorDisp
                             anchors.left: p_dis.right
                             anchors.top: p_dis.top
                             anchors.leftMargin: r_dis.width / 3
@@ -1887,6 +2116,8 @@ FlightMap {
                             }
                             Rectangle{
                                 id: roll_pos
+                                z: 10
+
                                 width: r_dis.width / 1.25
                                 anchors.bottom: r_dis.verticalCenter
                                 anchors.horizontalCenter: r_dis.horizontalCenter
@@ -1935,6 +2166,8 @@ FlightMap {
                             }
                             Rectangle{
                                 id: roll_neg
+                                z: 10
+
                                 width: r_dis.width / 1.25
                                 anchors.top: r_dis.verticalCenter
                                 anchors.horizontalCenter: r_dis.horizontalCenter
@@ -1986,6 +2219,9 @@ FlightMap {
 
                         Rectangle{
                             id: y_dis
+                            z: 10
+
+                            visible: _errorDisp
                             anchors.left: r_dis.right
                             anchors.top: r_dis.top
                             anchors.leftMargin: y_dis.width / 3
@@ -2043,6 +2279,8 @@ FlightMap {
                                 anchors.horizontalCenter: y_dis.horizontalCenter
                             }
                             Rectangle{
+                                z: 10
+
                                 id: yaw_pos
                                 width: y_dis.width / 1.25
                                 anchors.bottom: y_dis.verticalCenter
@@ -2092,6 +2330,8 @@ FlightMap {
                             }
                             Rectangle{
                                 id: yaw_neg
+                                z: 10
+
                                 width: y_dis.width / 1.25
                                 anchors.top: y_dis.verticalCenter
                                 anchors.horizontalCenter: y_dis.horizontalCenter
@@ -2141,7 +2381,10 @@ FlightMap {
                         }
 
                         Rectangle{
+                            z: 10
+
                             id: topRef
+                            visible: _errorDisp
                             width: p_dis.width
                             height: 2
                             color: "black"
@@ -2156,7 +2399,10 @@ FlightMap {
                         }
 
                         Rectangle{
+                            z: 10
+
                             id: sideRef
+                            visible: _errorDisp
                             width: 2
                             height: p_dis.height
                             color: "black"
@@ -2167,6 +2413,9 @@ FlightMap {
 
                         Rectangle{
                             id: bottomRef
+                            z: 10
+
+                            visible: _errorDisp
                             width: p_dis.width
                             height: 2
                             color: "black"
@@ -2182,6 +2431,9 @@ FlightMap {
 
                         Rectangle{
                             id: midRef
+                            z: 10
+
+                            visible: _errorDisp
                             width: p_dis.width
                             height: 2
                             color: "black"
@@ -2197,18 +2449,22 @@ FlightMap {
                         }
 
                         Rectangle{
+                            z: 10
+
                             width: buttons.width
                             height: buttons.height
                             color: "transparent"
                         }
 
                         Rectangle{
+                            visible: _buttonsDisp
+                            z: 10
+
                             id: rc_button
                             height: buttons.width / 8
-                            width: buttons.width / 2.75
-                            anchors.right: buttons.horizontalCenter
-                            anchors.top: buttons.top
-                            anchors.leftMargin: p_dis.width
+                            width: buttons.width / 4.25
+                            anchors.horizontalCenter: armed_button.left
+                            anchors.top: rcGhost.bottom
                             property string rc_border_color: "lime"
                             states: [
                                 State {
@@ -2241,17 +2497,21 @@ FlightMap {
                                 }
                             ]
                             Button{
+                                visible: _buttonsDisp
+
                                 id: rc_button_control
                                 width: rc_button.width
                                 height: rc_button.height
                                 text: "RC"
+                                anchors.horizontalCenter: rc_button.horizontalCenter
+                                anchors.verticalCenter: rc_button.verticalCenter
                                 palette.buttonText: "white"
                                 palette.button: "steelblue"
                                 Rectangle{
                                     width: rc_button.width
                                     height: rc_button.height
                                     border.color: rc_button.rc_border_color
-                                    border.width: 1.25
+                                    border.width: 2
                                     color: "transparent"
                                 }
 
@@ -2264,13 +2524,17 @@ FlightMap {
                         }
 
                         Rectangle{
+                            visible: _buttonsDisp
+                            z: 10
+
                             id: train_button
                             height: buttons.width / 8
-                            width: buttons.width / 2.75
-                            anchors.right: buttons.right
-                            anchors.top: buttons.top
-                            anchors.rightMargin: p_dis.width
-                            color: "black"
+                            width: buttons.width / 3.75
+                            anchors.horizontalCenter: armed_button.right
+                            anchors.top: learnGhost.bottom
+                            property string train_border_color: "black"
+
+                            color: "white"
                             states: [
                                 State {
                                     name: "train_on"
@@ -2294,20 +2558,29 @@ FlightMap {
                                 }
                             ]
                             Button{
+                                visible: _buttonsDisp
+
                                 id: train_button_control
-                                width: rc_button.width
-                                height: rc_button.height
-                                text: "Train"
-                                palette.text: "white"
+                                width: train_button.width
+                                height: train_button.height
+                                text: "LEARN"
+                                palette.text: "black"
                                 anchors.horizontalCenter: train_button.horizontalCenter
                                 anchors.verticalCenter: train_button.verticalCenter
-                                palette.buttonText: "white"
-                                palette.button: "black"
+                                palette.buttonText: "black"
+                                palette.button: "white"
+                                Rectangle{
+                                    width: train_button.width
+                                    height: train_button.height
+                                    border.color: train_button.train_border_color
+                                    border.width: 2
+                                    color: "transparent"
+                                }
                                 onClicked: {
                                     train_button.state = (train_button.state === 'train_on' ? 'train_off' : "train_on");
 
                                     if (slider.value <= 15 ) {
-                                        _value.interval = slider.value * 1000
+                                        timer_value.interval = slider.value * 1000
                                         timer_value.start()
                                     } else {
                                         timer_value.interval = 10000
@@ -2323,10 +2596,13 @@ FlightMap {
                             }
                         }
                         Slider {
+                            visible: _buttonsDisp
+                            z: 10
+
                             id: slider
-                            anchors.bottom: rc_button.top
-                            anchors.right: rc_button.left
-                            anchors.horizontalCenterOffset: rc_button.width
+                            anchors.bottom: buttons.top
+                            anchors.right: slideGhost.left
+                            anchors.horizontalCenterOffset: button.width
                             from: 0; to: 15; stepSize: 5
                             value: 0
                             ToolTip {
@@ -2335,45 +2611,263 @@ FlightMap {
                                     text: slider.valueAt(slider.position).toFixed(1)
                                 }
                         }
+                        Rectangle{
+                            id: sliderGhost
+                            anchors.bottom: slider.bottom
+                            anchors.right: slider.left
+                            height: slider.height * 2
+                            width: slider.width / 2
+                            visible: false
+                            color: 'black'
+                        }
+                        Rectangle{
+                            id: learnGhost
+                            anchors.top: sliderGhost.bottom
+                            anchors.left: sliderGhost.right
+                            height: slider.height * 6
+                            width: slider.width / 3
+                            visible: false
+                            color: 'lime'
+                        }
+                        Rectangle{
+                            id: rcGhost
+                            anchors.top: sliderGhost.bottom
+                            anchors.left: sliderGhost.left
+                            height: slider.height * 6
+                            width: slider.width / 6
+                            visible: false
+                            color: 'blue'
+                        }
+                        Rectangle{
+                            id: armedGhost
+                            anchors.top: sliderGhost.bottom
+                            anchors.left: rcGhost.right
+                            height: slider.height * 7
+                            width: slider.width / 4.25
+                            visible: false
+                            color: 'red'
+                        }
+                        Rectangle{
+                            id: slideGhost
+                            height: buttons.width / 8
+                            width: buttons.width / 2.75
+                            anchors.right: buttons.horizontalCenter
+                            anchors.top: buttons.top
+                            anchors.leftMargin: p_dis.width
+                            property string rc_border_color: "lime"
+                            visible: false
+                        }
+                        Rectangle{
+                            id: block
+                            anchors.bottom: rc_button.top
+                            height: buttons.width / 15
+                            color: 'purple'
+                            visible: false
+                            radius: 10
+                        }
+                        Rectangle{
+                            id: block2
+                            anchors.left: armed_button.horizontalCenter
+                            width: buttons.width / 15
+                            color: 'lime'
+                            visible: false
+                        }
+                        Rectangle{
+                            id: vert1Ghost
+                            anchors.right: rc_button.right
+                            anchors.bottom: block.top
+                            width: buttons.width / 60
+                            height: buttons.width / 1.75
+                            color: 'black'
+                            visible: false
+                            radius: 10
+                        }
+                        Rectangle{
+                            id: vert2Ghost
+                            anchors.left: train_button.left
+                            anchors.bottom: block.top
+                            width: buttons.width / 60
+                            height: buttons.width / 1.75
+                            color: 'black'
+                            visible: false
+                            radius: 10
+                        }
+                        Rectangle{
+                            id: vert1
+                            anchors.right: vert1Ghost.left
+                            anchors.bottom: block.top
+                            width: buttons.width / 60
+                            height: buttons.width / 1.75
+                            color: 'black'
+                            visible: true
+                            radius: 10
+                        }
+                        Rectangle{
+                            id: vert2
+                            anchors.left: vert2Ghost.right
+                            anchors.bottom: block.top
+                            width: buttons.width / 60
+                            height: buttons.width / 1.75
+                            color: 'black'
+                            visible: true
+                            radius: 10
+                        }
+                        Rectangle{
+                            id: horiz1
+                            anchors.left: rc_button.left
+                            y: vert1.y + 2 * vert1.height / 3
+                            width: buttons.width / 1.6
+                            height: buttons.width / 60
+                            color: 'black'
+                            visible: true
+                            radius: 10
+                        }
+                        Rectangle{
+                            id: horiz2
+                            anchors.left: rc_button.left
+                            y: vert1.y + vert1.height / 3.5
+                            width: buttons.width / 1.6
+                            height: buttons.width / 60
+                            color: 'black'
+                            visible: true
+                            radius: 10
+                        }
+                        Grid {
+                            anchors.horizontalCenter: block2.horizontalCenter
+                            anchors.bottom: rc_button.top
+                            columns: 3
+                            rows: 3
+                            spacing: 2
+                            Rectangle {
+                                id: c1r1
+                                color: 'transparent'
+                                width: buttons.width / 5
+                                height: buttons.width / 5
+                                Text {
+                                    text: qsTr("1.57")
+                                }
+                            }
+                            Rectangle {
+                                id: c1r2
+                                color: 'transparent'
+                                width: buttons.width / 5
+                                height: buttons.width / 5
+                                Text {
+                                    text: qsTr("9.87")
+                                }
+                            }
+                            Rectangle {
+                                id: c1r3
+                                color: 'transparent'
+                                width: buttons.width / 5
+                                height: buttons.width / 5
+                                Text {
+                                    text: qsTr("6.89")
+                                }
+                            }
+                            Rectangle {
+                                id: c2r1
+                                color: 'transparent'
+                                width: buttons.width / 5
+                                height: buttons.width / 5
+                                Text {
+                                    text: qsTr("4.89")
+                                }
+                            }
+                            Rectangle {
+                                id: c2r2
+                                color: 'transparent'
+                                width: buttons.width / 5
+                                height: buttons.width / 5
+                                Text {
+                                    text: qsTr("1.70")
+                                }
+                            }
+                            Rectangle {
+                                id: c2r3
+                                color: 'transparent'
+                                width: buttons.width / 5
+                                height: buttons.width / 5
+                                Text {
+                                    text: qsTr("0.78")
+                                }
+                            }
+                            Rectangle {
+                                id: c3r1
+                                color: 'transparent'
+                                width: buttons.width / 5
+                                height: buttons.width / 5
+                                Text {
+                                    text: qsTr("8.67")
+                                }
+                            }
+                            Rectangle {
+                                id: c3r2
+                                color: 'transparent'
+                                width: buttons.width / 5
+                                height: buttons.width / 5
+                                Text {
+                                    text: qsTr("4.98")
+                                }
+                            }
+                            Rectangle {
+                                id: c3r3
+                                color: 'transparent'
+                                width: buttons.width / 5
+                                height: buttons.width / 5
+                                Text {
+                                    text: qsTr("0.90")
+                                }
+                            }
+
+                        }
 
                         Button {
+                            visible: _buttonsDisp
+
                             id: armed_button
+                            Rectangle{
+                                width: armed_button.width
+                                height: armed_button.height
+                                border.color: 'lime'
+                                border.width: 2
+                                color: "transparent"
+                            }
                             background: Rectangle{
                                 color: "green"
                                 id: button_comp
 
                             states: [
                                 State {
-                                    name: "armed"
+                                    name: "ARMED"
                                     PropertyChanges { target: button_comp; color: "red" }
                                 },
                                 State {
-                                    name: "disarmed"
+                                    name: "DISARMED"
                                     PropertyChanges { target: button_comp; color: "green" }
                                 }
                             ]
 
                             transitions: [
                                 Transition {
-                                    from: "disarmed"; to: "armed"; reversible: true
+                                    from: "DISARMED"; to: "ARMED"; reversible: true
                                 }
                             ]
                             }
+                            anchors.left: armedGhost.right
+                            anchors.top: armedGhost.bottom
 
-                            anchors.bottom: buttons.top
-                            anchors.horizontalCenter: buttons.horizontalCenter
-                            anchors.bottomMargin: train_button.height / 3
                             property bool   _armed:         _activeVehicle ? _activeVehicle.armed : false
                             Layout.alignment:   Qt.AlignHCenter
-                            text:               _armed ?  qsTr("Armed") : (forceArm ? qsTr("Force Arm") : qsTr("Disarmed"))
-
+                            text:               _armed ?  qsTr("ARMED") : (forceArm ? qsTr("Force Arm") : qsTr("DISARMED"))
+                            width: buttons.width / 2.5
                             property bool forceArm: false
 
                             onTextChanged: {
                                 if (_armed == true) {
-                                button_comp.state = 'armed'
+                                button_comp.state = 'ARMED'
                                 } else {
-                                    button_comp.state = 'disarmed'
+                                    button_comp.state = 'DISARMED'
                                 }
                             }
 
