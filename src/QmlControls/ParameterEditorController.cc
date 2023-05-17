@@ -28,6 +28,10 @@ QColor color_rpm_min = "green";
 QColor color_rpm_med = "yellow";
 QColor color_rpm_max = "red";
 
+QColor color_batt_max = "green";
+QColor color_batt_med = "yellow";
+QColor color_batt_min = "red";
+
 double error_color_minimum = .333;
 double error_color_medium = .667;
 double error_color_maximum = 1;
@@ -36,6 +40,11 @@ QColor color_error_min = "green";
 QColor color_error_med = "yellow";
 QColor color_error_max = "red";
 
+bool error = true;
+bool drone = true;
+bool battery = true;
+bool buttons = true;
+bool windDisplay = true;
 //
 ParameterEditorController::ParameterEditorController(void)
     : _parameterMgr(_vehicle->parameterManager())
@@ -67,7 +76,7 @@ void ParameterEditorController::rcToPid()
     Fact* fact=getParam("MC_ML_CTRL_EN");
     fact->_containerRawValueChanged(rc_or_pid);
 }
-void ParameterEditorController::changeValue(QString variable, int value){
+void ParameterEditorController::changeValue(QString variable, double value){
     if(variable.compare("RC_OR_PID") == 0){
         rc_or_pid = value;
     }
@@ -95,6 +104,26 @@ void ParameterEditorController::changeValue(QString variable, int value){
     else if(variable.compare("error_color_maximum") == 0){
         error_color_maximum = value;
     }
+    else if(variable.compare("error") == 0){
+        if(value == 0) error = false;
+        else error = true;
+    }
+    else if(variable.compare("drone") == 0){
+        if(value == 0) drone = false;
+        else drone = true;
+    }
+    else if(variable.compare("battery") == 0){
+        if(value == 0) battery = false;
+        else battery = true;
+    }
+    else if(variable.compare("buttons") == 0){
+        if(value == 0) buttons = false;
+        else buttons = true;
+    }
+    else if(variable.compare("windDisplay") == 0){
+        if(value == 0) windDisplay = false;
+        else windDisplay = true;
+    }
 }
 void ParameterEditorController::changeColor(QString variable, QColor value){
     if(variable.compare("color_rpm_min") == 0){
@@ -114,6 +143,15 @@ void ParameterEditorController::changeColor(QString variable, QColor value){
     }
     else if(variable.compare("color_error_max") == 0){
         color_error_max = value;
+    }
+    else if(variable.compare("color_batt_min") == 0){
+        color_batt_min = value;
+    }
+    else if(variable.compare("color_batt_med") == 0){
+        color_batt_med = value;
+    }
+    else if(variable.compare("color_batt_max") == 0){
+        color_batt_max = value;
     }
 }
 
@@ -136,6 +174,15 @@ QColor ParameterEditorController::getColor(QString variable){
     }
     else if(variable.compare("color_error_max") == 0){
         return color_error_max;
+    }
+    else if(variable.compare("color_batt_min") == 0){
+        return color_batt_min;
+    }
+    else if(variable.compare("color_batt_med") == 0){
+        return color_batt_med;
+    }
+    else if(variable.compare("color_batt_max") == 0){
+        return color_batt_max;
     }
     //default
     return "green";
@@ -165,6 +212,26 @@ double ParameterEditorController::getValue(QString variable){
     }
     else if(variable.compare("error_color_maximum") == 0){
         return error_color_maximum;
+    }
+    else if(variable.compare("error") == 0){
+        if(error) return 1;
+        else return 0;
+    }
+    else if(variable.compare("drone") == 0){
+        if(drone) return 1;
+        else return 0;
+    }
+    else if(variable.compare("battery") == 0){
+        if(battery) return 1;
+        else return 0;
+    }
+    else if(variable.compare("buttons") == 0){
+        if(buttons) return 1;
+        else return 0;
+    }
+    else if(variable.compare("windDisplay") == 0){
+        if(windDisplay) return 1;
+        else return 0;
     }
     //default
     return -1;
