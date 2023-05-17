@@ -106,7 +106,7 @@ public:
     //rc button and customization functions declarations
     Q_INVOKABLE Fact* getParam(const QString& paramName);
     Q_INVOKABLE void rcToPid();
-    Q_INVOKABLE void changeValue(QString variable, int value);
+    Q_INVOKABLE void changeValue(QString variable, double value);
     Q_INVOKABLE void changeColor(QString variable, QColor value);
     Q_INVOKABLE QColor getColor(QString variable);
     Q_INVOKABLE double getValue(QString variable);
