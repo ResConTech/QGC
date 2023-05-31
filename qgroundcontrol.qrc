@@ -27,7 +27,9 @@
         <file alias="SubChecklist.qml">src/FlightDisplay/SubChecklist.qml</file>
     </qresource>
     <qresource prefix="/qml">
+        <file alias="battDisplaySettings.qml">src/FlightDisplay/battDisplaySettings.qml</file>
         <file alias="CustomizationScreen.qml">src/FlightDisplay/CustomizationScreen.qml</file>
+        <file alias="errorDisplaySettings.qml">src/FlightDisplay/errorDisplaySettings.qml</file>
         <file alias="QGroundControl/Controls/HeightIndicator.qml">src/QmlControls/HeightIndicator.qml</file>
         <file alias="QGroundControl/Controls/QGCDynamicObjectManager.qml">src/QmlControls/QGCDynamicObjectManager.qml</file>
         <file alias="QGroundControl/Controls/QGCOptionsComboBox.qml">src/QmlControls/QGCOptionsComboBox.qml</file>
@@ -179,7 +181,7 @@
         <file alias="QGroundControl/Controls/TerrainStatus.qml">src/PlanView/TerrainStatus.qml</file>
         <file alias="QGroundControl/Controls/TakeoffItemMapVisual.qml">src/PlanView/TakeoffItemMapVisual.qml</file>
         <file alias="QGroundControl/Controls/ToolStrip.qml">src/QmlControls/ToolStrip.qml</file>
-       	<file alias="QGroundControl/Controls/ToolStripHoverButton.qml">src/QmlControls/ToolStripHoverButton.qml</file>
+        <file alias="QGroundControl/Controls/ToolStripHoverButton.qml">src/QmlControls/ToolStripHoverButton.qml</file>
         <file alias="QGroundControl/Controls/TransectStyleComplexItemStats.qml">src/PlanView/TransectStyleComplexItemStats.qml</file>
         <file alias="QGroundControl/Controls/TransectStyleComplexItemTabBar.qml">src/PlanView/TransectStyleComplexItemTabBar.qml</file>
         <file alias="QGroundControl/Controls/TransectStyleComplexItemTerrainFollow.qml">src/PlanView/TransectStyleComplexItemTerrainFollow.qml</file>
@@ -261,6 +263,7 @@
         <file alias="QGroundControl/ScreenTools/ScreenTools.qml">src/QmlControls/ScreenTools.qml</file>
         <file alias="QmlTest.qml">src/QmlControls/QmlTest.qml</file>
         <file alias="RadioComponent.qml">src/AutoPilotPlugins/Common/RadioComponent.qml</file>
+        <file alias="rpmDisplaySettings.qml">src/FlightDisplay/rpmDisplaySettings.qml</file>
         <file alias="SerialSettings.qml">src/ui/preferences/SerialSettings.qml</file>
         <file alias="SetupParameterEditor.qml">src/VehicleSetup/SetupParameterEditor.qml</file>
         <file alias="SetupView.qml">src/VehicleSetup/SetupView.qml</file>
