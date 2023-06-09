@@ -50,6 +50,8 @@ Rectangle {
 
     property bool updated: false
     property double diameter: rpm_circle_red.width
+
+    property bool _minmax: getTruth(paramController.getValue('minmax'))
     Text {
         id: _title
         x: Screen.width * .025 //2.75
@@ -65,6 +67,7 @@ Rectangle {
         running:    true
         repeat: true
         onTriggered: {
+            _minmax                  =        getTruth(paramController.getValue('minmax'))
             if(updated){
                 midChecked          =        paramController.getValue('RPM_color_mid')
                 highChecked         =        paramController.getValue('RPM_color_high')
@@ -122,7 +125,7 @@ Rectangle {
     Text {
         id: _rpmCurr
         anchors.left: _rpm.right
-        anchors.leftMargin: _rpm.width
+        anchors.leftMargin: _rpm.width / 3
         anchors.verticalCenter: _rpm.verticalCenter
         text: qsTr("Current Display")
         font.italic: true
@@ -131,6 +134,7 @@ Rectangle {
         horizontalAlignment: Text.AlignHCenter
         font.pixelSize: 20
     }
+
 
     Text {
         id: rpm_color_maximum_text
@@ -325,13 +329,34 @@ Rectangle {
             paramController.changeColor('color_rpm_min', minColor)
             paramController.changeColor('color_rpm_med', midColor)
             paramController.changeColor('color_rpm_max', maxColor)
-            if((rpm_color_maximum.text > mid || (rpm_color_maximum.text > rpm_color_medium.text && rpm_color_medium.text > 0)) && rpm_color_maximum.text < 100){
-                paramController.changeValue('RPM_color_high', rpm_color_maximum.text)
-                rpm_color_maximum.text = ''
+            if(rpm_color_maximum.text < 100 && rpm_color_maximum.text > 0){
+                if(rpm_color_medium.text > 0 && rpm_color_medium.text < 100){
+                    if(rpm_color_maximum.text > rpm_color_medium.text){
+                        paramController.changeValue('RPM_color_high', rpm_color_maximum.text)
+                        rpm_color_maximum.text = ''
+                    }
+                }
+                else{
+                    if(rpm_color_maximum.text > midChecked){
+                        paramController.changeValue('RPM_color_high', rpm_color_maximum.text)
+                        rpm_color_maximum.text = ''
+                    }
+                }
             }
-            if(rpm_color_medium.text > 0 && (rpm_color_medium.text < high || (rpm_color_medium.text < rpm_color_maximum.text && rpm_color_maximum.text > 0))){
-                paramController.changeValue('RPM_color_mid', rpm_color_medium.text)
-                rpm_color_medium.text = ''
+
+            if(rpm_color_medium.text < 100 && rpm_color_medium.text > 0){
+                if(rpm_color_maximum.text > 0 && rpm_color_maximum.text < 100){
+                    if(rpm_color_medium.text < rpm_color_maximum.text){
+                        paramController.changeValue('RPM_color_mid', rpm_color_medium.text)
+                        rpm_color_medium.text = ''
+                    }
+                }
+                else{
+                    if(rpm_color_medium.text < highChecked){
+                        paramController.changeValue('RPM_color_mid', rpm_color_medium.text)
+                        rpm_color_medium.text = ''
+                    }
+                }
             }
         }
     }
@@ -411,6 +436,44 @@ Rectangle {
         color: maxColorChecked
         border.width: 4
         border.color: 'white'
+    }
+    Text {
+        id: _rpmMinMax
+        anchors.horizontalCenter: rpm_circle_red.horizontalCenter
+        anchors.top: rpm_circle_red.bottom
+        anchors.topMargin: _rpm.width / 4
+        text: qsTr("Display Min/Max")
+        color: 'white'
+        horizontalAlignment: Text.AlignHCenter
+        font.pixelSize: 20
+    }
+    CheckBox{
+        id: minmax
+        checked: _minmax
+        width: 20
+        anchors.right: _rpmMinMax.left
+        anchors.verticalCenter: _rpmMinMax.verticalCenter
+        //anchors.verticalCenterOffset: -10
+        onClicked: {
+            paramController.changeValue('minmax', getValue(paramController.getValue('minmax')))
+        }
+        style: CheckBoxStyle {
+                indicator: Rectangle {
+                        implicitWidth: 16
+                        implicitHeight: 16
+                        border.color: 'gray'
+                        border.width: 2
+                        Text {
+                            text: '✓'
+                            visible: control.checked
+                            //color: control.activeFocus ? "black" : "lightgray"
+                            //color: "lightgray"
+                            //anchors.margins: 4
+                            anchors.fill: parent
+                            anchors.leftMargin: 2
+                        }
+                }
+            }
     }
 //    Rectangle{
 //        id: rpm_circle_border
@@ -515,3 +578,4 @@ Rectangle {
         }
     }
 }
+
