@@ -83,11 +83,29 @@ FlightMap {
     property bool _buttonsDisp: paramController.getValue('buttons')
     property bool _windDisp: paramController.getValue('windDisplay')
     property bool _woutDisp: paramController.getValue('wout')
+    property bool _minmaxDisp: paramController.getValue('minmax')
 
     property FactGroup weatherFactGroup: paramController.vehicle.getFactGroup("wind")
     property Fact windDirection: weatherFactGroup.getFact("direction")
     property Fact windSpeed: weatherFactGroup.getFact("speed")
 
+    property int top_left_val: _activeVehicle ? _activeVehicle.servoRaw.value:0
+    property int top_left_min
+    property int top_left_max
+
+    property int top_right_val: _activeVehicle ? _activeVehicle.servoRaw2.value : 0
+    property int top_right_min
+    property int top_right_max
+
+    property int bottom_left_val: _activeVehicle ? _activeVehicle.servoRaw3.value : 0
+    property int bottom_left_min
+    property int bottom_left_max
+
+    property int bottom_right_val: _activeVehicle ? _activeVehicle.servoRaw4.value : 0
+    property int bottom_right_min
+    property int bottom_right_max
+
+    property int first: 1
     Timer {
         id:         update_custo
         interval:   100
@@ -120,6 +138,7 @@ FlightMap {
             _buttonsDisp       =    paramController.getValue('buttons')
             _windDisp          =    paramController.getValue('windDisplay')
             _woutDisp          =    paramController.getValue('wout')
+            _minmaxDisp        =    paramController.getValue('minmax')
 
             color_batt_min     =    paramController.getColor('color_batt_min')
             color_batt_med     =    paramController.getColor('color_batt_med')
@@ -128,12 +147,79 @@ FlightMap {
             batt_low           =    paramController.getValue('batt_low')
             batt_mid           =    paramController.getValue('batt_mid')
 
+            top_left_val       =    _activeVehicle ? _activeVehicle.servoRaw.value:0
+            top_right_val      =    _activeVehicle ? _activeVehicle.servoRaw2.value : 0
+            bottom_left_val    =    _activeVehicle ? _activeVehicle.servoRaw3.value : 0
+            bottom_right_val   =    _activeVehicle ? _activeVehicle.servoRaw4.value : 0
+
             if(_activeVehicle)
             {
                 batt           =   (_activeVehicle.batteries.get(0).percentRemaining.rawValue)
             }
+            if(train_button.state === 'train_on'){
+                if(first === 1){
+                    top_left_min = top_left_val
+                    top_left_max = top_left_val
+
+                    top_right_min = top_right_val
+                    top_right_max = top_right_val
+
+                    bottom_left_min = bottom_left_val
+                    bottom_left_max = bottom_left_val
+
+                    bottom_right_min = bottom_right_val
+                    bottom_right_max = bottom_right_val
+
+                    first = 0
+                }
+                if(top_left_val > top_left_max){
+                    top_left_max = top_left_val
+                }
+                if(top_left_val < top_left_min){
+                    top_left_min = top_left_val
+                }
+
+                if(top_right_val > top_right_max){
+                    top_right_max = top_right_val
+                }
+                if(top_right_val < top_right_min){
+                    top_right_min = top_right_val
+                }
+
+                if(bottom_left_val > bottom_left_max){
+                    bottom_left_max = bottom_left_val
+                }
+                if(bottom_left_val < bottom_left_min){
+                    bottom_left_min = bottom_left_val
+                }
+
+                if(bottom_right_val > bottom_right_max){
+                    bottom_right_max = bottom_right_val
+                }
+                if(bottom_right_val < bottom_right_min){
+                    bottom_right_min = bottom_right_val
+                }
+            }
+            else{
+                first = 1
+            }
         }
     }
+    function widthOfBackground(start_width){
+        if((_droneDisp || _batteryDisp || _windDisp)  && !_buttonsDisp && !_woutDisp){
+            return start_width * (2.0 / 3)
+        }
+        else if(!_droneDisp && !_batteryDisp && !_windDisp  && !_buttonsDisp && !_woutDisp  && _errorDisp){
+            return start_width * (1 / 4.5)
+        }
+        else if(!_droneDisp && !_batteryDisp && !_windDisp  && !_buttonsDisp && !_woutDisp  && !_errorDisp){
+            return 0
+        }
+        else{
+            return start_width
+        }
+    }
+
     function errorHeight(error, height, index){
         if(error * height / 2 * (100 / error_bar_max) > height / 2){
             maximum_error[index] = true
@@ -1605,10 +1691,18 @@ FlightMap {
                             anchors.verticalCenter: parent.verticalCenter
                             visible:                true
                             font.pointSize: 20
-                            text:                   _activeVehicle ? _activeVehicle.servoRaw.value : 0
+                            text:                   top_left_val
                     }
                 }
-
+                Text {
+                    id: top_left_prop_min_max
+                    z:1000
+                    visible: _minmaxDisp
+                    anchors.verticalCenter: top_left_prop.verticalCenter
+                    anchors.right: top_left_prop.left
+                    anchors.rightMargin: 2
+                    text: top_left_max + '\n' + top_left_min
+                }
                 Rectangle {
                     visible: _droneDisp
                     z: 10
@@ -1658,10 +1752,18 @@ FlightMap {
                             anchors.verticalCenter: parent.verticalCenter
                             visible:                true
                             font.pointSize: 20
-                            text:                   _activeVehicle ? _activeVehicle.servoRaw3.value : 0
+                            text:                   bottom_left_val
                     }
                 }
-
+                Text {
+                    id: bottom_left_prop_min_max
+                    z:1000
+                    visible: _minmaxDisp
+                    anchors.verticalCenter: bottom_left_prop.verticalCenter
+                    anchors.right: bottom_left_prop.left
+                    anchors.rightMargin: 2
+                    text: bottom_left_max + '\n' + bottom_left_min
+                }
                 Rectangle {
                     visible: _droneDisp
                     z: 10
@@ -1710,10 +1812,18 @@ FlightMap {
                             anchors.verticalCenter: parent.verticalCenter
                             visible:                true
                             font.pointSize: 20
-                            text:                   _activeVehicle ? _activeVehicle.servoRaw4.value : 0
+                            text:                   bottom_right_val
                     }
                 }
-
+                Text {
+                    id: bottom_right_prop_min_max
+                    z:1000
+                    visible: _minmaxDisp
+                    anchors.verticalCenter: bottom_right_prop.verticalCenter
+                    anchors.left: bottom_right_prop.right
+                    anchors.rightMargin: 2
+                    text: bottom_right_max + '\n' + bottom_right_min
+                }
                 Rectangle {
                     visible: _droneDisp
                     z: 10
@@ -1763,11 +1873,19 @@ FlightMap {
                             anchors.verticalCenter: parent.verticalCenter
                             visible:                true
                             font.pointSize: 20
-                            text:                   _activeVehicle ? _activeVehicle.servoRaw2.value : 0
+                            text:                   top_right_val
                     }
                 }
 
-
+                Text {
+                    id: top_right_prop_min_max
+                    z:1000
+                    visible: _minmaxDisp
+                    anchors.verticalCenter: top_right_prop.verticalCenter
+                    anchors.left: top_right_prop.right
+                    anchors.rightMargin: 2
+                    text: top_right_max + '\n' + top_right_min
+                }
                     Rectangle{
                         visible: _buttonsDisp
 
@@ -1815,20 +1933,32 @@ FlightMap {
                         height: 2.5*(drone.height)
                         anchors.verticalCenter: drone.verticalCenter
                         anchors.horizontalCenter: drone.horizontalCenter
+                        Rectangle{
+                            id: white_background_ghost
+                            visible: false
+                            z: 0
+                            color: "white"
+                            opacity: 0.5
+                            width: (p_dis.width * 6.5 * 4.125)
+                            height: p_dis.height * 1.2 * 2.7
+                            anchors.left: sliderGhost.left
+                            //anchors.rightMargin: 2
+                            anchors.top: sliderGhost.top//p_dis.top
+                            anchors.topMargin: -p_dis.width / 2
+                            //anchors.leftMargin: -p_dis.width / 4
 
+                        }
                         Rectangle{
                             id: white_background
                             visible: true
                             z: 0
                             color: "white"
                             opacity: 0.5
-                            width: p_dis.width * 6.5 * 4.125
-                            height: p_dis.height * 1.2 * 2.7
-                            anchors.left: sliderGhost.left//buttons.right
-                            anchors.top: sliderGhost.top//p_dis.top
+                            width: widthOfBackground(p_dis.width * 6.5 * 4.125)
+                            height: white_background_ghost.height
+                            anchors.right: white_background_ghost.right
+                            anchors.top: white_background_ghost.top
                             anchors.topMargin: -p_dis.width / 2
-                            //anchors.leftMargin: -p_dis.width / 4
-
                         }
 
                         Rectangle{
@@ -1836,6 +1966,7 @@ FlightMap {
                             z: 10
                             visible: _errorDisp
                             anchors.left: buttons.right
+                            anchors.leftMargin: width / 1.5
                             anchors.top: buttons.top
                             anchors.topMargin: buttons.width / 3.5
                             height: buttons.height / 2
@@ -1843,8 +1974,8 @@ FlightMap {
                             color: "transparent"
                             border.color: "black"
                             border.width: 2
-                            property real _pitch: _activeVehicle ? actualNormalize(_activeVehicle.pitch.value) : 0
-                            property real pitchError: _activeVehicle ? ((Math.abs(_pitch - _activeVehicle.getSetpointPitch())) / 180) : 0
+                            property real _pitch: _activeVehicle ? Math.abs(actualNormalize(_activeVehicle.pitch.value)) : 0
+                            property real pitchError: _activeVehicle ? (Math.abs(_pitch - Math.abs(_activeVehicle.getSetpointPitch()))) / 180 : 0
                             states: [
                                 State {
                                     name: "pos"
@@ -2012,8 +2143,8 @@ FlightMap {
                             color: "transparent"
                             border.color: "black"
                             border.width: 2
-                            property real _roll: _activeVehicle ? actualNormalize(_activeVehicle.roll.value) : 0
-                            property real rollError: _activeVehicle ? ((Math.abs(_roll - _activeVehicle.getSetpointRoll())) / 180) : 0
+                            property real _roll: _activeVehicle ? Math.abs(actualNormalize(_activeVehicle.roll.value)) : 0
+                            property real rollError: _activeVehicle ? (Math.abs(_roll - Math.abs(_activeVehicle.getSetpointRoll()))) / 180 : 0
                             states: [
                                 State {
                                     name: "pos"
