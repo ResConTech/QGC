@@ -57,6 +57,7 @@ bool battery = true;
 bool buttons = true;
 bool windDisplay = true;
 bool wout = true;
+bool minmax = true && drone;
 
 //
 ParameterEditorController::ParameterEditorController(void)
@@ -161,6 +162,10 @@ void ParameterEditorController::changeValue(QString variable, double value){
     else if(variable.compare("wout") == 0){
         if(value == 0) wout = false;
         else wout = true;
+    }
+    else if(variable.compare("minmax") == 0){
+        if(value != 0 && drone) minmax = true;
+        else minmax = false;
     }
 }
 void ParameterEditorController::changeColor(QString variable, QColor value){
@@ -294,6 +299,10 @@ double ParameterEditorController::getValue(QString variable){
     }
     else if(variable.compare("wout") == 0){
         if(wout) return 1;
+        else return 0;
+    }
+    else if(variable.compare("minmax") == 0){
+        if(minmax && drone) return 1;
         else return 0;
     }
     //default
@@ -707,3 +716,4 @@ void ParameterEditorController::setCurrentGroup(QObject* currentGroup)
         emit currentGroupChanged();
     }
 }
+
