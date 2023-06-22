@@ -22,18 +22,15 @@
 #include "UAS.h"
 #include "JoystickManager.h"
 #include "MissionManager.h"
-#include "MissionController.h"
 #include "PlanMasterController.h"
 #include "GeoFenceManager.h"
 #include "RallyPointManager.h"
-#include "FlightPathSegment.h"
 #include "QGCApplication.h"
 #include "QGCImageProvider.h"
 #include "MissionCommandTree.h"
 #include "SettingsManager.h"
 #include "QGCQGeoCoordinate.h"
 #include "QGCCorePlugin.h"
-#include "QGCOptions.h"
 #include "ADSBVehicleManager.h"
 #include "QGCCameraManager.h"
 #include "VideoReceiver.h"
@@ -42,7 +39,6 @@
 #include "PositionManager.h"
 #include "VehicleObjectAvoidance.h"
 #include "TrajectoryPoints.h"
-#include "QGCGeo.h"
 #include "TerrainProtocolHandler.h"
 #include "ParameterManager.h"
 #include "FTPManager.h"
@@ -89,6 +85,12 @@ const char* Vehicle::_headingToHomeFactName =       "headingToHome";
 const char* Vehicle::_distanceToGCSFactName =       "distanceToGCS";
 const char* Vehicle::_hobbsFactName =               "hobbs";
 const char* Vehicle::_throttlePctFactName =         "throttlePct";
+
+const char* Vehicle::_chanRaw1FactName =            "chanRaw1";
+const char* Vehicle::_chanRaw2FactName =            "chanRaw2";
+const char* Vehicle::_chanRaw3FactName =            "chanRaw3";
+const char* Vehicle::_chanRaw4FactName =            "chanRaw4";
+
 const char* Vehicle::_servoRawFactName =            "servoRaw";
 const char* Vehicle::_servoRaw2FactName =           "servoRaw2";
 const char* Vehicle::_servoRaw3FactName =           "servoRaw3";
@@ -154,6 +156,12 @@ Vehicle::Vehicle(LinkInterface*             link,
     , _distanceToGCSFact            (0, _distanceToGCSFactName,     FactMetaData::valueTypeDouble)
     , _hobbsFact                    (0, _hobbsFactName,             FactMetaData::valueTypeString)
     , _throttlePctFact              (0, _throttlePctFactName,       FactMetaData::valueTypeUint16)
+
+    , _chanRaw1Fact                 (0, _chanRaw1FactName,          FactMetaData::valueTypeUint16)
+    , _chanRaw2Fact                 (0, _chanRaw2FactName,          FactMetaData::valueTypeUint16)
+    , _chanRaw3Fact                 (0, _chanRaw3FactName,          FactMetaData::valueTypeUint16)
+    , _chanRaw4Fact                 (0, _chanRaw4FactName,          FactMetaData::valueTypeUint16)
+
     , _servoRawFact                 (0, _servoRawFactName,          FactMetaData::valueTypeUint16)
     , _servoRaw2Fact                (0, _servoRaw2FactName,         FactMetaData::valueTypeUint16)
     , _servoRaw3Fact                (0, _servoRaw3FactName,         FactMetaData::valueTypeUint16)
@@ -312,6 +320,12 @@ Vehicle::Vehicle(MAV_AUTOPILOT              firmwareType,
     , _distanceToGCSFact                (0, _distanceToGCSFactName,     FactMetaData::valueTypeDouble)
     , _hobbsFact                        (0, _hobbsFactName,             FactMetaData::valueTypeString)
     , _throttlePctFact                  (0, _throttlePctFactName,       FactMetaData::valueTypeUint16)
+
+    , _chanRaw1Fact                     (0, _chanRaw1FactName,          FactMetaData::valueTypeUint16)
+    , _chanRaw2Fact                     (0, _chanRaw2FactName,          FactMetaData::valueTypeUint16)
+    , _chanRaw3Fact                     (0, _chanRaw3FactName,          FactMetaData::valueTypeUint16)
+    , _chanRaw4Fact                     (0, _chanRaw4FactName,          FactMetaData::valueTypeUint16)
+
     , _servoRawFact                     (0, _servoRawFactName,          FactMetaData::valueTypeUint16)
     , _servoRaw2Fact                    (0, _servoRaw2FactName,         FactMetaData::valueTypeUint16)
     , _servoRaw3Fact                    (0, _servoRaw3FactName,         FactMetaData::valueTypeUint16)
@@ -440,6 +454,13 @@ void Vehicle::_commonInit()
     _addFact(&_headingToHomeFact,       _headingToHomeFactName);
     _addFact(&_distanceToGCSFact,       _distanceToGCSFactName);
     _addFact(&_throttlePctFact,         _throttlePctFactName);
+
+    _addFact(&_chanRaw1Fact,            _chanRaw1FactName);
+    _addFact(&_chanRaw2Fact,            _chanRaw2FactName);
+    _addFact(&_chanRaw3Fact,            _chanRaw3FactName);
+    _addFact(&_chanRaw4Fact,            _chanRaw4FactName);
+
+
     _addFact(&_servoRawFact,            _servoRawFactName);
     _addFact(&_servoRaw2Fact,           _servoRaw2FactName);
     _addFact(&_servoRaw3Fact,           _servoRaw3FactName);
@@ -1623,8 +1644,8 @@ void Vehicle::_handleServoOutputRaw(const mavlink_message_t& message)
                 }
             }
     }
+    emit servoChannels(channels.port, rpmValues);
 }
-
 
 void Vehicle::_handlePosValue(const mavlink_message_t& message)
 {
@@ -1734,7 +1755,6 @@ void Vehicle::_handleRCChannels(mavlink_message_t& message)
         &channels.chan18_raw,
     };
     int pwmValues[cMaxRcChannels];
-
     for (int i=0; i<cMaxRcChannels; i++) {
         uint16_t channelValue = *_rgChannelvalues[i];
 
@@ -1743,6 +1763,24 @@ void Vehicle::_handleRCChannels(mavlink_message_t& message)
         } else {
             pwmValues[i] = -1;
         }
+
+        switch (i){
+            case 1:
+                _chanRaw1Fact.setRawValue(pwmValues[1]/20);
+                break;
+            case 2:
+                _chanRaw2Fact.setRawValue(pwmValues[2]/20);
+                break;
+            case 3:
+                _chanRaw3Fact.setRawValue(pwmValues[3]/20);
+                break;
+            case 4:
+                _chanRaw4Fact.setRawValue(pwmValues[4]/20);
+                break;
+            default:
+                break;
+        }
+
     }
 
     emit remoteControlRSSIChanged(channels.rssi);
