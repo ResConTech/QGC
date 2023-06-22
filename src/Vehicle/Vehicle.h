@@ -279,6 +279,12 @@ public:
     Q_PROPERTY(Fact* distanceToGCS      READ distanceToGCS      CONSTANT)
     Q_PROPERTY(Fact* hobbs              READ hobbs              CONSTANT)
     Q_PROPERTY(Fact* throttlePct        READ throttlePct        CONSTANT)
+
+    Q_PROPERTY(Fact* chanRaw1           READ chanRaw1           CONSTANT)
+    Q_PROPERTY(Fact* chanRaw2           READ chanRaw2           CONSTANT)
+    Q_PROPERTY(Fact* chanRaw3           READ chanRaw3           CONSTANT)
+    Q_PROPERTY(Fact* chanRaw4           READ chanRaw4           CONSTANT)
+
     Q_PROPERTY(Fact* servoRaw           READ servoRaw           CONSTANT)
     Q_PROPERTY(Fact* servoRaw2          READ servoRaw2          CONSTANT)
     Q_PROPERTY(Fact* servoRaw3          READ servoRaw3          CONSTANT)
@@ -614,6 +620,12 @@ public:
     Fact* distanceToGCS                     () { return &_distanceToGCSFact; }
     Fact* hobbs                             () { return &_hobbsFact; }
     Fact* throttlePct                       () { return &_throttlePctFact; }
+
+    Fact* chanRaw1                          () { return &_chanRaw1Fact; }
+    Fact* chanRaw2                          () { return &_chanRaw2Fact; }
+    Fact* chanRaw3                          () { return &_chanRaw3Fact; }
+    Fact* chanRaw4                          () { return &_chanRaw4Fact; }
+
     Fact* servoRaw                          () { return &_servoRawFact; }
     Fact* servoRaw2                         () { return &_servoRaw2Fact; }
     Fact* servoRaw3                         () { return &_servoRaw3Fact; }
@@ -650,6 +662,7 @@ public:
 
     static const int cMaxRcChannels = 18;
     static const int cMaxServoChannels = 4;
+
     static const int cMaxAttitudeChannels = 3;
     static const int cMaxPosChannels = 4;
 
@@ -790,6 +803,8 @@ public slots:
     void _offlineFirmwareTypeSettingChanged (QVariant varFirmwareType); // Should only be used by MissionControler to set firmware from Plan file
     void _offlineVehicleTypeSettingChanged  (QVariant varVehicleType);  // Should only be used by MissionController to set vehicle type from Plan file
     void _handleServoOutputRaw              (const mavlink_message_t& message);
+
+
     void _handleAttitudeTarget              (const mavlink_message_t& message);
     void _handlePosValue                    (const mavlink_message_t& message);
     //Setpoint roll pitch yaw retrieve
@@ -866,6 +881,8 @@ signals:
     ///     @param pwmValues -1 signals channel not available
     void rcChannelsChanged              (int channelCount, int pwmValues[cMaxRcChannels]);
     void servoChannels                  (int channelPort, int rpmValues[cMaxServoChannels]);
+
+
     void attitudeChannels               (int channelPort, int attValues[cMaxAttitudeChannels]);
     void posChannels                    (int channelIn, int posValues[cMaxPosChannels]);
 
@@ -1244,6 +1261,12 @@ private:
     Fact _distanceToGCSFact;
     Fact _hobbsFact;
     Fact _throttlePctFact;
+
+    Fact _chanRaw1Fact;
+    Fact _chanRaw2Fact;
+    Fact _chanRaw3Fact;
+    Fact _chanRaw4Fact;
+
     Fact _servoRawFact;
     Fact _servoRaw2Fact;
     Fact _servoRaw3Fact;
@@ -1297,6 +1320,12 @@ private:
     static const char* _distanceToGCSFactName;
     static const char* _hobbsFactName;
     static const char* _throttlePctFactName;
+
+    static const char* _chanRaw1FactName;
+    static const char* _chanRaw2FactName;
+    static const char* _chanRaw3FactName;
+    static const char* _chanRaw4FactName;
+
     static const char* _servoRawFactName;
     static const char* _servoRaw2FactName;
     static const char* _servoRaw3FactName;
