@@ -45,6 +45,25 @@ Rectangle {
     property string _messagePanelText:              qsTr("missing message panel text")
     property bool   _fullParameterVehicleAvailable: QGroundControl.multiVehicleManager.parameterReadyVehicleAvailable && !QGroundControl.multiVehicleManager.activeVehicle.parameterManager.missingParameters
     property var    _corePlugin:                    QGroundControl.corePlugin
+
+    property bool errorDisp: paramController.getValue('error')
+    property bool droneDisp: paramController.getValue('drone')
+    property bool battDisp: paramController.getValue('battery')
+    property bool buttonsDisp: paramController.getValue('buttons')
+    property bool windDisp: paramController.getValue('windDisplay')
+    property bool woutDisp: paramController.getValue('wout')
+    property bool minmaxDisp: paramController.getValue('minmax')
+
+
+    Timer {
+        id:         update_bools
+        interval:   1
+        running:    true
+        repeat: true
+        onTriggered: {
+            windDisp = paramController.getValue('windDisplay')
+        }
+    }
     function getValue(value)
     {
         if(value === 1) return 0
@@ -176,7 +195,7 @@ Rectangle {
 //                }
                 CheckBox{
                     id: errorB
-                    checked: getTruth(paramController.getValue('error'))
+                    checked: errorDisp
                     width: 20
                     anchors.right: parent.right
                     anchors.verticalCenter: parent.verticalCenter
@@ -197,7 +216,7 @@ Rectangle {
                 onClicked: showRpmPanel()
                 CheckBox{
                     id: rpmB
-                    checked: getTruth(paramController.getValue('drone'))
+                    checked: droneDisp
                     width: 20
                     anchors.right: parent.right
                     anchors.verticalCenter: parent.verticalCenter
@@ -218,7 +237,7 @@ Rectangle {
                 onClicked: showBattPanel()
                 CheckBox{
                     id: battB
-                    checked: getTruth(paramController.getValue('battery'))
+                    checked: battDisp
                     width: 20
                     anchors.right: parent.right
                     anchors.verticalCenter: parent.verticalCenter
@@ -239,7 +258,7 @@ Rectangle {
                 //onClicked: showButtPanel()
                 CheckBox{
                     id: buttB
-                    checked: getTruth(paramController.getValue('buttons'))
+                    checked: buttonsDisp
                     width: 20
                     anchors.right: parent.right
                     anchors.verticalCenter: parent.verticalCenter
@@ -260,7 +279,7 @@ Rectangle {
                 //onClicked: showButtPanel()
                 CheckBox{
                     id: woutB
-                    checked: getTruth(paramController.getValue('wout'))
+                    checked: woutDisp
                     width: 20
                     anchors.right: parent.right
                     anchors.verticalCenter: parent.verticalCenter
@@ -281,7 +300,7 @@ Rectangle {
                 //onClicked: showButtPanel()
                 CheckBox{
                     id: windB
-                    checked: getTruth(paramController.getValue('windDisplay'))
+                    checked: windDisp
                     width: 20
                     anchors.right: parent.right
                     anchors.verticalCenter: parent.verticalCenter
