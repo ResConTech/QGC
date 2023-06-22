@@ -35,7 +35,7 @@ import QGroundControl.FactControls  1.0
 
 FlightMap {
     id:                         _root
-    property double batt: PreFlightBatteryCheck ? _activeVehicle.batteries.get(0).percentRemaining.rawValue : 0
+    property double batt // PreFlightBatteryCheck ? _activeVehicle.batteries.get(0).percentRemaining.rawValue : 0
     property var    curSystem:          controller ? controller.activeSystem : null
     property var    curMessage:         curSystem && curSystem.messages.count ? curSystem.messages.get(curSystem.selected) : null
     property int    curCompID:          0
@@ -89,30 +89,33 @@ FlightMap {
     property Fact windDirection: weatherFactGroup.getFact("direction")
     property Fact windSpeed: weatherFactGroup.getFact("speed")
 
-    property int top_left_val: _activeVehicle ? _activeVehicle.servoRaw.value:0
+    property int top_left_val: 0
     property int top_left_min
     property int top_left_max
 
-    property int top_right_val: _activeVehicle ? _activeVehicle.servoRaw2.value : 0
+    property int top_right_val: 0
     property int top_right_min
     property int top_right_max
 
-    property int bottom_left_val: _activeVehicle ? _activeVehicle.servoRaw3.value : 0
+    property int bottom_left_val: 0
     property int bottom_left_min
     property int bottom_left_max
 
-    property int bottom_right_val: _activeVehicle ? _activeVehicle.servoRaw4.value : 0
+    property int bottom_right_val: 0
     property int bottom_right_min
     property int bottom_right_max
 
     property int first: 1
+
+
     Timer {
         id:         update_custo
-        interval:   100
+        interval:   1
         running:    true
         repeat: true
         onTriggered: {
-            error_bar_max   =    paramController.getValue('Rerror_color_maximum')
+
+            error_bar_max      =    paramController.getValue('Rerror_color_maximum')
             rpm_color_low_min  =    paramController.getValue('RPM_color_low_min')
             rpm_color_low_max  =    paramController.getValue('RPM_color_low_max')
             rpm_color_mid_max  =    paramController.getValue('RPM_color_mid_max')
@@ -147,14 +150,37 @@ FlightMap {
             batt_low           =    paramController.getValue('batt_low')
             batt_mid           =    paramController.getValue('batt_mid')
 
-            top_left_val       =    _activeVehicle ? _activeVehicle.servoRaw.value:0
-            top_right_val      =    _activeVehicle ? _activeVehicle.servoRaw2.value : 0
-            bottom_left_val    =    _activeVehicle ? _activeVehicle.servoRaw3.value : 0
-            bottom_right_val   =    _activeVehicle ? _activeVehicle.servoRaw4.value : 0
-
+            if(_activeVehicle){
+                //Live Flight
+                if(_activeVehicle.servoRaw.value < 1 || _activeVehicle.servoRaw2.value < 1 || _activeVehicle.servoRaw3.value < 1 || _activeVehicle.servoRaw4.value < 1){
+                    top_left_val       =    _activeVehicle.chanRaw3.value
+                    top_right_val      =    _activeVehicle.chanRaw1.value
+                    bottom_left_val    =    _activeVehicle.chanRaw2.value
+                    bottom_right_val   =    _activeVehicle.chanRaw4.value
+                }
+                //Simulated Flight
+                else if(_activeVehicle.chanRaw3.value < 1 || _activeVehicle.chanRaw1.value < 1 || _activeVehicle.chanRaw2.value < 1 || _activeVehicle.chanRaw4.value < 1){
+                    top_left_val       =    _activeVehicle.servoRaw3.value
+                    top_right_val      =    _activeVehicle.servoRaw.value
+                    bottom_left_val    =    _activeVehicle.servoRaw2.value
+                    bottom_right_val   =    _activeVehicle.servoRaw4.value
+                }
+                else{
+                    top_left_val       =    0
+                    top_right_val      =    0
+                    bottom_left_val    =    0
+                    bottom_right_val   =    0
+                }
+            }
+            else{
+                top_left_val       =    0
+                top_right_val      =    0
+                bottom_left_val    =    0
+                bottom_right_val   =    0
+            }
             if(_activeVehicle)
             {
-                batt           =   (_activeVehicle.batteries.get(0).percentRemaining.rawValue)
+                //batt           =   (_activeVehicle.batteries.get(0).percentRemaining.rawValue)
             }
             if(train_button.state === 'train_on'){
                 if(first === 1){
@@ -1652,15 +1678,15 @@ FlightMap {
                     color: "white"
                     states:[
                         State {
-                            name: "green"; when: _activeVehicle && _activeVehicle.servoRaw.value < rpm_color_mid
+                            name: "green"; when: _activeVehicle && top_left_val < rpm_color_mid
                             PropertyChanges {target: top_left_prop; color: color_rpm_min}
                         },
                         State {
-                            name: "yellow"; when: _activeVehicle.servoRaw.value >= rpm_color_mid && _activeVehicle.servoRaw.value < rpm_color_high
+                            name: "yellow"; when: top_left_val >= rpm_color_mid && top_left_val < rpm_color_high
                             PropertyChanges {target: top_left_prop; color: color_rpm_med}
                         },
                         State {
-                            name: "red"; when: _activeVehicle.servoRaw.value >= rpm_color_high
+                            name: "red"; when: top_left_val >= rpm_color_high
                             PropertyChanges {target: top_left_prop; color: color_rpm_max}
                         }
                     ]
@@ -1713,15 +1739,15 @@ FlightMap {
                     color: "white"
                     states:[
                         State {
-                            name: "green"; when: _activeVehicle && _activeVehicle.servoRaw3.value < rpm_color_mid
+                            name: "green"; when: _activeVehicle && bottom_left_val < rpm_color_mid
                             PropertyChanges {target: bottom_left_prop; color: color_rpm_min}
                         },
                         State {
-                            name: "yellow"; when: _activeVehicle.servoRaw3.value >= rpm_color_mid && _activeVehicle.servoRaw3.value < rpm_color_high
+                            name: "yellow"; when: bottom_left_val >= rpm_color_mid && bottom_left_val < rpm_color_high
                             PropertyChanges {target: bottom_left_prop; color: color_rpm_med}
                         },
                         State {
-                            name: "red"; when: _activeVehicle.servoRaw3.value >= rpm_color_high
+                            name: "red"; when: bottom_left_val >= rpm_color_high
                             PropertyChanges {target: bottom_left_prop; color: color_rpm_max}
                         }
                     ]
@@ -1774,15 +1800,15 @@ FlightMap {
                     color: "white"
                     states:[
                         State {
-                            name: "green"; when: _activeVehicle && _activeVehicle.servoRaw4.value < rpm_color_mid
+                            name: "green"; when: _activeVehicle && bottom_right_val < rpm_color_mid
                             PropertyChanges {target: bottom_right_prop; color: color_rpm_min}
                         },
                         State {
-                            name: "yellow"; when: _activeVehicle.servoRaw4.value >= rpm_color_mid && _activeVehicle.servoRaw4.value < rpm_color_high
+                            name: "yellow"; when: bottom_right_val >= rpm_color_mid && bottom_right_val < rpm_color_high
                             PropertyChanges {target: bottom_right_prop; color: color_rpm_med}
                         },
                         State {
-                            name: "red"; when: _activeVehicle.servoRaw4.value >= rpm_color_high
+                            name: "red"; when: bottom_right_val >= rpm_color_high
                             PropertyChanges {target: bottom_right_prop; color: color_rpm_max}
                         }
                     ]
@@ -1834,15 +1860,15 @@ FlightMap {
                     color: "white"
                     states:[
                         State {
-                            name: "green"; when: _activeVehicle && _activeVehicle.servoRaw2.value < rpm_color_mid
+                            name: "green"; when: _activeVehicle && top_left_val < rpm_color_mid
                             PropertyChanges {target: top_right_prop; color: color_rpm_min}
                         },
                         State {
-                            name: "yellow"; when: _activeVehicle.servoRaw2.value >= rpm_color_mid && _activeVehicle.servoRaw2.value < rpm_color_high
+                            name: "yellow"; when: top_left_val >= rpm_color_mid && top_left_val < rpm_color_high
                             PropertyChanges {target: top_right_prop; color: color_rpm_med}
                         },
                         State {
-                            name: "red"; when: _activeVehicle.servoRaw2.value >= rpm_color_high
+                            name: "red"; when: top_left_val >= rpm_color_high
                             PropertyChanges {target: top_right_prop; color: color_rpm_max}
                         }
                     ]
@@ -1933,6 +1959,7 @@ FlightMap {
                         height: 2.5*(drone.height)
                         anchors.verticalCenter: drone.verticalCenter
                         anchors.horizontalCenter: drone.horizontalCenter
+
                         Rectangle{
                             id: white_background_ghost
                             visible: false
@@ -2835,7 +2862,7 @@ FlightMap {
                                 width: buttons.width / 5
                                 height: buttons.width / 5
                                 Text {
-                                    text: qsTr("1.57")
+                                    text: ""
                                 }
                             }
                             Rectangle {
@@ -2844,7 +2871,7 @@ FlightMap {
                                 width: buttons.width / 5
                                 height: buttons.width / 5
                                 Text {
-                                    text: qsTr("9.87")
+                                    text: ""
                                 }
                             }
                             Rectangle {
@@ -2853,7 +2880,7 @@ FlightMap {
                                 width: buttons.width / 5
                                 height: buttons.width / 5
                                 Text {
-                                    text: qsTr("6.89")
+                                    text: ""
                                 }
                             }
                             Rectangle {
@@ -2862,7 +2889,7 @@ FlightMap {
                                 width: buttons.width / 5
                                 height: buttons.width / 5
                                 Text {
-                                    text: qsTr("4.89")
+                                    text: ""
                                 }
                             }
                             Rectangle {
@@ -2871,7 +2898,7 @@ FlightMap {
                                 width: buttons.width / 5
                                 height: buttons.width / 5
                                 Text {
-                                    text: qsTr("1.70")
+                                    text: ""
                                 }
                             }
                             Rectangle {
@@ -2880,7 +2907,7 @@ FlightMap {
                                 width: buttons.width / 5
                                 height: buttons.width / 5
                                 Text {
-                                    text: qsTr("0.78")
+                                    text: ""
                                 }
                             }
                             Rectangle {
@@ -2889,7 +2916,7 @@ FlightMap {
                                 width: buttons.width / 5
                                 height: buttons.width / 5
                                 Text {
-                                    text: qsTr("8.67")
+                                    text: ""
                                 }
                             }
                             Rectangle {
@@ -2898,7 +2925,7 @@ FlightMap {
                                 width: buttons.width / 5
                                 height: buttons.width / 5
                                 Text {
-                                    text: qsTr("4.98")
+                                    text: ""
                                 }
                             }
                             Rectangle {
@@ -2907,7 +2934,7 @@ FlightMap {
                                 width: buttons.width / 5
                                 height: buttons.width / 5
                                 Text {
-                                    text: qsTr("0.90")
+                                    text: ""
                                 }
                             }
 
