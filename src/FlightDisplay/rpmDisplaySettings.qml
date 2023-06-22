@@ -37,6 +37,7 @@ Rectangle {
     property color midColor: paramController.getColor('color_rpm_med')
     property color minColor: paramController.getColor('color_rpm_min')
 
+
     property color maxColorChecked: paramController.getColor('color_rpm_max')
     property color midColorChecked: paramController.getColor('color_rpm_med')
     property color minColorChecked: paramController.getColor('color_rpm_min')
@@ -578,4 +579,5 @@ Rectangle {
         }
     }
 }
+
 
