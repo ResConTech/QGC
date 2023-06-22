@@ -55,7 +55,7 @@ bool error = true;
 bool drone = true;
 bool battery = true;
 bool buttons = true;
-bool windDisplay = true;
+bool windDisplay = true && drone;
 bool wout = true;
 bool minmax = true && drone;
 
@@ -156,8 +156,8 @@ void ParameterEditorController::changeValue(QString variable, double value){
         else buttons = true;
     }
     else if(variable.compare("windDisplay") == 0){
-        if(value == 0) windDisplay = false;
-        else windDisplay = true;
+        if(value != 0 && drone) windDisplay = true;
+        else windDisplay = false;
     }
     else if(variable.compare("wout") == 0){
         if(value == 0) wout = false;
@@ -294,7 +294,7 @@ double ParameterEditorController::getValue(QString variable){
         else return 0;
     }
     else if(variable.compare("windDisplay") == 0){
-        if(windDisplay) return 1;
+        if(windDisplay && drone) return 1;
         else return 0;
     }
     else if(variable.compare("wout") == 0){
@@ -716,4 +716,5 @@ void ParameterEditorController::setCurrentGroup(QObject* currentGroup)
         emit currentGroupChanged();
     }
 }
+
 
